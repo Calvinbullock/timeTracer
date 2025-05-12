@@ -168,7 +168,8 @@ function getUrlListAsTable(urlList) {
     display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
     display += "<tbody>";
 
-    for (let i = 0; i < urlList.length; i++) {
+    // list top 20 Urls time was spent on
+    for (let i = 0; i < 20; i++) {
         const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
