@@ -70,7 +70,7 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
-        console.log(`LOG - Tracking starts for ${url}`)
+        console.log(`LOG - Tracking starts for ${url}`);
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -102,7 +102,7 @@ class UrlDataObj {
         // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
-            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
         } else {
             // TODO: update tests to cover this case
@@ -110,8 +110,8 @@ class UrlDataObj {
             this.urlList.push( {
                 url: this.activeUrl,
                 totalTime: elapsedTime
-            })
-            console.log(`LOG - ${this.activeUrl} added to urlList`)
+            });
+            console.log(`LOG - ${this.activeUrl} added to urlList`);
         }
 
         this.activeUrl = null;
