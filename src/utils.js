@@ -101,6 +101,7 @@ function cleanUrl(url) {
  * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
  */
 function getDateKey(dateKey = new Date()) {
+    // TODO: this needs to store the key and when the key changes run a end Session somehow...
     const year = dateKey.getFullYear();
     const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
     const day = String(dateKey.getDate()).padStart(2, '0');
@@ -168,8 +169,11 @@ function getUrlListAsTable(urlList) {
     display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
     display += "<tbody>";
 
+    // take the list size or max at 20
+    let tableSize = Math.min(20, urlList.length);
+
     // list top 20 Urls time was spent on
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < tableSize; i++) {
         const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
