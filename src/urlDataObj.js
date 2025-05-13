@@ -23,10 +23,10 @@ class UrlDataObj {
     }
 
     /**
-    * Retrieves the currently active URL being tracked.
-    *
-    * @returns {string} - The currently active URL, or an empty string if no URL is active.
-    */
+     * Retrieves the currently active URL being tracked.
+     *
+     * @returns {string} - The currently active URL, or an empty string if no URL is active.
+     */
     getActiveUrl() {
         return this.activeUrl;
     }
@@ -48,19 +48,19 @@ class UrlDataObj {
     }
 
     /**
-    * Starts a new tracking session for a given URL.
-    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    *   provided 'currentTime' (or the current timestamp if not provided).
-    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    *   truthy when attempting to start a new session.
-    *
-    * @param {string} url - The URL to set as the currently active one to start tracking.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   starting time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    * @returns {boolean} - True if the session was started successfully, false otherwise
-    *   (e.g., if a session was already active).
-    */
+     * Starts a new tracking session for a given URL.
+     * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+     * provided 'currentTime' (or the current timestamp if not provided).
+     * Logs an error and returns false if 'startTime' or 'activeUrl' are already
+     * truthy when attempting to start a new session.
+     *
+     * @param {string} url - The URL to set as the currently active one to start tracking.
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * starting time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     * @returns {boolean} - True if the session was started successfully, false otherwise
+     * (e.g., if a session was already active).
+     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
             console.error("Error: startTime / activeUrl should never be true on enter ",
@@ -77,19 +77,19 @@ class UrlDataObj {
     }
 
     /**
-    * Ends the currently active tracking session and records the elapsed time.
-    *   It finds the active URL in the urlList, calculates the time elapsed since
-    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    *   and resets the 'startDate' and 'isActive' properties of that item.
-    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    *   Logs an error if no active item is found.
-    *
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   ending time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    */
+     * Ends the currently active tracking session and records the elapsed time.
+     * It finds the active URL in the urlList, calculates the time elapsed since
+     * the 'startTime', adds it to the 'totalTime' of the corresponding item,
+     * and resets the 'startDate' and 'isActive' properties of that item.
+     * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+     * Logs an error if no active item is found.
+     *
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * ending time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     */
     endSession(currentTime = new Date()) {
-        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`);
 
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
@@ -139,16 +139,16 @@ class UrlDataObj {
     }
 
     /**
-    * Creates a new UrlDataObj instance from a JSON string.
-    * It attempts to parse the JSON string and populate the properties
-    * of a new UrlDataObj. Date strings in the JSON are converted back
-    * to Date objects. Handles potential JSON parsing errors and returns null
-    * in case of an error.
-    *
-    * @param {string} jsonString - The JSON string to parse.
-    * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
-    * data from the JSON string, or null if an error occurred during parsing.
-    */
+     * Creates a new UrlDataObj instance from a JSON string.
+     * It attempts to parse the JSON string and populate the properties
+     * of a new UrlDataObj. Date strings in the JSON are converted back
+     * to Date objects. Handles potential JSON parsing errors and returns null
+     * in case of an error.
+     *
+     * @param {string} jsonString - The JSON string to parse.
+     * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
+     * data from the JSON string, or null if an error occurred during parsing.
+     */
     fromJSONString(jsonString) {
         try {
             // check the obj is of the right type
@@ -175,11 +175,11 @@ class UrlDataObj {
     }
 
     /**
-    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
-    *
-    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
-    * @returns {number} The time elapsed in milliseconds.
-    */
+     * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+     *
+     * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+     * @returns {number} The time elapsed in milliseconds.
+     */
     calcTimeElapsed(startDate, endDate) {
 
         // check if startDate is valid
@@ -296,11 +296,12 @@ function test_appendListItem_basic() {
 
     // check / test
     const finalLength = trackerObj.urlList.length;
-    const addedItem = trackerObj.urlList[finalLength -1];
+    const addedItem = trackerObj.urlList[finalLength - 1];
     const itemUrl = addedItem.url;
     const itemTime = addedItem.totalTime;
 
-    if ( result === true
+    if (
+        result === true
         && finalLength === initialLength + 1
         && itemUrl == urlToAppend
         && itemTime == 0
@@ -318,7 +319,7 @@ function test_AppendListItem_existing() {
     // setup
     const trackerObj = new UrlDataObj();
     const existingUrl = "simple.com";
-    trackerObj.urlList.push( { url: existingUrl, totalTime: 4 } );
+    trackerObj.urlList.push({ url: existingUrl, totalTime: 4 });
     const initialLength = trackerObj.urlList.length;
 
     // exercise
@@ -327,7 +328,7 @@ function test_AppendListItem_existing() {
     // check / test
     const finalLength = trackerObj.urlList.length;
 
-    if ( result === false && finalLength === initialLength ) {
+    if (result === false && finalLength === initialLength) {
         return 1;
     } else {
         console.log(`test_AppendListItem_existing ------------------------ ❗ `);
@@ -398,7 +399,7 @@ function test_endSession_basic() {
     const testUrl = "test-url.com";
     trackerObj.activeUrl = testUrl;
     trackerObj.startTime = new Date(2024, 0, 1, 10, 0, 0); // Example start time
-    trackerObj.urlList.push( { url: testUrl, totalTime: 4 } );
+    trackerObj.urlList.push({ url: testUrl, totalTime: 4 });
 
     const endTime = new Date(2024, 0, 1, 10, 30, 0); // Example end time (30 minutes later)
     const expectedElapsedTime = (endTime - trackerObj.startTime) + 4; // in milli sec
@@ -545,7 +546,7 @@ function calcTimeElapsed_doubleDate() {
     //setup
     const trackerObj = new UrlDataObj();
     const startDate = "January 7, 2024, 11:00 AM";
-    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);     // Example: January 7, 2024, 11:00 AM
 
     //exercise
     muteConsole();
@@ -569,8 +570,8 @@ function calcTimeElapsed_doubleDate() {
 function calcTimeElapsed_doubleDateFix() {
     //setup
     const trackerObj = new UrlDataObj();
-    let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
-    const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);   // Example: January 7, 2024, 11:00 AM
+    let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);      // Example: January 7, 2024, 11:00 AM
+    const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);      // Example: January 7, 2024, 11:00 AM
     startDate = JSON.stringify(startDate.toISOString());
     startDate = JSON.parse(startDate);
     startDate = new Date(startDate);
