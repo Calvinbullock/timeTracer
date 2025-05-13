@@ -11,26 +11,30 @@
  */
 
 
-// TODO: NEXT
-// TODO: clean up css
-// TODO: show top 10 and allow exspand / scroll
-// TODO: when opening report the data for current tab time session not show for the current page until you leave it
-// TODO: make the UI window wider / remove the count from the table
+// TODO: Release - 2
+// - block list - (site blocker dialog)
+// - day selector - day selector right above the table as a carasell ` < day X   day Y >`
+// - storage - clear data button
 //
-// AFTER LAUNCH?
-// TODO: clean up old data (Date based)
-// TODO: build lockOut ui page
-// TODO: build DoNotTrack ui page
-// TODO: add a total time count?
+// TODO: Release - 3
+// - data continuity - run exit session when computer sleeps ( NOTE: is this possible? )
+// - data continuity - when opening report pop up the data for current tab's time session is not shown until you leave that tab
+// - data continuity - set a heart beat check the elapsed time every x amount of time and trough away values outside that range
+// - data continuity - clean up old data (Date based)
+// - build DoNotTrack ui page
+// - add a total time count?
+// - when date key changes need to run endSesstion
+// - make the UI window wider / remove the count from the table
 
-//  TODO: - MAINTENANCE -- see if there is a way to easily test extension performance impact
-//  TODO: - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
+// TODO: - Future..
+// - MAINTENANCE -- see if there is a way to easily test extension performance impact
+// - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
 //
-//  TODO: - FEATURE -- add a button to clear / reset all local data (check the chrome API)
-//  TODO: - FEATURE -- add % of total time spent on each site (later)
-//  TODO: - FEATURE -- get the data on display (live update???)
-//  TODO: - FEATURE -- allow pausing of tracking
-//  TODO: - FEATURE -- store dates in a obj and use dates as the key for a days url tracking
+// - FEATURE -- add a button to clear / reset all local data (check the chrome API)
+// - FEATURE -- add % of total time spent on each site (later)
+// - FEATURE -- get the data on display (live update???)
+// - FEATURE -- allow pausing of tracking
+// - FEATURE -- store dates in a obj and use dates as the key for a days url tracking
 //          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
 //          local this will be easy to clean up and check if days need to be cleaned
 
