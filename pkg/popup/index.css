@@ -3,7 +3,7 @@
     --card-background: #1e1e1e;
     --main-background: #a93226;
     --text-primary-color: #f5f5f5;
-    --active-item-color: #a93226;
+    --active-item-color: #ff4226;
     --active-item-color-hover: #603000;
 }
 
@@ -81,6 +81,28 @@ main p {
     margin-bottom: 0.8em;
 }
 
+footer {
+    font-size: 1em;
+
+    background-color: var(--card-background);
+    color: var(--text-primary-color);
+    text-align: center;
+    padding: 0.5em 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* ============================================================ */
+/* ============================================================ */
+/*                          Nav                                 */
+/* ============================================================ */
+/* ============================================================ */
+
 nav {
     font-size: .8em;
     padding: 0;
@@ -94,7 +116,7 @@ nav a {
     text-decoration: none;
     padding: 0.3em 0.6em;
     border-radius: 3px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.5s ease;
 }
 
 nav a:hover {
@@ -102,8 +124,16 @@ nav a:hover {
 }
 
 .active {
-    color: var(--main-background);
+    transition: color 0.4s ease;
+    color: var(--active-item-color);
+    font-weight: bolder;
 }
+
+/* ============================================================ */
+/* ============================================================ */
+/*                      reusable page styles                  */
+/* ============================================================ */
+/* ============================================================ */
 
 #content-div {
     font-size: 1.2em;
