@@ -1,6 +1,11 @@
 
 set -e
 
+echo "__Running Tests__"
+./test.sh
+echo
+
+echo "__Building__"
 destinationFile_BE="pkg/background.js"
 destinationFile_FE="pkg/popup/index.js"
 
