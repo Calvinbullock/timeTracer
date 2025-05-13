@@ -18,7 +18,8 @@
 class UrlDataObj {
     constructor() {
         this.activeUrl = null;
-        this.startTime = null
+        this.lastActiveUrl = null;
+        this.startTime = null;
         this.urlList = [];
     }
 
@@ -29,6 +30,15 @@ class UrlDataObj {
      */
     getActiveUrl() {
         return this.activeUrl;
+    }
+
+    /**
+     * Retrieves the last active URL that was being tracked.
+     *
+     * @returns {string|null} - The last active URL, or null if no URL has been active yet.
+     */
+    getLastActiveUrl() {
+        return this.lastActiveUrl;
     }
 
     /**
@@ -114,6 +124,11 @@ class UrlDataObj {
             console.log(`LOG - ${this.activeUrl} added to urlList`);
         }
 
+        console.log(`LOG - activeUrl was: ${this.activeUrl}`)
+        if (this.activeUrl != null) {
+            this.lastActiveUrl = this.activeUrl;
+            console.log(`LOG - lastActiveUrl is: ${this.lastActiveUrl}`)
+        }
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -123,12 +138,13 @@ class UrlDataObj {
      * Date objects are converted to ISO 8601 string format for serialization.
      *
      * @returns {string} - A JSON string representing the TrackingData.
-     * The string includes 'activeUrl', 'startTime' (as an ISO string or null), and
-     * 'urlList' (an array of objects with 'url' and 'totalTime' properties).
+     * The string includes 'activeUrl', 'lastActiveUrl', 'startTime' (as an ISO string or null),
+     * and 'urlList' (an array of objects with 'url' and 'totalTime' properties).
      */
     toJSONString() {
         const jsonObject = {
             activeUrl: this.activeUrl,
+            lastActiveUrl: this.lastActiveUrl,
             startTime: this.startTime ? this.startTime.toISOString() : null,
             urlList: this.urlList.map(item => ({
                 url: item.url,
@@ -160,6 +176,7 @@ class UrlDataObj {
 
             const trackingData = new UrlDataObj();
             trackingData.activeUrl = jsonObj.activeUrl;
+            trackingData.lastActiveUrl = jsonObj.lastActiveUrl;
             trackingData.startTime = jsonObj.startTime ? new Date(jsonObj.startTime) : null;
             trackingData.urlList = jsonObj.urlList ? jsonObj.urlList.map(item => ({
                 url: item.url,
@@ -351,15 +368,18 @@ function test_startSession_newSession() {
     // check / test
     const newStartTime = trackerObj.startTime;
     const newActiveUrl = trackerObj.activeUrl;
+    const newLastActiveUrl = trackerObj.lastActiveUrl;
 
     if (newStartTime === testTime
         && newActiveUrl === testUrl
+        && newLastActiveUrl === null
     ) {
         return 1;
     } else {
         console.log(`test_startSession_newSession ------------------------ ❗ `);
         console.log("newStartTime === testTime:", newStartTime === testTime, newStartTime);
         console.log("newActiveUrl === testUrl: ", newActiveUrl === testUrl, newActiveUrl);
+        console.log("newLastActiveUrl === null:", newLastActiveUrl === null, newLastActiveUrl);
         return 0;
     }
 }
@@ -412,11 +432,13 @@ function test_endSession_basic() {
     // Check / Test
     const endedSessionUrl = trackerObj.activeUrl;
     const endedSessionStartTime = trackerObj.startTime;
+    const endedLastActiveUrl = trackerObj.lastActiveUrl;
     const targetItem = trackerObj.urlList.find(item => item.url === testUrl);
 
     if (
         endedSessionUrl === null &&
         endedSessionStartTime === null &&
+        endedLastActiveUrl === testUrl &&
         targetItem && // Make sure targetItem exists
         targetItem.totalTime === expectedElapsedTime &&
         trackerObj.startTime === null
@@ -424,11 +446,12 @@ function test_endSession_basic() {
         return 1;
     } else {
         console.log(`test_endSession_basic ------------------------------- ❗ `);
-        console.log("endedSessionUrl:       ", endedSessionUrl === null);
-        console.log("endedSessionStartTime: ", endedSessionStartTime === null);
-        console.log("targetItem:            ", !!targetItem);
-        console.log("targetItem.totalTime:  ", targetItem.totalTime === expectedElapsedTime);
-        console.log("targetItem.startDate   ", trackerObj.startTime === null);
+        console.log("endedSessionUrl:         ", endedSessionUrl === null);
+        console.log("endedSessionStartTime:   ", endedSessionStartTime === null);
+        console.log("endedLastActiveUrl:   ", endedLastActiveUrl === testUrl);
+        console.log("targetItem:              ", !!targetItem);
+        console.log("targetItem.totalTime:    ", targetItem.totalTime === expectedElapsedTime);
+        console.log("trackerObj.startTime:    ", trackerObj.startTime === null);
         return 0;
     }
 }
@@ -443,13 +466,19 @@ function test_endSession_nullActiveUrl() {
     unmuteConsole();
 
     // Check / Test
-    if (trackerObj.urlList.length === 0 && trackerObj.activeUrl === null && trackerObj.startTime === null) {
+    if (
+        trackerObj.urlList.length === 0 
+            && trackerObj.activeUrl === null 
+            && trackerObj.startTime === null 
+            && trackerObj.lastActiveUrl === null
+    ) {
         return 1;
     } else {
         console.log(`test_endSession_nullActiveUrl ----------------------- ❗ `);
         console.log("urlList.length:", trackerObj.urlList.length);
         console.log("activeUrl:", trackerObj.activeUrl);
         console.log("startTime:", trackerObj.startTime);
+        console.log("lastActiveUrl:", trackerObj.lastActiveUrl);
         return 0;
     }
 }
@@ -599,6 +628,7 @@ function test_toJSON_basic() {
 
     const trackerObj = new UrlDataObj();
     trackerObj.activeUrl = testUrl1;
+    trackerObj.lastActiveUrl = "last-active.com";
     trackerObj.startTime = startTime;
     trackerObj.urlList = [
         { url: testUrl1, totalTime: 1800 },
@@ -611,6 +641,7 @@ function test_toJSON_basic() {
     // Check / Test
     const expectedOutput = JSON.stringify({ // Stringify the expected output
         activeUrl: testUrl1,
+        lastActiveUrl: "last-active.com",
         startTime: startTime.toISOString(),
         urlList: [
             { url: testUrl1, totalTime: 1800 },
@@ -635,16 +666,20 @@ function test_fromJSONString_basic() {
     const testUrl2 = "test-url-2.com";
     const startTime = new Date(2024, 0, 1, 10, 0, 0);
 
+    // what the out put should parse into
     const expectedTrackerObj = new UrlDataObj();
     expectedTrackerObj.activeUrl = testUrl1;
+    expectedTrackerObj.lastActiveUrl = "lastActiveUrl";
     expectedTrackerObj.startTime = startTime;
     expectedTrackerObj.urlList = [
         { url: testUrl1, totalTime: 1800 },
         { url: testUrl2, totalTime: 0 }
     ];
 
+    // json string that needs to be parsed (fromJSONString())
     const jsonString = JSON.stringify({
         activeUrl: testUrl1,
+        lastActiveUrl: "lastActiveUrl",
         startTime: startTime.toISOString(),
         urlList: [
             { url: testUrl1, totalTime: 1800 },
@@ -657,10 +692,11 @@ function test_fromJSONString_basic() {
 
     // Check / Test
     const activeUrlMatch = trackerObj.activeUrl === expectedTrackerObj.activeUrl;
+    const lastActiveUrlMatch = trackerObj.lastActiveUrl === expectedTrackerObj.lastActiveUrl;
     const startTimeMatch = trackerObj.startTime.getTime() === expectedTrackerObj.startTime.getTime();
     const urlListMatch = JSON.stringify(trackerObj.urlList) === JSON.stringify(expectedTrackerObj.urlList);
 
-    if (activeUrlMatch && startTimeMatch && urlListMatch) {
+    if (activeUrlMatch && lastActiveUrlMatch && startTimeMatch && urlListMatch) {
         return true;
     } else {
         console.log(`test_fromJSONString_basic --------------------------- ❗ `);
@@ -671,7 +707,7 @@ function test_fromJSONString_basic() {
 }
 
 // check that if we put a UrlDataObj though toJSONString and
-//      fromJSONString it comes out how it should
+//          fromJSONString it comes out how it should
 function test_toJSON_fromJSON_integration() {
     // Setup
     const testUrl1 = "test-url-1.com";
@@ -680,6 +716,7 @@ function test_toJSON_fromJSON_integration() {
 
     const originalTrackerObj = new UrlDataObj();
     originalTrackerObj.activeUrl = testUrl1;
+    originalTrackerObj.lastActiveUrl = "lastActiveUrl";
     originalTrackerObj.startTime = startTime;
     originalTrackerObj.urlList = [
         { url: testUrl1, totalTime: 1800 },
@@ -692,10 +729,11 @@ function test_toJSON_fromJSON_integration() {
 
     // Check / Test
     const activeUrlMatch = reconstructedTrackerObj.activeUrl === originalTrackerObj.activeUrl;
+    const lastActiveUrlMatch = reconstructedTrackerObj.lastActiveUrl === originalTrackerObj.lastActiveUrl;
     const startTimeMatch = reconstructedTrackerObj.startTime.getTime() === originalTrackerObj.startTime.getTime();
     const urlListMatch = JSON.stringify(reconstructedTrackerObj.urlList) === JSON.stringify(originalTrackerObj.urlList);
 
-    if (activeUrlMatch && startTimeMatch && urlListMatch) {
+    if (activeUrlMatch && lastActiveUrlMatch && startTimeMatch && urlListMatch) {
         return true;
     } else {
         console.log(`test_toJSON_fromJSON_integration -------------------- ❗ `);
