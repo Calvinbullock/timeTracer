@@ -558,15 +558,24 @@ function createBlockedUrlTable(blockedUrlList, activeUrl) {
             <tbody>
     `;
 
-    // add all the list items into the table rows
-    for (let index = 0; index < blockedUrlList.length; index++) {
-        const blockedUrl = blockedUrlList[index];
-        html += `
-                <tr>
-                    <td>${blockedUrl}</td>
-                    <td><button class="outlined-button removeBlockedUrlBtn" data-url="${blockedUrl}">X</button></td>
-                </tr>
-        `;
+    if (blockedUrlList.length === 0) {
+            html += `
+                    <tr>
+                        <td>No blocked URLs</td>
+                        <td><button class="outlined-button">-</button></td>
+                    </tr>
+            `;
+    } else {
+        // add all the list items into the table rows
+        for (let index = 0; index < blockedUrlList.length; index++) {
+            const blockedUrl = blockedUrlList[index];
+            html += `
+                    <tr>
+                        <td>${blockedUrl}</td>
+                        <td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedUrl}">X</button></td>
+                    </tr>
+            `;
+        }
     }
     html += `
             </tbody>
@@ -595,22 +604,58 @@ async function displayBlockListPage() {
 
 /**
  * Asynchronously adds a new URL to the list of blocked URLs in Chrome's local storage.
- * It first retrieves the existing list, appends the new URL, and then saves the updated list.
+ * It retrieves the existing list, checks if the URL already exists, and appends it if it doesn't.
+ * Finally, it saves the updated list.
  *
  * @async
  * @param {string} newBlockedUrl - The URL to add to the blocked sites list.
- * @returns {Promise<void>} - A Promise that resolves when the URL has been successfully added and the list has been saved.
+ * @returns {Promise<boolean>} - A Promise that resolves with true if the URL was added, and false if it already existed.
  */
 async function addNewBlockedUrl(newBlockedUrl) {
     let blockedList = await getBlockedSiteList();
 
-    blockedList.push(newBlockedUrl);
+    // return if the array already has the item
+    for (let index = 0; index < blockedList.length; index++) {
+        if (blockedList[index] === newBlockedUrl) {return false}
+    }
 
+    // added item
+    blockedList.push(newBlockedUrl);
+    await setBlockedSiteList(blockedList);
+
+    return true;
+}
+
+/**
+ * Asynchronously removes a specific URL from the list of blocked URLs in Chrome's local storage.
+ * It retrieves the existing list, filters out the target URL, and then saves the updated list.
+ *
+ * @async
+ * @param {string} targetUrl - The URL to remove from the blocked sites list.
+ * @returns {Promise<void>} - A Promise that resolves when the URL has been successfully removed and the list has been saved.
+ */
+async function removeBlockedUrl(targetUrl) {
+    let blockedList = await getBlockedSiteList();
+    blockedList = blockedList.filter(item => item !== targetUrl);
     await setBlockedSiteList(blockedList);
 }
 
-// checks all clicks then checks if the id of a click matches our target
-//    prevents selecting un-loaded dynamic content
+// NOTE: listener for removing url from block list
+// checks all clicks of button matching the target class then gets the dataset of the
+//      triggered button prevents error from selecting un-loaded dynamic content.
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("removeBlockedUrlBtn")) {
+        const urlToRemove = event.target.dataset.url;
+        removeBlockedUrl(urlToRemove);
+
+        console.log(`log - ${urlToRemove} removed from blockList`);
+        displayBlockListPage();
+    }
+});
+
+// NOTE: listener for adding url to block list
+// checks all clicks of button matching the target class then looks for the
+//      id of the clicked button prevents error on selecting un-loaded dynamic content
 document.addEventListener("click", (event) => {
     if (event.target.classList.contains("addNewBlockedUrlBtn")) {
         const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
