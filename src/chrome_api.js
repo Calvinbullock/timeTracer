@@ -215,6 +215,20 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     setSiteObjData(siteDataObj);
 }
 
+// TODO: finish this
+// function checkBlockedUrls(newActiveUrl) {
+//     const blockedUrlsList = getblockedUrlsList();
+//
+//     // check if newActive Url is on block list
+//     if (undesirableSites.includes(newActiveUrl)) {
+//         // Option 1: Send a message to the content script to display a warning
+//         chrome.tabs.sendMessage(details.tabId, { action: 'warnUser' });
+//
+//         // Option 2: Immediately redirect (comment out the sendMessage above if using this)
+//         // chrome.tabs.update(details.tabId, { url: 'your_safe_redirect_url' });
+//     }
+// }
+
 // ===================================================== \\
 // ===================================================== \\
 //              Chromium API Event Listeners             \\
