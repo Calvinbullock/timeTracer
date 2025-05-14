@@ -132,15 +132,25 @@ function createBlockedUrlTable(blockedUrlList, activeUrl) {
             <tbody>
     `;
 
-    // add all the list items into the table rows
-    for (let index = 0; index < blockedUrlList.length; index++) {
-        const blockedUrl = blockedUrlList[index];
+    // if blockedUrlList is empty add a row letting the usr know its empty
+    if (blockedUrlList.length === 0) {
         html += `
                 <tr>
-                    <td>${blockedUrl}</td>
-                    <td><button class="removeBlockedUrlBtn outlined-button removeBlockedUrlBtn" data-url="${blockedUrl}">X</button></td>
+                    <td>No blocked URLs</td>
+                    <td><button class="outlined-button">-</button></td>
                 </tr>
         `;
+    } else {
+        // add all the list items into the table rows
+        for (let index = 0; index < blockedUrlList.length; index++) {
+            const blockedUrl = blockedUrlList[index];
+            html += `
+                    <tr>
+                        <td>${blockedUrl}</td>
+                        <td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedUrl}">X</button></td>
+                    </tr>
+            `;
+        }
     }
     html += `
             </tbody>
