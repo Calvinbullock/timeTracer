@@ -92,6 +92,20 @@ async function setSiteObjData(siteDataObj) {
 }
 
 /**
+ * Asynchronously saves a list of URLs to be blocked in Chrome's local storage.
+ * The provided list is first converted to a JSON string before being stored.
+ * This function overwrites any existing blocked URL list in storage.
+ *
+ * @async
+ * @param {Array<string>} blockedUrlList - An array of URLs representing the complete list of sites to be blocked.
+ * @returns {Promise<void>} - A Promise that resolves when the data is successfully stored.
+ */
+async function setBlockedSiteList(blockedUrlList) {
+    const blockedUrlString = JSON.stringify(blockedUrlList);
+    storeChromeLocalData("blockedUrlList", blockedUrlString);
+}
+
+/**
  * Retrieves data from Chrome's local storage.
  *
  * This asynchronous function retrieves data from Chrome's local storage using the provided key.
@@ -137,6 +151,28 @@ async function getSiteObjData() {
         console.error( "Error: siteData is not instance of UrlDataObj - in getSiteObjData()",);
     }
     return siteDataObj;
+}
+
+/**
+ * Asynchronously retrieves the list of blocked URLs from Chrome's local storage.
+ * The stored data, which is expected to be a JSON string, is parsed back into an array.
+ * If no blocked URL list is found in storage, or if the stored data is falsy,
+ * an empty array `[]` is returned.
+ *
+ * @async
+ * @returns {Promise<Array<string>>} - A Promise that resolves with the array of blocked URLs.
+ * Returns an empty array `[]` if no list is found or if parsing fails.
+ */
+async function getBlockedSiteList() {
+    let blockedSiteList = await getChromeLocalData("blockedUrlList");
+
+    // create blockList if empty
+    if (!blockedSiteList) {
+        console.log(`log - created new blockList`)
+        return [];
+    }
+
+    return JSON.parse(blockedSiteList);
 }
 
 // ADD_TO_FRONT_END_END

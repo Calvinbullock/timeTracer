@@ -64,6 +64,80 @@ function setHtmlById(htmlId, htmlContent) {
 }
 
 /**
+ * Creates an HTML table to display the list of blocked URLs.
+ * It also includes a button to add the currently active URL to the block list.
+ *
+ * @param {Array<string>} blockedUrlList - An array of URLs that are currently blocked.
+ * @param {string} activeUrl - The URL of the currently active tab.
+ * @returns {string} - An HTML string representing the blocked URL table and the "add current URL" button.
+ */
+function createBlockedUrlTable(blockedUrlList, activeUrl) {
+    let html = `
+        <p id='blockUrl-sentance'>Block
+            <button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
+        </p>
+        <table id='blockListTable'>
+            <thead>
+                <tr>
+                    <th>Blocked URL</th>
+                    <th>Remove Item</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // add all the list items into the table rows
+    for (let index = 0; index < blockedUrlList.length; index++) {
+        const blockedUrl = blockedUrlList[index];
+        html += `
+                <tr>
+                    <td>${blockedUrl}</td>
+                    <td><button class="outlined-button removeBlockedUrlBtn" data-url="${blockedUrl}">X</button></td>
+                </tr>
+        `;
+    }
+    html += `
+            </tbody>
+        </table>
+    `;
+    return html;
+}
+
+/**
+ * Asynchronously retrieves the blocked URL list and the last active URL,
+ * then generates and displays the block list page content in the 'content-div'.
+ *
+ * @async
+ * @returns {Promise<void>} - A Promise that resolves after the block list page content has been successfully displayed.
+ */
+async function displayBlockListPage() {
+    // get lastActiveUrl
+    const data = await getSiteObjData();
+    const lastActiveUrl = data.getLastActiveUrl();
+
+    let blockedSiteList = await getBlockedSiteList();
+
+    let html = createBlockedUrlTable(blockedSiteList, lastActiveUrl);
+    setHtmlById('content-div', html);
+}
+
+/**
+ * Asynchronously adds a new URL to the list of blocked URLs in Chrome's local storage.
+ * It first retrieves the existing list, appends the new URL, and then saves the updated list.
+ *
+ * @async
+ * @param {string} newBlockedUrl - The URL to add to the blocked sites list.
+ * @returns {Promise<void>} - A Promise that resolves when the URL has been successfully added and the list has been saved.
+ */
+async function addNewBlockedUrl(newBlockedUrl) {
+    let blockedList = await getBlockedSiteList();
+
+    blockedList.push(newBlockedUrl);
+
+    await setBlockedSiteList(blockedList);
+}
+
+/**
  * Asynchronously retrieves website tracking data and displays it in an HTML table
  * within the element having the ID 'content-div'.
  * It fetches the data using 'getSiteObjData', formats it into an HTML table using
@@ -95,7 +169,22 @@ async function dispayUrlTimePage() {
     setHtmlById('content-div', html);
 }
 
-dispayUrlData();
+// ===================================================== \\
+// ===================================================== \\
+//                    Event Listeners
+// ===================================================== \\
+// ===================================================== \\
+
+// checks all clicks then checks if the id of a click matches our target
+//    prevents selecting un-loaded dynamic content
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("addNewBlockedUrlBtn")) {
+        const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
+        addNewBlockedUrl(addBlockedUrlBtn.value);
+        console.log(`log - ${addBlockedUrlBtn.value} added blockList`)
+        displayBlockListPage();
+    }
+});
 
 // ===================================================== \\
 // ===================================================== \\
@@ -105,7 +194,7 @@ dispayUrlData();
 
 const timeSpentLink = document.getElementById('timeSpentLink');
 const doNotTrackLink = document.getElementById('doNotTrackLink');
-const lockOutLink = document.getElementById('lockOutLink');
+const blockListkLink = document.getElementById('blockListLink');
 const menuLinks = document.querySelectorAll('.menu-link');
 
 // Function to remove 'active' from all menu links
@@ -133,10 +222,10 @@ doNotTrackLink.addEventListener('click', function(event) {
     this.classList.add('active');
 })
 
-lockOutLink.addEventListener('click', function(event) {
+blockListkLink.addEventListener('click', function(event) {
     event.preventDefault()
     // TODO: build page
-    setHtmlById('content-div', "Work In Progress");
+    displayBlockListPage();
 
     // set active link item
     removeActiveClassFromAll();
