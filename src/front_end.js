@@ -72,7 +72,7 @@ function setHtmlById(htmlId, htmlContent) {
  * @async
  * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
  */
-async function dispayUrlData() {
+async function dispayUrlTimePage() {
     // get the data on display (live update???)
     let data = await getSiteObjData();
 
@@ -115,7 +115,7 @@ function removeActiveClassFromAll() {
 
 timeSpentLink.addEventListener('click', function(event) {
     event.preventDefault()
-    dispayUrlData();
+    dispayUrlTimePage();
 
     // set active link item
     removeActiveClassFromAll();
