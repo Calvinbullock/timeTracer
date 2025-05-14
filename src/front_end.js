@@ -15,6 +15,8 @@
 // - block list - (site blocker dialog)
 // - day selector - day selector right above the table as a carasell ` < day X   day Y >`
 // - storage - clear data button
+// - publicly list the extension
+// - Maintinance - break the front end script up into pages so its cleaner and easier to read
 //
 // TODO: Release - 3
 // - data continuity - run exit session when computer sleeps ( NOTE: is this possible? )
@@ -42,7 +44,7 @@
 
 // ===================================================== \\
 // ===================================================== \\
-//                      Main Script
+//                Multi Page functions
 // ===================================================== \\
 // ===================================================== \\
 
@@ -62,6 +64,50 @@ function setHtmlById(htmlId, htmlContent) {
     console.error(`HTML element with ID "${htmlId}" not found.`);
   }
 }
+
+// ===================================================== \\
+// ===================================================== \\
+//                TimeTracking Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Asynchronously retrieves website tracking data and displays it in an HTML table
+ * within the element having the ID 'content-div'.
+ * It fetches the data using 'getSiteObjData', formats it into an HTML table using
+ * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
+ *
+ * @async
+ * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
+ */
+async function dispayUrlTimePage() {
+    // get the data on display (live update???)
+    let data = await getSiteObjData();
+
+    // sort by highest usage time
+    let sortedUrlList = data.urlList.sort((a, b) => {
+        // Compare the totalTime property of the two objects
+        if (a.totalTime < b.totalTime) {
+            return 1; // a comes before b
+        }
+        if (a.totalTime > b.totalTime) {
+            return -1;  // a comes after b
+        }
+        return 0;    // a and b are equal
+    });
+
+    // format the data
+    let html = getUrlListAsTable(sortedUrlList);
+
+    // inject the data
+    setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//                  BlockList Page JS
+// ===================================================== \\
+// ===================================================== \\
 
 /**
  * Creates an HTML table to display the list of blocked URLs.
@@ -137,44 +183,6 @@ async function addNewBlockedUrl(newBlockedUrl) {
     await setBlockedSiteList(blockedList);
 }
 
-/**
- * Asynchronously retrieves website tracking data and displays it in an HTML table
- * within the element having the ID 'content-div'.
- * It fetches the data using 'getSiteObjData', formats it into an HTML table using
- * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
- *
- * @async
- * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
- */
-async function dispayUrlTimePage() {
-    // get the data on display (live update???)
-    let data = await getSiteObjData();
-
-    // sort by highest usage time
-    let sortedUrlList = data.urlList.sort((a, b) => {
-        // Compare the totalTime property of the two objects
-        if (a.totalTime < b.totalTime) {
-            return 1; // a comes before b
-        }
-        if (a.totalTime > b.totalTime) {
-            return -1;  // a comes after b
-        }
-        return 0;    // a and b are equal
-    });
-
-    // format the data
-    let html = getUrlListAsTable(sortedUrlList);
-
-    // inject the data
-    setHtmlById('content-div', html);
-}
-
-// ===================================================== \\
-// ===================================================== \\
-//                    Event Listeners
-// ===================================================== \\
-// ===================================================== \\
-
 // checks all clicks then checks if the id of a click matches our target
 //    prevents selecting un-loaded dynamic content
 document.addEventListener("click", (event) => {
@@ -188,11 +196,12 @@ document.addEventListener("click", (event) => {
 
 // ===================================================== \\
 // ===================================================== \\
-//                      Nav Script
+//                  Nav Script / Listeners
 // ===================================================== \\
 // ===================================================== \\
 
 const timeSpentLink = document.getElementById('timeSpentLink');
+const weeklySum = document.getElementById('weeklySum');
 const doNotTrackLink = document.getElementById('doNotTrackLink');
 const blockListkLink = document.getElementById('blockListLink');
 const menuLinks = document.querySelectorAll('.menu-link');
@@ -209,7 +218,16 @@ timeSpentLink.addEventListener('click', function(event) {
     // set active link item
     removeActiveClassFromAll();
     this.classList.add('active');
+})
 
+weeklySum.addEventListener('click', function(event) {
+    event.preventDefault()
+    // TODO: build page
+    setHtmlById('content-div', "Work In Progress");
+
+    // set active link item
+    removeActiveClassFromAll();
+    this.classList.add('active');
 })
 
 doNotTrackLink.addEventListener('click', function(event) {
@@ -231,5 +249,9 @@ blockListkLink.addEventListener('click', function(event) {
     removeActiveClassFromAll();
     this.classList.add('active');
 })
+
+
+// first function that is called on enter
+dispayUrlTimePage();
 
 // END_IMPORT_HERE

@@ -8,17 +8,27 @@
 class UrlDataObj {
     constructor() {
         this.activeUrl = null;
-        this.startTime = null
+        this.lastActiveUrl = null;
+        this.startTime = null;
         this.urlList = [];
     }
 
     /**
-    * Retrieves the currently active URL being tracked.
-    *
-    * @returns {string} - The currently active URL, or an empty string if no URL is active.
-    */
+     * Retrieves the currently active URL being tracked.
+     *
+     * @returns {string} - The currently active URL, or an empty string if no URL is active.
+     */
     getActiveUrl() {
         return this.activeUrl;
+    }
+
+    /**
+     * Retrieves the last active URL that was being tracked.
+     *
+     * @returns {string|null} - The last active URL, or null if no URL has been active yet.
+     */
+    getLastActiveUrl() {
+        return this.lastActiveUrl;
     }
 
     /**
@@ -38,19 +48,19 @@ class UrlDataObj {
     }
 
     /**
-    * Starts a new tracking session for a given URL.
-    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    *   provided 'currentTime' (or the current timestamp if not provided).
-    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    *   truthy when attempting to start a new session.
-    *
-    * @param {string} url - The URL to set as the currently active one to start tracking.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   starting time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    * @returns {boolean} - True if the session was started successfully, false otherwise
-    *   (e.g., if a session was already active).
-    */
+     * Starts a new tracking session for a given URL.
+     * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+     * provided 'currentTime' (or the current timestamp if not provided).
+     * Logs an error and returns false if 'startTime' or 'activeUrl' are already
+     * truthy when attempting to start a new session.
+     *
+     * @param {string} url - The URL to set as the currently active one to start tracking.
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * starting time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     * @returns {boolean} - True if the session was started successfully, false otherwise
+     * (e.g., if a session was already active).
+     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
             console.error("Error: startTime / activeUrl should never be true on enter ",
@@ -60,26 +70,26 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
-        console.log(`LOG - Tracking starts for ${url}`)
+        console.log(`LOG - Tracking starts for ${url}`);
 
         this.activeUrl = url;
         this.startTime = currentTime;
     }
 
     /**
-    * Ends the currently active tracking session and records the elapsed time.
-    *   It finds the active URL in the urlList, calculates the time elapsed since
-    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    *   and resets the 'startDate' and 'isActive' properties of that item.
-    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    *   Logs an error if no active item is found.
-    *
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   ending time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    */
+     * Ends the currently active tracking session and records the elapsed time.
+     * It finds the active URL in the urlList, calculates the time elapsed since
+     * the 'startTime', adds it to the 'totalTime' of the corresponding item,
+     * and resets the 'startDate' and 'isActive' properties of that item.
+     * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+     * Logs an error if no active item is found.
+     *
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * ending time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     */
     endSession(currentTime = new Date()) {
-        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`);
 
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
@@ -92,7 +102,7 @@ class UrlDataObj {
         // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
-            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
         } else {
             // TODO: update tests to cover this case
@@ -100,10 +110,15 @@ class UrlDataObj {
             this.urlList.push( {
                 url: this.activeUrl,
                 totalTime: elapsedTime
-            })
-            console.log(`LOG - ${this.activeUrl} added to urlList`)
+            });
+            console.log(`LOG - ${this.activeUrl} added to urlList`);
         }
 
+        console.log(`LOG - activeUrl was: ${this.activeUrl}`)
+        if (this.activeUrl != null) {
+            this.lastActiveUrl = this.activeUrl;
+            console.log(`LOG - lastActiveUrl is: ${this.lastActiveUrl}`)
+        }
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -113,12 +128,13 @@ class UrlDataObj {
      * Date objects are converted to ISO 8601 string format for serialization.
      *
      * @returns {string} - A JSON string representing the TrackingData.
-     * The string includes 'activeUrl', 'startTime' (as an ISO string or null), and
-     * 'urlList' (an array of objects with 'url' and 'totalTime' properties).
+     * The string includes 'activeUrl', 'lastActiveUrl', 'startTime' (as an ISO string or null),
+     * and 'urlList' (an array of objects with 'url' and 'totalTime' properties).
      */
     toJSONString() {
         const jsonObject = {
             activeUrl: this.activeUrl,
+            lastActiveUrl: this.lastActiveUrl,
             startTime: this.startTime ? this.startTime.toISOString() : null,
             urlList: this.urlList.map(item => ({
                 url: item.url,
@@ -129,16 +145,16 @@ class UrlDataObj {
     }
 
     /**
-    * Creates a new UrlDataObj instance from a JSON string.
-    * It attempts to parse the JSON string and populate the properties
-    * of a new UrlDataObj. Date strings in the JSON are converted back
-    * to Date objects. Handles potential JSON parsing errors and returns null
-    * in case of an error.
-    *
-    * @param {string} jsonString - The JSON string to parse.
-    * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
-    * data from the JSON string, or null if an error occurred during parsing.
-    */
+     * Creates a new UrlDataObj instance from a JSON string.
+     * It attempts to parse the JSON string and populate the properties
+     * of a new UrlDataObj. Date strings in the JSON are converted back
+     * to Date objects. Handles potential JSON parsing errors and returns null
+     * in case of an error.
+     *
+     * @param {string} jsonString - The JSON string to parse.
+     * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
+     * data from the JSON string, or null if an error occurred during parsing.
+     */
     fromJSONString(jsonString) {
         try {
             // check the obj is of the right type
@@ -150,6 +166,7 @@ class UrlDataObj {
 
             const trackingData = new UrlDataObj();
             trackingData.activeUrl = jsonObj.activeUrl;
+            trackingData.lastActiveUrl = jsonObj.lastActiveUrl;
             trackingData.startTime = jsonObj.startTime ? new Date(jsonObj.startTime) : null;
             trackingData.urlList = jsonObj.urlList ? jsonObj.urlList.map(item => ({
                 url: item.url,
@@ -165,11 +182,11 @@ class UrlDataObj {
     }
 
     /**
-    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
-    *
-    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
-    * @returns {number} The time elapsed in milliseconds.
-    */
+     * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+     *
+     * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+     * @returns {number} The time elapsed in milliseconds.
+     */
     calcTimeElapsed(startDate, endDate) {
 
         // check if startDate is valid
@@ -278,6 +295,7 @@ function cleanUrl(url) {
  * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
  */
 function getDateKey(dateKey = new Date()) {
+    // TODO: this needs to store the key and when the key changes run a end Session somehow...
     const year = dateKey.getFullYear();
     const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
     const day = String(dateKey.getDate()).padStart(2, '0');
@@ -377,6 +395,20 @@ async function setSiteObjData(siteDataObj) {
 }
 
 /**
+ * Asynchronously saves a list of URLs to be blocked in Chrome's local storage.
+ * The provided list is first converted to a JSON string before being stored.
+ * This function overwrites any existing blocked URL list in storage.
+ *
+ * @async
+ * @param {Array<string>} blockedUrlList - An array of URLs representing the complete list of sites to be blocked.
+ * @returns {Promise<void>} - A Promise that resolves when the data is successfully stored.
+ */
+async function setBlockedSiteList(blockedUrlList) {
+    const blockedUrlString = JSON.stringify(blockedUrlList);
+    storeChromeLocalData("blockedUrlList", blockedUrlString);
+}
+
+/**
  * Retrieves data from Chrome's local storage.
  *
  * This asynchronous function retrieves data from Chrome's local storage using the provided key.
@@ -425,6 +457,28 @@ async function getSiteObjData() {
 }
 
 /**
+ * Asynchronously retrieves the list of blocked URLs from Chrome's local storage.
+ * The stored data, which is expected to be a JSON string, is parsed back into an array.
+ * If no blocked URL list is found in storage, or if the stored data is falsy,
+ * an empty array `[]` is returned.
+ *
+ * @async
+ * @returns {Promise<Array<string>>} - A Promise that resolves with the array of blocked URLs.
+ * Returns an empty array `[]` if no list is found or if parsing fails.
+ */
+async function getBlockedSiteList() {
+    let blockedSiteList = await getChromeLocalData("blockedUrlList");
+
+    // create blockList if empty
+    if (!blockedSiteList) {
+        console.log(`log - created new blockList`)
+        return [];
+    }
+
+    return JSON.parse(blockedSiteList);
+}
+
+/**
  * Manages the tracking session for the currently active URL.
  *
  * This asynchronous function retrieves the stored website tracking data,
@@ -461,6 +515,20 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 
     setSiteObjData(siteDataObj);
 }
+
+// TODO: finish this
+// function checkBlockedUrls(newActiveUrl) {
+//     const blockedUrlsList = getblockedUrlsList();
+//
+//     // check if newActive Url is on block list
+//     if (undesirableSites.includes(newActiveUrl)) {
+//         // Option 1: Send a message to the content script to display a warning
+//         chrome.tabs.sendMessage(details.tabId, { action: 'warnUser' });
+//
+//         // Option 2: Immediately redirect (comment out the sendMessage above if using this)
+//         // chrome.tabs.update(details.tabId, { url: 'your_safe_redirect_url' });
+//     }
+// }
 
 // ===================================================== \\
 // ===================================================== \\

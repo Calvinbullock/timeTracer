@@ -8,17 +8,27 @@
 class UrlDataObj {
     constructor() {
         this.activeUrl = null;
-        this.startTime = null
+        this.lastActiveUrl = null;
+        this.startTime = null;
         this.urlList = [];
     }
 
     /**
-    * Retrieves the currently active URL being tracked.
-    *
-    * @returns {string} - The currently active URL, or an empty string if no URL is active.
-    */
+     * Retrieves the currently active URL being tracked.
+     *
+     * @returns {string} - The currently active URL, or an empty string if no URL is active.
+     */
     getActiveUrl() {
         return this.activeUrl;
+    }
+
+    /**
+     * Retrieves the last active URL that was being tracked.
+     *
+     * @returns {string|null} - The last active URL, or null if no URL has been active yet.
+     */
+    getLastActiveUrl() {
+        return this.lastActiveUrl;
     }
 
     /**
@@ -38,19 +48,19 @@ class UrlDataObj {
     }
 
     /**
-    * Starts a new tracking session for a given URL.
-    *   It sets the 'activeUrl' to the provided URL and the 'startTime' to the
-    *   provided 'currentTime' (or the current timestamp if not provided).
-    *   Logs an error and returns false if 'startTime' or 'activeUrl' are already
-    *   truthy when attempting to start a new session.
-    *
-    * @param {string} url - The URL to set as the currently active one to start tracking.
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   starting time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    * @returns {boolean} - True if the session was started successfully, false otherwise
-    *   (e.g., if a session was already active).
-    */
+     * Starts a new tracking session for a given URL.
+     * It sets the 'activeUrl' to the provided URL and the 'startTime' to the
+     * provided 'currentTime' (or the current timestamp if not provided).
+     * Logs an error and returns false if 'startTime' or 'activeUrl' are already
+     * truthy when attempting to start a new session.
+     *
+     * @param {string} url - The URL to set as the currently active one to start tracking.
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * starting time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     * @returns {boolean} - True if the session was started successfully, false otherwise
+     * (e.g., if a session was already active).
+     */
     startSession(url, currentTime = new Date()) {
         if (this.startTime || this.activeUrl) {
             console.error("Error: startTime / activeUrl should never be true on enter ",
@@ -60,26 +70,26 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
-        console.log(`LOG - Tracking starts for ${url}`)
+        console.log(`LOG - Tracking starts for ${url}`);
 
         this.activeUrl = url;
         this.startTime = currentTime;
     }
 
     /**
-    * Ends the currently active tracking session and records the elapsed time.
-    *   It finds the active URL in the urlList, calculates the time elapsed since
-    *   the 'startTime', adds it to the 'totalTime' of the corresponding item,
-    *   and resets the 'startDate' and 'isActive' properties of that item.
-    *   It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-    *   Logs an error if no active item is found.
-    *
-    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-    *   ending time of the session. Defaults to the current timestamp if not provided,
-    *   allowing for easier testing.
-    */
+     * Ends the currently active tracking session and records the elapsed time.
+     * It finds the active URL in the urlList, calculates the time elapsed since
+     * the 'startTime', adds it to the 'totalTime' of the corresponding item,
+     * and resets the 'startDate' and 'isActive' properties of that item.
+     * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
+     * Logs an error if no active item is found.
+     *
+     * @param {Date} [currentTime=new Date()] - An optional Date object representing the
+     * ending time of the session. Defaults to the current timestamp if not provided,
+     * allowing for easier testing.
+     */
     endSession(currentTime = new Date()) {
-        console.log(`LOG - Tracking exits for ${this.activeUrl}`)
+        console.log(`LOG - Tracking exits for ${this.activeUrl}`);
 
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
@@ -92,7 +102,7 @@ class UrlDataObj {
         // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
-            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`)
+            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
         } else {
             // TODO: update tests to cover this case
@@ -100,10 +110,15 @@ class UrlDataObj {
             this.urlList.push( {
                 url: this.activeUrl,
                 totalTime: elapsedTime
-            })
-            console.log(`LOG - ${this.activeUrl} added to urlList`)
+            });
+            console.log(`LOG - ${this.activeUrl} added to urlList`);
         }
 
+        console.log(`LOG - activeUrl was: ${this.activeUrl}`)
+        if (this.activeUrl != null) {
+            this.lastActiveUrl = this.activeUrl;
+            console.log(`LOG - lastActiveUrl is: ${this.lastActiveUrl}`)
+        }
         this.activeUrl = null;
         this.startTime = null;
     }
@@ -113,12 +128,13 @@ class UrlDataObj {
      * Date objects are converted to ISO 8601 string format for serialization.
      *
      * @returns {string} - A JSON string representing the TrackingData.
-     * The string includes 'activeUrl', 'startTime' (as an ISO string or null), and
-     * 'urlList' (an array of objects with 'url' and 'totalTime' properties).
+     * The string includes 'activeUrl', 'lastActiveUrl', 'startTime' (as an ISO string or null),
+     * and 'urlList' (an array of objects with 'url' and 'totalTime' properties).
      */
     toJSONString() {
         const jsonObject = {
             activeUrl: this.activeUrl,
+            lastActiveUrl: this.lastActiveUrl,
             startTime: this.startTime ? this.startTime.toISOString() : null,
             urlList: this.urlList.map(item => ({
                 url: item.url,
@@ -129,16 +145,16 @@ class UrlDataObj {
     }
 
     /**
-    * Creates a new UrlDataObj instance from a JSON string.
-    * It attempts to parse the JSON string and populate the properties
-    * of a new UrlDataObj. Date strings in the JSON are converted back
-    * to Date objects. Handles potential JSON parsing errors and returns null
-    * in case of an error.
-    *
-    * @param {string} jsonString - The JSON string to parse.
-    * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
-    * data from the JSON string, or null if an error occurred during parsing.
-    */
+     * Creates a new UrlDataObj instance from a JSON string.
+     * It attempts to parse the JSON string and populate the properties
+     * of a new UrlDataObj. Date strings in the JSON are converted back
+     * to Date objects. Handles potential JSON parsing errors and returns null
+     * in case of an error.
+     *
+     * @param {string} jsonString - The JSON string to parse.
+     * @returns {UrlDataObj|null} - A new UrlDataObj instance populated with
+     * data from the JSON string, or null if an error occurred during parsing.
+     */
     fromJSONString(jsonString) {
         try {
             // check the obj is of the right type
@@ -150,6 +166,7 @@ class UrlDataObj {
 
             const trackingData = new UrlDataObj();
             trackingData.activeUrl = jsonObj.activeUrl;
+            trackingData.lastActiveUrl = jsonObj.lastActiveUrl;
             trackingData.startTime = jsonObj.startTime ? new Date(jsonObj.startTime) : null;
             trackingData.urlList = jsonObj.urlList ? jsonObj.urlList.map(item => ({
                 url: item.url,
@@ -165,11 +182,11 @@ class UrlDataObj {
     }
 
     /**
-    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
-    *
-    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
-    * @returns {number} The time elapsed in milliseconds.
-    */
+     * Calculates the time elapsed between a given start date and the current time, in milliseconds.
+     *
+     * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
+     * @returns {number} The time elapsed in milliseconds.
+     */
     calcTimeElapsed(startDate, endDate) {
 
         // check if startDate is valid
@@ -203,6 +220,7 @@ class UrlDataObj {
  * const specificDateKey = getDateKey(new Date(2023, 11, 25)); // Returns '2023-12-25'
  */
 function getDateKey(dateKey = new Date()) {
+    // TODO: this needs to store the key and when the key changes run a end Session somehow...
     const year = dateKey.getFullYear();
     const month = String(dateKey.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so add 1
     const day = String(dateKey.getDate()).padStart(2, '0');
@@ -268,7 +286,11 @@ function getUrlListAsTable(urlList) {
     display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
     display += "<tbody>";
 
-    for (let i = 0; i < urlList.length; i++) {
+    // take the list size or max at 20
+    let tableSize = Math.min(20, urlList.length);
+
+    // list top 20 Urls time was spent on
+    for (let i = 0; i < tableSize; i++) {
         const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
         display += `<tr>`;
         display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
@@ -362,6 +384,20 @@ async function setSiteObjData(siteDataObj) {
 }
 
 /**
+ * Asynchronously saves a list of URLs to be blocked in Chrome's local storage.
+ * The provided list is first converted to a JSON string before being stored.
+ * This function overwrites any existing blocked URL list in storage.
+ *
+ * @async
+ * @param {Array<string>} blockedUrlList - An array of URLs representing the complete list of sites to be blocked.
+ * @returns {Promise<void>} - A Promise that resolves when the data is successfully stored.
+ */
+async function setBlockedSiteList(blockedUrlList) {
+    const blockedUrlString = JSON.stringify(blockedUrlList);
+    storeChromeLocalData("blockedUrlList", blockedUrlString);
+}
+
+/**
  * Retrieves data from Chrome's local storage.
  *
  * This asynchronous function retrieves data from Chrome's local storage using the provided key.
@@ -409,10 +445,32 @@ async function getSiteObjData() {
     return siteDataObj;
 }
 
+/**
+ * Asynchronously retrieves the list of blocked URLs from Chrome's local storage.
+ * The stored data, which is expected to be a JSON string, is parsed back into an array.
+ * If no blocked URL list is found in storage, or if the stored data is falsy,
+ * an empty array `[]` is returned.
+ *
+ * @async
+ * @returns {Promise<Array<string>>} - A Promise that resolves with the array of blocked URLs.
+ * Returns an empty array `[]` if no list is found or if parsing fails.
+ */
+async function getBlockedSiteList() {
+    let blockedSiteList = await getChromeLocalData("blockedUrlList");
+
+    // create blockList if empty
+    if (!blockedSiteList) {
+        console.log(`log - created new blockList`)
+        return [];
+    }
+
+    return JSON.parse(blockedSiteList);
+}
+
 
 // ===================================================== \\
 // ===================================================== \\
-//                      Main Script
+//                Multi Page functions
 // ===================================================== \\
 // ===================================================== \\
 
@@ -433,6 +491,12 @@ function setHtmlById(htmlId, htmlContent) {
   }
 }
 
+// ===================================================== \\
+// ===================================================== \\
+//                TimeTracking Page JS
+// ===================================================== \\
+// ===================================================== \\
+
 /**
  * Asynchronously retrieves website tracking data and displays it in an HTML table
  * within the element having the ID 'content-div'.
@@ -442,7 +506,7 @@ function setHtmlById(htmlId, htmlContent) {
  * @async
  * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
  */
-async function dispayUrlData() {
+async function dispayUrlTimePage() {
     // get the data on display (live update???)
     let data = await getSiteObjData();
 
@@ -465,17 +529,107 @@ async function dispayUrlData() {
     setHtmlById('content-div', html);
 }
 
-dispayUrlData();
+// ===================================================== \\
+// ===================================================== \\
+//                  BlockList Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Creates an HTML table to display the list of blocked URLs.
+ * It also includes a button to add the currently active URL to the block list.
+ *
+ * @param {Array<string>} blockedUrlList - An array of URLs that are currently blocked.
+ * @param {string} activeUrl - The URL of the currently active tab.
+ * @returns {string} - An HTML string representing the blocked URL table and the "add current URL" button.
+ */
+function createBlockedUrlTable(blockedUrlList, activeUrl) {
+    let html = `
+        <p id='blockUrl-sentance'>Block
+            <button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
+        </p>
+        <table id='blockListTable'>
+            <thead>
+                <tr>
+                    <th>Blocked URL</th>
+                    <th>Remove Item</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // add all the list items into the table rows
+    for (let index = 0; index < blockedUrlList.length; index++) {
+        const blockedUrl = blockedUrlList[index];
+        html += `
+                <tr>
+                    <td>${blockedUrl}</td>
+                    <td><button class="outlined-button removeBlockedUrlBtn" data-url="${blockedUrl}">X</button></td>
+                </tr>
+        `;
+    }
+    html += `
+            </tbody>
+        </table>
+    `;
+    return html;
+}
+
+/**
+ * Asynchronously retrieves the blocked URL list and the last active URL,
+ * then generates and displays the block list page content in the 'content-div'.
+ *
+ * @async
+ * @returns {Promise<void>} - A Promise that resolves after the block list page content has been successfully displayed.
+ */
+async function displayBlockListPage() {
+    // get lastActiveUrl
+    const data = await getSiteObjData();
+    const lastActiveUrl = data.getLastActiveUrl();
+
+    let blockedSiteList = await getBlockedSiteList();
+
+    let html = createBlockedUrlTable(blockedSiteList, lastActiveUrl);
+    setHtmlById('content-div', html);
+}
+
+/**
+ * Asynchronously adds a new URL to the list of blocked URLs in Chrome's local storage.
+ * It first retrieves the existing list, appends the new URL, and then saves the updated list.
+ *
+ * @async
+ * @param {string} newBlockedUrl - The URL to add to the blocked sites list.
+ * @returns {Promise<void>} - A Promise that resolves when the URL has been successfully added and the list has been saved.
+ */
+async function addNewBlockedUrl(newBlockedUrl) {
+    let blockedList = await getBlockedSiteList();
+
+    blockedList.push(newBlockedUrl);
+
+    await setBlockedSiteList(blockedList);
+}
+
+// checks all clicks then checks if the id of a click matches our target
+//    prevents selecting un-loaded dynamic content
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("addNewBlockedUrlBtn")) {
+        const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
+        addNewBlockedUrl(addBlockedUrlBtn.value);
+        console.log(`log - ${addBlockedUrlBtn.value} added blockList`)
+        displayBlockListPage();
+    }
+});
 
 // ===================================================== \\
 // ===================================================== \\
-//                      Nav Script
+//                  Nav Script / Listeners
 // ===================================================== \\
 // ===================================================== \\
 
 const timeSpentLink = document.getElementById('timeSpentLink');
+const weeklySum = document.getElementById('weeklySum');
 const doNotTrackLink = document.getElementById('doNotTrackLink');
-const lockOutLink = document.getElementById('lockOutLink');
+const blockListkLink = document.getElementById('blockListLink');
 const menuLinks = document.querySelectorAll('.menu-link');
 
 // Function to remove 'active' from all menu links
@@ -485,12 +639,21 @@ function removeActiveClassFromAll() {
 
 timeSpentLink.addEventListener('click', function(event) {
     event.preventDefault()
-    dispayUrlData();
+    dispayUrlTimePage();
 
     // set active link item
     removeActiveClassFromAll();
     this.classList.add('active');
+})
 
+weeklySum.addEventListener('click', function(event) {
+    event.preventDefault()
+    // TODO: build page
+    setHtmlById('content-div', "Work In Progress");
+
+    // set active link item
+    removeActiveClassFromAll();
+    this.classList.add('active');
 })
 
 doNotTrackLink.addEventListener('click', function(event) {
@@ -503,13 +666,17 @@ doNotTrackLink.addEventListener('click', function(event) {
     this.classList.add('active');
 })
 
-lockOutLink.addEventListener('click', function(event) {
+blockListkLink.addEventListener('click', function(event) {
     event.preventDefault()
     // TODO: build page
-    setHtmlById('content-div', "Work In Progress");
+    displayBlockListPage();
 
     // set active link item
     removeActiveClassFromAll();
     this.classList.add('active');
 })
+
+
+// first function that is called on enter
+dispayUrlTimePage();
 
