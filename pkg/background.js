@@ -517,18 +517,35 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 }
 
 // TODO: finish this
-// function checkBlockedUrls(newActiveUrl) {
-//     const blockedUrlsList = getblockedUrlsList();
+// async function checkBlockedUrls(newActiveUrl) {
+//     const blockedUrlsList = await getBlockedSiteList();
 //
 //     // check if newActive Url is on block list
-//     if (undesirableSites.includes(newActiveUrl)) {
-//         // Option 1: Send a message to the content script to display a warning
-//         chrome.tabs.sendMessage(details.tabId, { action: 'warnUser' });
+//     if (blockedUrlsList.includes(newActiveUrl)) {
+//         console.log(`--> popup`)
 //
-//         // Option 2: Immediately redirect (comment out the sendMessage above if using this)
-//         // chrome.tabs.update(details.tabId, { url: 'your_safe_redirect_url' });
 //     }
 // }
+
+/**
+ * Handles actions to be performed when a new tab becomes active or the URL of the current tab changes.
+ * It cleans the provided URL, checks if it's blocked and potentially redirects, then if not blocked
+ * updates the active URL session, and logs the event.
+ *
+ * @param {string} activeUrl - The URL of the newly active or changed tab.
+ * @param {string} logMsg - A message to be included in the console log for this action.
+ * @returns {void} - This function does not return any value.
+ */
+function tabEnterOrChangeAction(activeUrl, logMsg) {
+    activeUrl = cleanUrl(activeUrl);
+
+    // check and redirect
+    //checkBlockedUrls(activeUrl);
+
+    updateActiveUrlSession(activeUrl, false);
+    console.log("");
+    console.log(`LOG - ${logMsg} ${activeUrl}`);
+}
 
 // ===================================================== \\
 // ===================================================== \\
@@ -539,10 +556,7 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 // checking if the current tab URL / site has changed
 chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
-        // get url, then update siteList
-        let activeUrl = cleanUrl(changeInfo.url);
-        updateActiveUrlSession(activeUrl, false);
-        console.log("LOG - URL changed: " + activeUrl); // DEBUG:
+        tabEnterOrChangeAction(changeInfo.url, `URL changed:`);
     }
 });
 
@@ -554,31 +568,28 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
             console.error(chrome.runtime.lastError); // DEBUG:
             return;
         }
-
-        // get url, then update siteList
-        let activeUrl = cleanUrl(tab.url); // get new URL
-        updateActiveUrlSession(activeUrl, false);
-        console.log("LOG - Active Tab URL: ", activeUrl); // DEBUG:
+        tabEnterOrChangeAction(tab.url, `Active Tab Url:`);
     });
 });
 
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
+        // BUG: this is trigger to often
         console.log("LOG - All Chrome windows are now unfocused.");
+        console.log("");
         updateActiveUrlSession("", true);
 
     } else {
+        console.log("");
         console.log(`LOG - Chrome window with ID ${windowId} is now focused.`);
 
         // When focused, query for the active tab in the currently focused window.
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
             if (tabs && tabs.length > 0) {
                 const activeTab = tabs[0];
-                const activeUrl = cleanUrl(activeTab.url);
+                tabEnterOrChangeAction(activeTab.url, `Active tab url on focus`);
 
-                console.log("LOG - Active Tab URL on focus:", activeUrl);
-                updateActiveUrlSession(activeUrl, false); // Start tracking the newly active URL
             } else {
                 console.log("LOG - No active tab found in the newly focused window.");
             }

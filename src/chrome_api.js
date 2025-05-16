@@ -216,16 +216,13 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 }
 
 // TODO: finish this
-// function checkBlockedUrls(newActiveUrl) {
-//     const blockedUrlsList = getblockedUrlsList();
+// async function checkBlockedUrls(newActiveUrl) {
+//     const blockedUrlsList = await getBlockedSiteList();
 //
 //     // check if newActive Url is on block list
-//     if (undesirableSites.includes(newActiveUrl)) {
-//         // Option 1: Send a message to the content script to display a warning
-//         chrome.tabs.sendMessage(details.tabId, { action: 'warnUser' });
+//     if (blockedUrlsList.includes(newActiveUrl)) {
+//         console.log(`--> popup`)
 //
-//         // Option 2: Immediately redirect (comment out the sendMessage above if using this)
-//         // chrome.tabs.update(details.tabId, { url: 'your_safe_redirect_url' });
 //     }
 // }
 
@@ -242,7 +239,7 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
     activeUrl = cleanUrl(activeUrl);
 
     // check and redirect
-    checkBlockedUrls(activeUrl);
+    //checkBlockedUrls(activeUrl);
 
     updateActiveUrlSession(activeUrl, false);
     console.log("");

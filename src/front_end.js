@@ -13,10 +13,12 @@
 
 // TODO: Release - 2
 // - block list - (site blocker dialog)
+//      - DONE - add
+//      - DONE - remove
+//      - HERE - redirect
 // - day selector - day selector right above the table as a carasell ` < day X   day Y >`
 // - storage - clear data button
 // - publicly list the extension
-// - Maintinance - break the front end script up into pages so its cleaner and easier to read
 //
 // TODO: Release - 3
 // - data continuity - run exit session when computer sleeps ( NOTE: is this possible? )
@@ -288,8 +290,9 @@ doNotTrackLink.addEventListener('click', function(event) {
 
 blockListkLink.addEventListener('click', function(event) {
     event.preventDefault()
-    // TODO: build page
-    displayBlockListPage();
+    //displayBlockListPage(); // TODO: this front end is ready the backend is not
+
+    setHtmlById('content-div', "Work In Progress");
 
     // set active link item
     removeActiveClassFromAll();

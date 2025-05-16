@@ -558,13 +558,14 @@ function createBlockedUrlTable(blockedUrlList, activeUrl) {
             <tbody>
     `;
 
+    // if blockedUrlList is empty add a row letting the usr know its empty
     if (blockedUrlList.length === 0) {
-            html += `
-                    <tr>
-                        <td>No blocked URLs</td>
-                        <td><button class="outlined-button">-</button></td>
-                    </tr>
-            `;
+        html += `
+                <tr>
+                    <td>No blocked URLs</td>
+                    <td><button class="outlined-button">-</button></td>
+                </tr>
+        `;
     } else {
         // add all the list items into the table rows
         for (let index = 0; index < blockedUrlList.length; index++) {
@@ -713,8 +714,9 @@ doNotTrackLink.addEventListener('click', function(event) {
 
 blockListkLink.addEventListener('click', function(event) {
     event.preventDefault()
-    // TODO: build page
-    displayBlockListPage();
+    //displayBlockListPage(); // TODO: this front end is ready the backend is not
+
+    setHtmlById('content-div', "Work In Progress");
 
     // set active link item
     removeActiveClassFromAll();
