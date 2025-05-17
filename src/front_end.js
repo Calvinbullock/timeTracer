@@ -225,7 +225,7 @@ document.addEventListener("click", (event) => {
         const urlToRemove = event.target.dataset.url;
         removeBlockedUrl(urlToRemove);
 
-        console.log(`log - ${urlToRemove} removed from blockList`);
+        __logger__(`${urlToRemove} removed from blockList`);
         displayBlockListPage();
     }
 });
@@ -237,7 +237,7 @@ document.addEventListener("click", (event) => {
     if (event.target.classList.contains("addNewBlockedUrlBtn")) {
         const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
         addNewBlockedUrl(addBlockedUrlBtn.value);
-        console.log(`log - ${addBlockedUrlBtn.value} added blockList`)
+        __logger__(`${addBlockedUrlBtn.value} added blockList`);
         displayBlockListPage();
     }
 });

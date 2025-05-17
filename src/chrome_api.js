@@ -41,7 +41,7 @@ function removeChromeLocalStorageItem(key) {
                 console.error("Error removing item from local storage:", chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
             } else {
-                console.log(`LOG - Item with key "${key}" removed from local storage.`);
+                __logger__(`Item with key "${key}" removed from local storage.`);
                 resolve();
             }
         });
@@ -71,7 +71,7 @@ function storeChromeLocalData(key, data) {
                 console.error('Error saving to local storage:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError); // Indicate failure with the error
             } else {
-                console.log(`LOG - Stored: key: ${key}`);
+                __logger__(`Stored: key: ${key}`);
                 resolve(); // Indicate successful completion
             }
         });
@@ -119,7 +119,7 @@ async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
-        console.log(`LOG - retrieve: key: ${key}`);
+        __logger__(`Retrieve: key: ${key}`);
         return result[key];
 
     } catch (error) {
@@ -168,7 +168,7 @@ async function getBlockedSiteList() {
 
     // create blockList if empty
     if (!blockedSiteList) {
-        console.log(`log - created new blockList`)
+        __logger__(`Created new blockList`);
         return [];
     }
 
@@ -242,8 +242,7 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
     //checkBlockedUrls(activeUrl);
 
     updateActiveUrlSession(activeUrl, false);
-    console.log("");
-    console.log(`LOG - ${logMsg} ${activeUrl}`);
+    __logger__(`${logMsg} ${activeUrl}`, true);
 }
 
 // ===================================================== \\
@@ -273,15 +272,15 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
+    __logger__(`LOG - Chrome window ID ${windowId}.`);
+
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         // BUG: this is trigger to often
-        console.log("LOG - All Chrome windows are now unfocused.");
-        console.log("");
+        __logger__("All Chrome windows are now unfocused.", true);
         updateActiveUrlSession("", true);
 
     } else {
-        console.log("");
-        console.log(`LOG - Chrome window with ID ${windowId} is now focused.`);
+        __logger__(`Chrome window with ID ${windowId} is now focused.`, true);
 
         // When focused, query for the active tab in the currently focused window.
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -290,7 +289,7 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
                 tabEnterOrChangeAction(activeTab.url, `Active tab url on focus`);
 
             } else {
-                console.log("LOG - No active tab found in the newly focused window.");
+                __logger__("No active tab found in the newly focused window.");
             }
         });
     }

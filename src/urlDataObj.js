@@ -9,6 +9,41 @@
 
 // BEGIN_IMPORT_HERE
 
+function formatDateTime() {
+  const now = new Date();
+
+  // Format time (HH:MM:SS)
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const timeString = `${hours}:${minutes}:${seconds}`;
+
+  // Format date (YYYY/MM/DD)
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateString = `${year}/${month}/${day}`;
+
+  return `${timeString} ${dateString}`;
+}
+
+/**
+ * Logs a message to the console, optionally adding empty lines before and after for better readability.
+ *
+ * @param {string} msg The message to be logged.
+ * @param {boolean} [buffer=false] If true, adds an empty line before and after the log message. Defaults to false.
+ */
+function __logger__(msg, buffer = false) {
+    let timeStamp = formatDateTime();
+    if (buffer) {
+        console.log("");
+        console.log(`${timeStamp} - ${msg}`);
+        console.log("");
+    } else {
+        console.log(`${timeStamp} - ${msg}`)
+    }
+}
+
 // ===================================================== \\
 // ===================================================== \\
 //                     UrlDataObj
@@ -80,7 +115,7 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
-        console.log(`LOG - Tracking starts for ${url}`);
+        __logger__(`Tracking starts for ${url}`);
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -99,7 +134,7 @@ class UrlDataObj {
      * allowing for easier testing.
      */
     endSession(currentTime = new Date()) {
-        console.log(`LOG - Tracking exits for ${this.activeUrl}`);
+        __logger__(`Tracking exits for ${this.activeUrl}`);
 
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
@@ -112,7 +147,7 @@ class UrlDataObj {
         // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
-            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
+            __logger__(`${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
         } else {
             // TODO: update tests to cover this case
@@ -121,13 +156,13 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             });
-            console.log(`LOG - ${this.activeUrl} added to urlList`);
+            __logger__(`${this.activeUrl} added to urlList`);
         }
 
-        console.log(`LOG - activeUrl was: ${this.activeUrl}`)
+        __logger__(`ActiveUrl was: ${this.activeUrl}`);
         if (this.activeUrl != null) {
             this.lastActiveUrl = this.activeUrl;
-            console.log(`LOG - lastActiveUrl is: ${this.lastActiveUrl}`)
+            __logger__(`LastActiveUrl is: ${this.lastActiveUrl}`);
         }
         this.activeUrl = null;
         this.startTime = null;
@@ -467,9 +502,9 @@ function test_endSession_nullActiveUrl() {
 
     // Check / Test
     if (
-        trackerObj.urlList.length === 0 
-            && trackerObj.activeUrl === null 
-            && trackerObj.startTime === null 
+        trackerObj.urlList.length === 0
+            && trackerObj.activeUrl === null
+            && trackerObj.startTime === null
             && trackerObj.lastActiveUrl === null
     ) {
         return 1;
