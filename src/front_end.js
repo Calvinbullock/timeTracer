@@ -58,13 +58,13 @@
  * @param {string} htmlContent - The HTML string to inject into the element.
  */
 function setHtmlById(htmlId, htmlContent) {
-  const contentDiv = document.getElementById(htmlId);
+    const contentDiv = document.getElementById(htmlId);
 
-  if (contentDiv) {
-    contentDiv.innerHTML = htmlContent;
-  } else {
-    console.error(`HTML element with ID "${htmlId}" not found.`);
-  }
+    if (contentDiv) {
+        contentDiv.innerHTML = htmlContent;
+    } else {
+        console.error(`HTML element with ID "${htmlId}" not found.`);
+    }
 }
 
 // ===================================================== \\
