@@ -251,6 +251,11 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
 // ===================================================== \\
 // ===================================================== \\
 
+
+// ===================================================== \\
+//                    Tab / URL change                   \\
+// ===================================================== \\
+
 // checking if the current tab URL / site has changed
 chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
     if (changeInfo.url) {
@@ -270,12 +275,17 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
     });
 });
 
+// ===================================================== \\
+//                      Window Change                    \\
+// ===================================================== \\
+
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
+    // BUG: this is not trigger at the right times
     __logger__(`LOG - Chrome window ID ${windowId}.`);
 
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
-        // BUG: this is trigger to often
+        // BUG: this is not trigger at the right times
         __logger__("All Chrome windows are now unfocused.", true);
         updateActiveUrlSession("", true);
 
