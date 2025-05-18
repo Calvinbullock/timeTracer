@@ -253,6 +253,43 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
 
 
 // ===================================================== \\
+//                      Lock / Sleep                     \\
+// ===================================================== \\
+
+// Set the detection interval for the 'idle' state (in seconds)
+chrome.idle.setDetectionInterval(300); // 300 seconds = 5 minutes.
+chrome.idle.onStateChanged.addListener((newState) => {
+    __logger__(`Idle state changed to: ${newState}`);
+
+    // idle is when system is locked or screen savor is active
+    if (newState === "idle") {
+        // User has been inactive for the set duration
+        __logger__("[LOGIC] User is likely inactive.");
+        updateActiveUrlSession("", true); // true means exit only
+
+    } else if (newState === "active") {
+        // User is active again
+        __logger__("[LOGIC] User is active.");
+
+        // When focused, query for the active tab in the currently focused window.
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs && tabs.length > 0) {
+                const activeTab = tabs[0];
+                tabEnterOrChangeAction(activeTab.url, `Active tab url on focus`);
+
+            } else {
+                __logger__("No active tab found in the newly focused window.");
+            }
+        });
+    } else if (newState === "locked") {
+        // System is locked (likely sleep or explicit lock)
+        __logger__(`Lock state changed to: ${newState}`);
+        __logger__("[LOGIC] System locked/sleeping.");
+        updateActiveUrlSession("", true); // true means exit only
+    }
+});
+
+// ===================================================== \\
 //                    Tab / URL change                   \\
 // ===================================================== \\
 
