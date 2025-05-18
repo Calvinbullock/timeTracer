@@ -24,7 +24,7 @@ function formatDateTime() {
   const day = String(now.getDate()).padStart(2, '0');
   const dateString = `${year}/${month}/${day}`;
 
-  return `${timeString} ${dateString}`;
+  return `${dateString} ${timeString}`;
 }
 
 /**

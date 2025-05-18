@@ -319,7 +319,7 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 // chrome window leave, enter
 chrome.windows.onFocusChanged.addListener(function(windowId) {
     // BUG: this is not trigger at the right times
-    __logger__(`LOG - Chrome window ID ${windowId}.`);
+    __logger__(`Chrome window ID ${windowId}.`);
 
     if (windowId === chrome.windows.WINDOW_ID_NONE) {
         // BUG: this is not trigger at the right times
