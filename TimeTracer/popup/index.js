@@ -42,7 +42,18 @@
 //          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
 //          local this will be easy to clean up and check if days need to be cleaned
 
-// BEGIN_IMPORT_HERE
+// import { UrlDataObj } from "../utils/urlDataObj.js";
+import {
+  __logger__,
+  formatMillisecsToHoursAndMinutes
+} from "../utils/utils.js";
+import {
+  getSiteObjData,
+  getBlockedSiteList,
+  setBlockedSiteList,
+  // setSiteObjData
+} from "../utils/chromeStorage.js";
+
 
 // ===================================================== \\
 // ===================================================== \\
@@ -58,13 +69,13 @@
  * @param {string} htmlContent - The HTML string to inject into the element.
  */
 function setHtmlById(htmlId, htmlContent) {
-    const contentDiv = document.getElementById(htmlId);
+  const contentDiv = document.getElementById(htmlId);
 
-    if (contentDiv) {
-        contentDiv.innerHTML = htmlContent;
-    } else {
-        console.error(`HTML element with ID "${htmlId}" not found.`);
-    }
+  if (contentDiv) {
+    contentDiv.innerHTML = htmlContent;
+  } else {
+    console.error(`HTML element with ID "${htmlId}" not found.`);
+  }
 }
 
 // ===================================================== \\
@@ -72,6 +83,38 @@ function setHtmlById(htmlId, htmlContent) {
 //                TimeTracking Page JS
 // ===================================================== \\
 // ===================================================== \\
+
+/**
+ * Generates an HTML table string from an array of URL objects.
+ * The table includes columns for an example index, the site URL, and the time spent (in hours).
+ * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
+ *
+ * @param {Array<object>} urlList - An array of objects, where each object contains
+ * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
+ * @returns {string} - An HTML string representing a table displaying the URL data.
+ */
+function getUrlListAsTable(urlList) {
+  let display = "<table>";
+  display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
+  display += "<tbody>";
+
+  // take the list size or max at 20
+  let tableSize = Math.min(20, urlList.length);
+
+  // list top 20 Urls time was spent on
+  for (let i = 0; i < tableSize; i++) {
+    const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
+    display += `<tr>`;
+    display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
+    display += `<td>${urlList[i].url}</td>`;
+    display += `<td>${totalTime}</td>`;
+    display += `</tr>`;
+  }
+
+  display += "</tbody>";
+  display += "</table>";
+  return display;
+}
 
 /**
  * Asynchronously retrieves website tracking data and displays it in an HTML table
@@ -83,26 +126,26 @@ function setHtmlById(htmlId, htmlContent) {
  * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
  */
 async function dispayUrlTimePage() {
-    // get the data on display (live update???)
-    let data = await getSiteObjData();
+  // get the data on display (live update???)
+  let data = await getSiteObjData();
 
-    // sort by highest usage time
-    let sortedUrlList = data.urlList.sort((a, b) => {
-        // Compare the totalTime property of the two objects
-        if (a.totalTime < b.totalTime) {
-            return 1; // a comes before b
-        }
-        if (a.totalTime > b.totalTime) {
-            return -1;  // a comes after b
-        }
-        return 0;    // a and b are equal
-    });
+  // sort by highest usage time
+  let sortedUrlList = data.urlList.sort((a, b) => {
+    // Compare the totalTime property of the two objects
+    if (a.totalTime < b.totalTime) {
+      return 1; // a comes before b
+    }
+    if (a.totalTime > b.totalTime) {
+      return -1;  // a comes after b
+    }
+    return 0;    // a and b are equal
+  });
 
-    // format the data
-    let html = getUrlListAsTable(sortedUrlList);
+  // format the data
+  let html = getUrlListAsTable(sortedUrlList);
 
-    // inject the data
-    setHtmlById('content-div', html);
+  // inject the data
+  setHtmlById('content-div', html);
 }
 
 // ===================================================== \\
@@ -120,45 +163,45 @@ async function dispayUrlTimePage() {
  * @returns {string} - An HTML string representing the blocked URL table and the "add current URL" button.
  */
 function createBlockedUrlTable(blockedUrlList, activeUrl) {
-    let html = `
-        <p id='blockUrl-sentance'>Block
-            <button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
-        </p>
-        <table id='blockListTable'>
-            <thead>
-                <tr>
-                    <th>Blocked URL</th>
-                    <th>Remove Item</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+  let html = `
+<p id='blockUrl-sentance'>Block
+<button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
+</p>
+<table id='blockListTable'>
+<thead>
+<tr>
+<th>Blocked URL</th>
+<th>Remove Item</th>
+</tr>
+</thead>
+<tbody>
+`;
 
-    // if blockedUrlList is empty add a row letting the usr know its empty
-    if (blockedUrlList.length === 0) {
-        html += `
-                <tr>
-                    <td>No blocked URLs</td>
-                    <td><button class="outlined-button">-</button></td>
-                </tr>
-        `;
-    } else {
-        // add all the list items into the table rows
-        for (let index = 0; index < blockedUrlList.length; index++) {
-            const blockedUrl = blockedUrlList[index];
-            html += `
-                    <tr>
-                        <td>${blockedUrl}</td>
-                        <td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedUrl}">X</button></td>
-                    </tr>
-            `;
-        }
-    }
+  // if blockedUrlList is empty add a row letting the usr know its empty
+  if (blockedUrlList.length === 0) {
     html += `
-            </tbody>
-        </table>
-    `;
-    return html;
+<tr>
+<td>No blocked URLs</td>
+<td><button class="outlined-button">-</button></td>
+</tr>
+`;
+  } else {
+    // add all the list items into the table rows
+    for (let index = 0; index < blockedUrlList.length; index++) {
+      const blockedUrl = blockedUrlList[index];
+      html += `
+<tr>
+<td>${blockedUrl}</td>
+<td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedUrl}">X</button></td>
+</tr>
+`;
+    }
+  }
+  html += `
+</tbody>
+</table>
+`;
+  return html;
 }
 
 /**
@@ -169,14 +212,14 @@ function createBlockedUrlTable(blockedUrlList, activeUrl) {
  * @returns {Promise<void>} - A Promise that resolves after the block list page content has been successfully displayed.
  */
 async function displayBlockListPage() {
-    // get lastActiveUrl
-    const data = await getSiteObjData();
-    const lastActiveUrl = data.getLastActiveUrl();
+  // get lastActiveUrl
+  const data = await getSiteObjData();
+  const lastActiveUrl = data.getLastActiveUrl();
 
-    let blockedSiteList = await getBlockedSiteList();
+  let blockedSiteList = await getBlockedSiteList();
 
-    let html = createBlockedUrlTable(blockedSiteList, lastActiveUrl);
-    setHtmlById('content-div', html);
+  let html = createBlockedUrlTable(blockedSiteList, lastActiveUrl);
+  setHtmlById('content-div', html);
 }
 
 /**
@@ -189,18 +232,18 @@ async function displayBlockListPage() {
  * @returns {Promise<boolean>} - A Promise that resolves with true if the URL was added, and false if it already existed.
  */
 async function addNewBlockedUrl(newBlockedUrl) {
-    let blockedList = await getBlockedSiteList();
+  let blockedList = await getBlockedSiteList();
 
-    // return if the array already has the item
-    for (let index = 0; index < blockedList.length; index++) {
-        if (blockedList[index] === newBlockedUrl) {return false}
-    }
+  // return if the array already has the item
+  for (let index = 0; index < blockedList.length; index++) {
+    if (blockedList[index] === newBlockedUrl) {return false}
+  }
 
-    // added item
-    blockedList.push(newBlockedUrl);
-    await setBlockedSiteList(blockedList);
+  // added item
+  blockedList.push(newBlockedUrl);
+  await setBlockedSiteList(blockedList);
 
-    return true;
+  return true;
 }
 
 /**
@@ -212,34 +255,34 @@ async function addNewBlockedUrl(newBlockedUrl) {
  * @returns {Promise<void>} - A Promise that resolves when the URL has been successfully removed and the list has been saved.
  */
 async function removeBlockedUrl(targetUrl) {
-    let blockedList = await getBlockedSiteList();
-    blockedList = blockedList.filter(item => item !== targetUrl);
-    await setBlockedSiteList(blockedList);
+  let blockedList = await getBlockedSiteList();
+  blockedList = blockedList.filter(item => item !== targetUrl);
+  await setBlockedSiteList(blockedList);
 }
 
 // NOTE: listener for removing url from block list
 // checks all clicks of button matching the target class then gets the dataset of the
 //      triggered button prevents error from selecting un-loaded dynamic content.
 document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("removeBlockedUrlBtn")) {
-        const urlToRemove = event.target.dataset.url;
-        removeBlockedUrl(urlToRemove);
+  if (event.target.classList.contains("removeBlockedUrlBtn")) {
+    const urlToRemove = event.target.dataset.url;
+    removeBlockedUrl(urlToRemove);
 
-        __logger__(`${urlToRemove} removed from blockList`);
-        displayBlockListPage();
-    }
+    __logger__(`${urlToRemove} removed from blockList`);
+    displayBlockListPage();
+  }
 });
 
 // NOTE: listener for adding url to block list
 // checks all clicks of button matching the target class then looks for the
 //      id of the clicked button prevents error on selecting un-loaded dynamic content
 document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("addNewBlockedUrlBtn")) {
-        const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
-        addNewBlockedUrl(addBlockedUrlBtn.value);
-        __logger__(`${addBlockedUrlBtn.value} added blockList`);
-        displayBlockListPage();
-    }
+  if (event.target.classList.contains("addNewBlockedUrlBtn")) {
+    const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
+    addNewBlockedUrl(addBlockedUrlBtn.value);
+    __logger__(`${addBlockedUrlBtn.value} added blockList`);
+    displayBlockListPage();
+  }
 });
 
 // ===================================================== \\
@@ -260,47 +303,46 @@ function removeActiveClassFromAll() {
 }
 
 timeSpentLink.addEventListener('click', function(event) {
-    event.preventDefault()
-    dispayUrlTimePage();
+  event.preventDefault()
+  dispayUrlTimePage();
 
-    // set active link item
-    removeActiveClassFromAll();
-    this.classList.add('active');
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
 })
 
 weeklySum.addEventListener('click', function(event) {
-    event.preventDefault()
-    // TODO: build page
-    setHtmlById('content-div', "Work In Progress");
+  event.preventDefault()
+  // TODO: build page
+  setHtmlById('content-div', "Work In Progress");
 
-    // set active link item
-    removeActiveClassFromAll();
-    this.classList.add('active');
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
 })
 
 doNotTrackLink.addEventListener('click', function(event) {
-    event.preventDefault()
-    // TODO: build page
-    setHtmlById('content-div', "Work In Progress");
+  event.preventDefault()
+  // TODO: build page
+  setHtmlById('content-div', "Work In Progress");
 
-    // set active link item
-    removeActiveClassFromAll();
-    this.classList.add('active');
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
 })
 
 blockListkLink.addEventListener('click', function(event) {
-    event.preventDefault()
-    //displayBlockListPage(); // TODO: this front end is ready the backend is not
+  event.preventDefault()
+  //displayBlockListPage(); // TODO: this front end is ready the backend is not
 
-    setHtmlById('content-div', "Work In Progress");
+  setHtmlById('content-div', "Work In Progress");
 
-    // set active link item
-    removeActiveClassFromAll();
-    this.classList.add('active');
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
 })
 
 
 // first function that is called on enter
 dispayUrlTimePage();
 
-// END_IMPORT_HERE

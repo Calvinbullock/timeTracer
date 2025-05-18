@@ -1,0 +1,193 @@
+
+:root {
+  --card-background: #1e1e1e;
+  --main-background: #a93226;
+  --text-primary-color: #f5f5f5;
+  --active-item-color: #ff4226;
+  --active-item-color-hover: #603000;
+}
+
+body {
+  background-color: var(--main-background);
+  color: var(--text-primary-color);
+
+  width: 500px;
+  height: 550px;
+
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}
+
+header {
+  font-size: 2em;
+
+  background-color: var(--card-background);
+  color: var(--text-primary-color);
+
+  padding: 0.1em 10px;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+
+  border: solid 12px var(--card-background);
+  border-radius: 5px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+main {
+  background-color: var(--card-background);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  font-size: 15px;
+  border: solid 12px var(--card-background);
+  border-radius: 5px;
+
+  max-height: 66%;
+  width: 96%;
+
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 2px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar styles */
+main::-webkit-scrollbar {
+  width: 8px; /* Adjust width as needed */
+}
+
+main::-webkit-scrollbar-track {
+  background-color: var(--card-background);
+  border-radius: 3px;
+}
+
+main::-webkit-scrollbar-thumb {
+  background-color: var(--main-background);
+  border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+  background-color: var(--active-item-color-hover);
+}
+
+main p {
+  margin-bottom: 0.8em;
+}
+
+footer {
+  font-size: 1em;
+
+  background-color: var(--card-background);
+  color: var(--text-primary-color);
+  text-align: center;
+  padding: 0.5em 0;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* ============================================================ */
+/* ============================================================ */
+/*                          Nav                                 */
+/* ============================================================ */
+/* ============================================================ */
+
+nav {
+  font-size: .8em;
+  padding: 0;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+}
+
+nav a {
+  color: var(--text-primary-color);
+  text-decoration: none;
+  padding: 0.3em 0.6em;
+  border-radius: 3px;
+  transition: background-color 0.5s ease;
+}
+
+nav a:hover {
+  background-color: var(--active-item-color-hover);
+}
+
+.active {
+  transition: color 0.4s ease;
+  color: var(--active-item-color);
+  font-weight: bolder;
+}
+
+/* ============================================================ */
+/* ============================================================ */
+/*                      reusable page styles                  */
+/* ============================================================ */
+/* ============================================================ */
+
+#content-div {
+  font-size: 1.2em;
+}
+
+/* reusable  */
+.outlined-button {
+  background-color: transparent;
+  color: var(--text-primary-color);
+
+  border: 2px solid var(--active-item-color);
+  border-radius: 5px;
+
+  text-align: center;
+  text-decoration: none;
+  padding: 5px 15px;
+  margin: 2px 8px;
+  transition: color 0.3s ease;
+
+  display: inline-block;
+  cursor: pointer;
+}
+
+.outlined-button:hover {
+  border-color: var(--active-item-color-hover);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  margin: auto;
+}
+
+th, td {
+  padding-right: 10px;
+}
+
+/* ============================================================ */
+/* ============================================================ */
+/*                      Individual page styles                  */
+/* ============================================================ */
+/* ============================================================ */
+
+/*  ----- TimeSpent page ----- */
+
+
+/*  ----- BlockList page ----- */
+#blockUrl-sentance {
+  text-align: center;
+}
+
+#blockListTable {
+  margin: 4%;
+}
+
+
+
