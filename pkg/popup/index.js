@@ -1,4 +1,39 @@
 
+function formatDateTime() {
+  const now = new Date();
+
+  // Format time (HH:MM:SS)
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const timeString = `${hours}:${minutes}:${seconds}`;
+
+  // Format date (YYYY/MM/DD)
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateString = `${year}/${month}/${day}`;
+
+  return `${dateString} ${timeString}`;
+}
+
+/**
+ * Logs a message to the console, optionally adding empty lines before and after for better readability.
+ *
+ * @param {string} msg The message to be logged.
+ * @param {boolean} [buffer=false] If true, adds an empty line before and after the log message. Defaults to false.
+ */
+function __logger__(msg, buffer = false) {
+    let timeStamp = formatDateTime();
+    if (buffer) {
+        console.log("");
+        console.log(`${timeStamp} - ${msg}`);
+        console.log("");
+    } else {
+        console.log(`${timeStamp} - ${msg}`)
+    }
+}
+
 // ===================================================== \\
 // ===================================================== \\
 //                     UrlDataObj
@@ -70,7 +105,7 @@ class UrlDataObj {
                 "new activeUrl: ", url
             );
         }
-        console.log(`LOG - Tracking starts for ${url}`);
+        __logger__(`Tracking starts for ${url}`);
 
         this.activeUrl = url;
         this.startTime = currentTime;
@@ -89,7 +124,7 @@ class UrlDataObj {
      * allowing for easier testing.
      */
     endSession(currentTime = new Date()) {
-        console.log(`LOG - Tracking exits for ${this.activeUrl}`);
+        __logger__(`Tracking exits for ${this.activeUrl}`);
 
         if (this.activeUrl == null) {
             console.error("Error: activeItem was null when endSession was called.");
@@ -102,7 +137,7 @@ class UrlDataObj {
         // update or add new url to urlList
         if (activeItem) {
             activeItem.totalTime += elapsedTime;
-            console.log(`LOG - ${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
+            __logger__(`${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
         } else {
             // TODO: update tests to cover this case
@@ -111,13 +146,13 @@ class UrlDataObj {
                 url: this.activeUrl,
                 totalTime: elapsedTime
             });
-            console.log(`LOG - ${this.activeUrl} added to urlList`);
+            __logger__(`${this.activeUrl} added to urlList`);
         }
 
-        console.log(`LOG - activeUrl was: ${this.activeUrl}`)
+        __logger__(`ActiveUrl was: ${this.activeUrl}`);
         if (this.activeUrl != null) {
             this.lastActiveUrl = this.activeUrl;
-            console.log(`LOG - lastActiveUrl is: ${this.lastActiveUrl}`)
+            __logger__(`LastActiveUrl is: ${this.lastActiveUrl}`);
         }
         this.activeUrl = null;
         this.startTime = null;
@@ -333,7 +368,7 @@ function removeChromeLocalStorageItem(key) {
                 console.error("Error removing item from local storage:", chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
             } else {
-                console.log(`LOG - Item with key "${key}" removed from local storage.`);
+                __logger__(`Item with key "${key}" removed from local storage.`);
                 resolve();
             }
         });
@@ -363,7 +398,7 @@ function storeChromeLocalData(key, data) {
                 console.error('Error saving to local storage:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError); // Indicate failure with the error
             } else {
-                console.log(`LOG - Stored: key: ${key}`);
+                __logger__(`Stored: key: ${key}`);
                 resolve(); // Indicate successful completion
             }
         });
@@ -411,7 +446,7 @@ async function getChromeLocalData(key) {
     try {
         const result = await chrome.storage.local.get([key]);
         //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
-        console.log(`LOG - retrieve: key: ${key}`);
+        __logger__(`Retrieve: key: ${key}`);
         return result[key];
 
     } catch (error) {
@@ -460,7 +495,7 @@ async function getBlockedSiteList() {
 
     // create blockList if empty
     if (!blockedSiteList) {
-        console.log(`log - created new blockList`)
+        __logger__(`Created new blockList`);
         return [];
     }
 
@@ -482,13 +517,13 @@ async function getBlockedSiteList() {
  * @param {string} htmlContent - The HTML string to inject into the element.
  */
 function setHtmlById(htmlId, htmlContent) {
-  const contentDiv = document.getElementById(htmlId);
+    const contentDiv = document.getElementById(htmlId);
 
-  if (contentDiv) {
-    contentDiv.innerHTML = htmlContent;
-  } else {
-    console.error(`HTML element with ID "${htmlId}" not found.`);
-  }
+    if (contentDiv) {
+        contentDiv.innerHTML = htmlContent;
+    } else {
+        console.error(`HTML element with ID "${htmlId}" not found.`);
+    }
 }
 
 // ===================================================== \\
@@ -649,7 +684,7 @@ document.addEventListener("click", (event) => {
         const urlToRemove = event.target.dataset.url;
         removeBlockedUrl(urlToRemove);
 
-        console.log(`log - ${urlToRemove} removed from blockList`);
+        __logger__(`${urlToRemove} removed from blockList`);
         displayBlockListPage();
     }
 });
@@ -661,7 +696,7 @@ document.addEventListener("click", (event) => {
     if (event.target.classList.contains("addNewBlockedUrlBtn")) {
         const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
         addNewBlockedUrl(addBlockedUrlBtn.value);
-        console.log(`log - ${addBlockedUrlBtn.value} added blockList`)
+        __logger__(`${addBlockedUrlBtn.value} added blockList`);
         displayBlockListPage();
     }
 });
