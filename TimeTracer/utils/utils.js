@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview This file contains various utility functions (the bulk of the code)
  * used throughout the application. These functions include URL manipulation
@@ -43,11 +42,11 @@ function formatDateTime() {
 function __logger__(msg, buffer = false) {
   let timeStamp = formatDateTime();
   if (buffer) {
-    console.log("");
+    console.log('');
     console.log(`${timeStamp} - ${msg}`);
-    console.log("");
+    console.log('');
   } else {
-    console.log(`${timeStamp} - ${msg}`)
+    console.log(`${timeStamp} - ${msg}`);
   }
 }
 
@@ -77,7 +76,7 @@ function searchDataUrls(targetUrl, dataList) {
     if (dataList[i].url === targetUrl) {
       return i;
     }
-  };
+  }
   return -1;
 }
 
@@ -108,14 +107,13 @@ function cleanUrl(url) {
     let baseUrl = urlObj.origin;
 
     // remove `https://`
-    if (baseUrl.startsWith("https://")) {
+    if (baseUrl.startsWith('https://')) {
       return baseUrl.substring(8);
     }
 
     return baseUrl;
-
   } catch (error) {
-    console.error("Invalid URL:", url, error);
+    console.error('Invalid URL:', url, error);
     return null;
   }
 }
@@ -141,7 +139,6 @@ function getDateKey(dateKey = new Date()) {
 }
 
 // END_IMPORT_HERE
-
 
 // ===================================================== \\
 // ===================================================== \\
@@ -171,7 +168,7 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
 
   // Input validation: Check if minutes is a valid number and is not negative
   if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
-    return "0 min";
+    return '0 min';
   }
 
   const hours = Math.trunc(minutes / 60);
