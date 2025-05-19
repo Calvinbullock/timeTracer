@@ -14,6 +14,8 @@ import { UrlDataObj } from './urlDataObj.js';
 import { getDateKey } from './utils.js';
 import { __logger__ } from './utils.js';
 
+const BLOCK_LIST_DATA_KEY = 'blockedUrlList';
+
 // ==================================================== \\
 // ==================================================== \\
 // functions dependent on chrome API                    \\
@@ -109,7 +111,7 @@ async function setSiteObjData(siteDataObj) {
  */
 async function setBlockedSiteList(blockedUrlList) {
   const blockedUrlString = JSON.stringify(blockedUrlList);
-  storeChromeLocalData('blockedUrlList', blockedUrlString);
+  storeChromeLocalData(BLOCK_LIST_DATA_KEY, blockedUrlString);
 }
 
 /**
@@ -172,7 +174,7 @@ async function getSiteObjData() {
  * Returns an empty array `[]` if no list is found or if parsing fails.
  */
 async function getBlockedSiteList() {
-  let blockedSiteList = await getChromeLocalData('blockedUrlList');
+  let blockedSiteList = await getChromeLocalData(BLOCK_LIST_DATA_KEY);
 
   // create blockList if empty
   if (!blockedSiteList) {
