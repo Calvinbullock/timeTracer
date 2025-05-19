@@ -1,4 +1,5 @@
 # build / pkg files
+buildFiles/*
 TimeTracer.zip
 TimeTracer.crx
 TimeTracer.pem
