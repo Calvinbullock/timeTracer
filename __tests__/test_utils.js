@@ -2,7 +2,6 @@
 //import { unmuteConsole, muteConsole } from "./testHelpers.js";
 import {
   // formatDateTime,
-  __logger__,
   searchDataUrls,
   cleanUrl,
   getDateKey,

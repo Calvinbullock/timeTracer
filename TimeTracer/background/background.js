@@ -111,6 +111,10 @@ chrome.idle.onStateChanged.addListener((newState) => {
 
 // checking if the current tab URL / site has changed
 chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
+  // use them to remove eslint warnings
+  tab;
+  tabId;
+
   if (changeInfo.url) {
     tabEnterOrChangeAction(changeInfo.url, `URL changed:`);
   }
