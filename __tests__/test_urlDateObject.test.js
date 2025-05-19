@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { UrlDataObj } from './../TimeTracer/utils/urlDataObj.js';
 
 describe('UrlDataObj Tests', () => {
