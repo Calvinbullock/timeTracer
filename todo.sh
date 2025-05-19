@@ -1,2 +1,2 @@
 #!/bin/bash
-grep -rnw "./src" -e "// TODO:" | sed 's/^[^/]*\/\//\t\/\//'
+grep -rnw "./" -e "// TODO:" | sed 's/^[^/]*\/\//\t\/\//'
