@@ -50,6 +50,7 @@ import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
+  setSiteObjData,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
 
@@ -127,6 +128,9 @@ function getUrlListAsTable(urlList) {
 async function dispayUrlTimePage() {
   // get the data on display (live update???)
   let data = await getSiteObjData();
+
+  // update the data for display (this data is never re-stored to local - non persistent )
+  data.endSession();
 
   // sort by highest usage time
   let sortedUrlList = data.urlList.sort((a, b) => {
