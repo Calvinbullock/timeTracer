@@ -1,5 +1,6 @@
 ![Workflow Status](https://github.com/Calvinbullock/timeTracer/actions/workflows/lint.yaml/badge.svg)
 ![Workflow Status](https://github.com/Calvinbullock/timeTracer/actions/workflows/test.yaml/badge.svg)
+![Workflow Status](https://github.com/Calvinbullock/timeTracer/actions/workflows/prettier.yaml/badge.svg)
 
 # TimeTracer - Chrome Extension for Tracking Website Usage
 
