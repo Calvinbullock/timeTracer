@@ -50,7 +50,6 @@ import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
-  setSiteObjData,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
 
