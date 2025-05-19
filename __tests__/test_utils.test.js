@@ -5,7 +5,6 @@ import {
   getDateKey,
   minutesFromMilliseconds,
   formatMillisecsToHoursAndMinutes,
-  timeAcuracyCheck,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
