@@ -1,3 +1,6 @@
+![Workflow Status](https://github.com/OWNER/REPOSITORY/actions/workflows/WORKFLOW_FILE.yml/badge.svg)
+
+
 # TimeTracer - Chrome Extension for Tracking Website Usage
 
 ## This is a chrome extension that will track a users time on individual websites and communicate that time back to the user.
