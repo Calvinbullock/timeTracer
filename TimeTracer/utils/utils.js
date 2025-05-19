@@ -9,25 +9,24 @@
  * @date Date of creation: April, 2025
  */
 
-// ===================================================== \\
-// ===================================================== \\
-//                      Utilities
-// ===================================================== \\
-// ===================================================== \\
-
-function formatDateTime() {
-  const now = new Date();
-
+/**
+ * Formats a given date and time into a string with the format "YYYY/MM/DD HH:MM:SS".
+ * If no date is provided, the current date and time will be used.
+ *
+ * @param {Date} [currDate=new Date()] - The date object to format. Defaults to the current date and time.
+ * @returns {string} The formatted date and time string.
+ */
+function formatDateTime(currDate = new Date()) {
   // Format time (HH:MM:SS)
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const hours = String(currDate.getHours()).padStart(2, '0');
+  const minutes = String(currDate.getMinutes()).padStart(2, '0');
+  const seconds = String(currDate.getSeconds()).padStart(2, '0');
   const timeString = `${hours}:${minutes}:${seconds}`;
 
   // Format date (YYYY/MM/DD)
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-  const day = String(now.getDate()).padStart(2, '0');
+  const year = currDate.getFullYear();
+  const month = String(currDate.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const day = String(currDate.getDate()).padStart(2, '0');
   const dateString = `${year}/${month}/${day}`;
 
   return `${dateString} ${timeString}`;
@@ -137,14 +136,6 @@ function getDateKey(dateKey = new Date()) {
 
   return `${year}-${month}-${day}`;
 }
-
-// END_IMPORT_HERE
-
-// ===================================================== \\
-// ===================================================== \\
-//                      Utilities
-// ===================================================== \\
-// ===================================================== \\
 
 /**
  * Calculates the number of minutes from a given number of milliseconds.
