@@ -1,6 +1,6 @@
-import { UrlDataObj } from "../utils/urlDataObj.js";
-import { cleanUrl, __logger__ } from "../utils/utils.js";
-import { getSiteObjData, setSiteObjData } from "../utils/chromeStorage.js";
+import { UrlDataObj } from '../utils/urlDataObj.js';
+import { cleanUrl, __logger__ } from '../utils/utils.js';
+import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -25,13 +25,14 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
   let siteDataObj = await getSiteObjData();
 
   if (!(siteDataObj instanceof UrlDataObj)) {
-    console.error("Error: siteData not instance of UrlDataObj - updateStoredData");
+    console.error(
+      'Error: siteData not instance of UrlDataObj - updateStoredData'
+    );
   }
 
   // exit session
   if (stopTracking) {
     siteDataObj.endSession();
-
   } else {
     siteDataObj.endSession();
     siteDataObj.startSession(newActiveUrl);
@@ -39,7 +40,6 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 
   setSiteObjData(siteDataObj);
 }
-
 
 /**
  * Handles actions to be performed when a new tab becomes active or the URL of the current tab changes.
@@ -60,13 +60,11 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
   __logger__(`${logMsg} ${activeUrl}`, true);
 }
 
-
 // ===================================================== \\
 // ===================================================== \\
 //              Chromium API Event Listeners             \\
 // ===================================================== \\
 // ===================================================== \\
-
 
 // ===================================================== \\
 //                      Lock / Sleep                     \\
@@ -78,30 +76,28 @@ chrome.idle.onStateChanged.addListener((newState) => {
   __logger__(`Idle state changed to: ${newState}`);
 
   // idle is when system is locked or screen savor is active
-  if (newState === "idle") {
+  if (newState === 'idle') {
     // User has been inactive for the set duration
-    __logger__("[LOGIC] User is likely inactive.");
-    updateActiveUrlSession("", true); // true means exit only
-
-  } else if (newState === "active") {
+    __logger__('[LOGIC] User is likely inactive.');
+    updateActiveUrlSession('', true); // true means exit only
+  } else if (newState === 'active') {
     // User is active again
-    __logger__("[LOGIC] User is active.");
+    __logger__('[LOGIC] User is active.');
 
     // When focused, query for the active tab in the currently focused window.
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs && tabs.length > 0) {
         const activeTab = tabs[0];
-        tabEnterOrChangeAction(activeTab.url, `Active tab url on focus`);
-
+        tabEnterOrChangeAction(activeTab.url, 'Active tab url on focus');
       } else {
-        __logger__("No active tab found in the newly focused window.");
+        __logger__('No active tab found in the newly focused window.');
       }
     });
-  } else if (newState === "locked") {
+  } else if (newState === 'locked') {
     // System is locked (likely sleep or explicit lock)
     __logger__(`Lock state changed to: ${newState}`);
-    __logger__("[LOGIC] System locked/sleeping.");
-    updateActiveUrlSession("", true); // true means exit only
+    __logger__('[LOGIC] System locked/sleeping.');
+    updateActiveUrlSession('', true); // true means exit only
   }
 });
 
@@ -110,25 +106,25 @@ chrome.idle.onStateChanged.addListener((newState) => {
 // ===================================================== \\
 
 // checking if the current tab URL / site has changed
-chrome.tabs.onUpdated.addListener( function(tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   // use them to remove eslint warnings
   tab;
   tabId;
 
   if (changeInfo.url) {
-    tabEnterOrChangeAction(changeInfo.url, `URL changed:`);
+    tabEnterOrChangeAction(changeInfo.url, 'URL changed:');
   }
 });
 
 // get current URL on tab change
-chrome.tabs.onActivated.addListener(function(activeInfo) {
-  chrome.tabs.get(activeInfo.tabId, function(tab) {
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, function (tab) {
     // handle tab errors
-    if(chrome.runtime.lastError) {
+    if (chrome.runtime.lastError) {
       console.error(chrome.runtime.lastError); // DEBUG:
       return;
     }
-    tabEnterOrChangeAction(tab.url, `Active Tab Url:`);
+    tabEnterOrChangeAction(tab.url, 'Active Tab Url:');
   });
 });
 
@@ -137,30 +133,25 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 // ===================================================== \\
 
 // chrome window leave, enter
-chrome.windows.onFocusChanged.addListener(function(windowId) {
+chrome.windows.onFocusChanged.addListener(function (windowId) {
   // BUG: this is not trigger at the right times
   __logger__(`Chrome window ID ${windowId}.`);
 
   if (windowId === chrome.windows.WINDOW_ID_NONE) {
     // BUG: this is not trigger at the right times
-    __logger__("All Chrome windows are now unfocused.", true);
-    updateActiveUrlSession("", true);
-
+    __logger__('All Chrome windows are now unfocused.', true);
+    updateActiveUrlSession('', true);
   } else {
     __logger__(`Chrome window with ID ${windowId} is now focused.`, true);
 
     // When focused, query for the active tab in the currently focused window.
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs && tabs.length > 0) {
         const activeTab = tabs[0];
-        tabEnterOrChangeAction(activeTab.url, `Active tab url on focus`);
-
+        tabEnterOrChangeAction(activeTab.url, 'Active tab url on focus');
       } else {
-        __logger__("No active tab found in the newly focused window.");
+        __logger__('No active tab found in the newly focused window.');
       }
     });
   }
 });
-
-
-

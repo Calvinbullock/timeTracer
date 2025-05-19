@@ -10,7 +10,6 @@
  * @date Date of creation: April, 2025
  */
 
-
 // TODO: Release - 2
 // - block list - (site blocker dialog)
 //      - DONE - add
@@ -45,15 +44,14 @@
 // import { UrlDataObj } from "../utils/urlDataObj.js";
 import {
   __logger__,
-  formatMillisecsToHoursAndMinutes
-} from "../utils/utils.js";
+  formatMillisecsToHoursAndMinutes,
+} from '../utils/utils.js';
 import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
   // setSiteObjData
-} from "../utils/chromeStorage.js";
-
+} from '../utils/chromeStorage.js';
 
 // ===================================================== \\
 // ===================================================== \\
@@ -94,9 +92,10 @@ function setHtmlById(htmlId, htmlContent) {
  * @returns {string} - An HTML string representing a table displaying the URL data.
  */
 function getUrlListAsTable(urlList) {
-  let display = "<table>";
-  display += "<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>";
-  display += "<tbody>";
+  let display = '<table>';
+  display +=
+    '<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>';
+  display += '<tbody>';
 
   // take the list size or max at 20
   let tableSize = Math.min(20, urlList.length);
@@ -104,15 +103,15 @@ function getUrlListAsTable(urlList) {
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
     const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
-    display += `<tr>`;
+    display += '<tr>';
     display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
     display += `<td>${urlList[i].url}</td>`;
     display += `<td>${totalTime}</td>`;
-    display += `</tr>`;
+    display += '</tr>';
   }
 
-  display += "</tbody>";
-  display += "</table>";
+  display += '</tbody>';
+  display += '</table>';
   return display;
 }
 
@@ -136,9 +135,9 @@ async function dispayUrlTimePage() {
       return 1; // a comes before b
     }
     if (a.totalTime > b.totalTime) {
-      return -1;  // a comes after b
+      return -1; // a comes after b
     }
-    return 0;    // a and b are equal
+    return 0; // a and b are equal
   });
 
   // format the data
@@ -236,7 +235,9 @@ async function addNewBlockedUrl(newBlockedUrl) {
 
   // return if the array already has the item
   for (let index = 0; index < blockedList.length; index++) {
-    if (blockedList[index] === newBlockedUrl) {return false}
+    if (blockedList[index] === newBlockedUrl) {
+      return false;
+    }
   }
 
   // added item
@@ -256,15 +257,15 @@ async function addNewBlockedUrl(newBlockedUrl) {
  */
 async function removeBlockedUrl(targetUrl) {
   let blockedList = await getBlockedSiteList();
-  blockedList = blockedList.filter(item => item !== targetUrl);
+  blockedList = blockedList.filter((item) => item !== targetUrl);
   await setBlockedSiteList(blockedList);
 }
 
 // NOTE: listener for removing url from block list
 // checks all clicks of button matching the target class then gets the dataset of the
 //      triggered button prevents error from selecting un-loaded dynamic content.
-document.addEventListener("click", (event) => {
-  if (event.target.classList.contains("removeBlockedUrlBtn")) {
+document.addEventListener('click', (event) => {
+  if (event.target.classList.contains('removeBlockedUrlBtn')) {
     const urlToRemove = event.target.dataset.url;
     removeBlockedUrl(urlToRemove);
 
@@ -276,9 +277,9 @@ document.addEventListener("click", (event) => {
 // NOTE: listener for adding url to block list
 // checks all clicks of button matching the target class then looks for the
 //      id of the clicked button prevents error on selecting un-loaded dynamic content
-document.addEventListener("click", (event) => {
-  if (event.target.classList.contains("addNewBlockedUrlBtn")) {
-    const addBlockedUrlBtn = document.getElementById("addNewBlockedUrlBtn");
+document.addEventListener('click', (event) => {
+  if (event.target.classList.contains('addNewBlockedUrlBtn')) {
+    const addBlockedUrlBtn = document.getElementById('addNewBlockedUrlBtn');
     addNewBlockedUrl(addBlockedUrlBtn.value);
     __logger__(`${addBlockedUrlBtn.value} added blockList`);
     displayBlockListPage();
@@ -299,50 +300,48 @@ const menuLinks = document.querySelectorAll('.menu-link');
 
 // Function to remove 'active' from all menu links
 function removeActiveClassFromAll() {
-  menuLinks.forEach(link => link.classList.remove('active'));
+  menuLinks.forEach((link) => link.classList.remove('active'));
 }
 
-timeSpentLink.addEventListener('click', function(event) {
-  event.preventDefault()
+timeSpentLink.addEventListener('click', function (event) {
+  event.preventDefault();
   dispayUrlTimePage();
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
-})
+});
 
-weeklySum.addEventListener('click', function(event) {
-  event.preventDefault()
+weeklySum.addEventListener('click', function (event) {
+  event.preventDefault();
   // TODO: build page
-  setHtmlById('content-div', "Work In Progress");
+  setHtmlById('content-div', 'Work In Progress');
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
-})
+});
 
-doNotTrackLink.addEventListener('click', function(event) {
-  event.preventDefault()
+doNotTrackLink.addEventListener('click', function (event) {
+  event.preventDefault();
   // TODO: build page
-  setHtmlById('content-div', "Work In Progress");
+  setHtmlById('content-div', 'Work In Progress');
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
-})
+});
 
-blockListkLink.addEventListener('click', function(event) {
-  event.preventDefault()
+blockListkLink.addEventListener('click', function (event) {
+  event.preventDefault();
   //displayBlockListPage(); // TODO: this front end is ready the backend is not
 
-  setHtmlById('content-div', "Work In Progress");
+  setHtmlById('content-div', 'Work In Progress');
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
-})
-
+});
 
 // first function that is called on enter
 dispayUrlTimePage();
-

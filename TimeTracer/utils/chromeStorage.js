@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview This script contains functions that interact with the Chrome
  *  extension APIs for managing and retrieving website tracking data from
@@ -11,9 +10,9 @@
  * @date Date of creation: April, 2025
  */
 
-import { UrlDataObj } from "./urlDataObj.js";
-import { getDateKey } from "./utils.js";
-import { __logger__ } from "./utils.js";
+import { UrlDataObj } from './urlDataObj.js';
+import { getDateKey } from './utils.js';
+import { __logger__ } from './utils.js';
 
 // ==================================================== \\
 // ==================================================== \\
@@ -40,7 +39,10 @@ function removeChromeLocalStorageItem(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.remove(key, () => {
       if (chrome.runtime.lastError) {
-        console.error("Error removing item from local storage:", chrome.runtime.lastError);
+        console.error(
+          'Error removing item from local storage:',
+          chrome.runtime.lastError
+        );
         reject(chrome.runtime.lastError);
       } else {
         __logger__(`Item with key "${key}" removed from local storage.`);
@@ -68,9 +70,12 @@ function removeChromeLocalStorageItem(key) {
  */
 function storeChromeLocalData(key, data) {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [key]: data}, () => {
+    chrome.storage.local.set({ [key]: data }, () => {
       if (chrome.runtime.lastError) {
-        console.error('Error saving to local storage:', chrome.runtime.lastError);
+        console.error(
+          'Error saving to local storage:',
+          chrome.runtime.lastError
+        );
         reject(chrome.runtime.lastError); // Indicate failure with the error
       } else {
         __logger__(`Stored: key: ${key}`);
@@ -104,7 +109,7 @@ async function setSiteObjData(siteDataObj) {
  */
 async function setBlockedSiteList(blockedUrlList) {
   const blockedUrlString = JSON.stringify(blockedUrlList);
-  storeChromeLocalData("blockedUrlList", blockedUrlString);
+  storeChromeLocalData('blockedUrlList', blockedUrlString);
 }
 
 /**
@@ -123,9 +128,8 @@ async function getChromeLocalData(key) {
     //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
     __logger__(`Retrieve: key: ${key}`);
     return result[key];
-
   } catch (error) {
-    console.error("Error retrieving data:", error);
+    console.error('Error retrieving data:', error);
     return null;
   }
 }
@@ -150,7 +154,9 @@ async function getSiteObjData() {
 
   // check the obj is of the right type
   if (!(siteDataObj instanceof UrlDataObj)) {
-    console.error( "Error: siteData is not instance of UrlDataObj - in getSiteObjData()",);
+    console.error(
+      'Error: siteData is not instance of UrlDataObj - in getSiteObjData()'
+    );
   }
   return siteDataObj;
 }
@@ -166,11 +172,11 @@ async function getSiteObjData() {
  * Returns an empty array `[]` if no list is found or if parsing fails.
  */
 async function getBlockedSiteList() {
-  let blockedSiteList = await getChromeLocalData("blockedUrlList");
+  let blockedSiteList = await getChromeLocalData('blockedUrlList');
 
   // create blockList if empty
   if (!blockedSiteList) {
-    __logger__(`Created new blockList`);
+    __logger__('Created new blockList');
     return [];
   }
 
@@ -193,6 +199,5 @@ export {
   setSiteObjData,
   setBlockedSiteList,
   getSiteObjData,
-  getBlockedSiteList
+  getBlockedSiteList,
 };
-
