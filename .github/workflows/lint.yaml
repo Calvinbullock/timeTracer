@@ -1,4 +1,4 @@
-name: Node.js Lint
+name: Lint
 on:
   push:
     branches: [ "main" ]
