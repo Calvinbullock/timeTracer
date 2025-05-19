@@ -8,7 +8,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "test"
+    "test": "test",
     "lint": "eslint . --ext .js,.mjs",
     "lint:fix": "eslint . --ext .js,.mjs --fix"
   },
