@@ -44,7 +44,8 @@
 1. Download the extension files.
 2. Open Chrome and navigate to chrome://extensions.
 3. Enable "Developer mode" in the top right corner.
-4. ...
+4. Then in the top left click `Pack extension` and select the `TimeTracer/` directory. This will create a `.crx` file.
+5. Drag that `.crx` file into the extensions page and it will load it.
 
 ## Resources:
 
