@@ -14,7 +14,7 @@ import { UrlDataObj } from './urlDataObj.js';
 import { getDateKey } from './utils.js';
 import { __logger__ } from './utils.js';
 
-BLOCK_LIST_DATA_KEY = 'blockedUrlList';
+const BLOCK_LIST_DATA_KEY = 'blockedUrlList';
 
 // ==================================================== \\
 // ==================================================== \\
