@@ -3,3 +3,6 @@ buildFiles/*
 TimeTracer.zip
 TimeTracer.crx
 TimeTracer.pem
+
+# dev dependencies
+node_modules
