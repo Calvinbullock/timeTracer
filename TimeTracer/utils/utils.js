@@ -9,6 +9,8 @@
  * @date Date of creation: April, 2025
  */
 
+import { UrlDataObj } from "./urlDataObj";
+
 // ===================================================== \\
 // ===================================================== \\
 //                      Utilities
@@ -147,11 +149,22 @@ function getDateKey(dateKey = new Date()) {
 // ===================================================== \\
 
 /**
+ * Converts a given number of minutes into milliseconds.
+ *
+ * @param {number} minutes - The duration in minutes that needs to be converted.
+ * @returns {number} The equivalent duration in milliseconds.
+ */
+function convertMinutesToMilliseconds(minutes) {
+  return minutes * 60 * 1000;
+}
+
+/**
  * Calculates the number of minutes from a given number of milliseconds.
  *
  * @param {number} milliseconds - The number of milliseconds.
  * @returns {number} The number of minutes.
  */
+// TODO: add a converts to the name here
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
 }
@@ -183,6 +196,55 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
   }
 }
 
+/**
+ * Adjusts and updates URL activity time based on elapsed time since the last check.
+ * This function calculates the time elapsed since the URL's start date and its last check,
+ * then adds "active time" to the URL data based on whether this elapsed time falls
+ * within or exceeds a specified interval. It also logs diagnostic messages for
+ * significant time discrepancies.
+ *
+ * @param {UrlDataObj} urlData - An object containing URL-related data and methods.
+ * Expected methods:
+ * - `getStartDate()`: Returns the initial start date/timestamp of the URL.
+ * - `getLastDateCheck()`: Returns the timestamp of the last time this URL was checked.
+ * - `calcTimeElapsed(diff)`: Calculates elapsed time from a given difference (e.g., milliseconds to minutes).
+ * - `addActiveTime(time)`: Adds the specified time (in minutes) to the URL's total active duration.
+ * - `setLastDateCheck(date)`: Updates the last check date for the URL.
+ * @param {number} timeInterval - The expected interval (in minutes) between checks.
+ * @param {Date} [currentTime=new Date()] - The current time used for calculations. Defaults to the current system time.
+ * @returns {UrlDataObj} The updated `urlData` object.
+ */
+function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
+  // return if no active url
+  if (!urlData.hasActiveUrl()) {
+    return urlData;
+  }
+
+  // clac both elapsed times
+  const startElapsed = urlData.calcTimeElapsed(urlData.getStartDate(), currentTime);
+  const lastCheckElapsed = urlData.calcTimeElapsed(urlData.getLastDateCheck(), currentTime);
+
+  // get the smaller of start and lastCheck in (milli secs)
+  timeInterval = convertMinutesToMilliseconds(timeInterval);
+  let timeElapsed = Math.min(startElapsed, lastCheckElapsed);
+
+  // check if time Elapsed is less then / grater then the interval
+  if (timeElapsed <= timeInterval) {
+    urlData.addActiveTime(timeElapsed);
+
+  } else if (timeElapsed > timeInterval * 2) {
+    // no time is added here, this is invalid time path
+    __logger__(`timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`)
+
+  } else if (timeElapsed > timeInterval) {
+    __logger__(`timeCheck was over timeInterval (${timeInterval} minutes) Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites.`)
+    urlData.addActiveTime(timeInterval);
+  }
+
+  urlData.setLastDateCheck(currentTime);
+  return urlData;
+}
+
 export {
   formatDateTime,
   __logger__,
@@ -190,5 +252,7 @@ export {
   cleanUrl,
   getDateKey,
   minutesFromMilliseconds,
+  convertMinutesToMilliseconds,
   formatMillisecsToHoursAndMinutes,
+  checkTimeAcuraccy,
 };

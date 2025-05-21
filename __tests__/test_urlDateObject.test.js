@@ -15,6 +15,120 @@ describe('UrlDataObj Tests', () => {
   // ===================================================== \\
   // ===================================================== \\
 
+  describe('addActiveTime', () => {
+    // Test Case 1: activeUrl is null
+    test('should log an error and return if activeUrl is null', () => {
+      // setup
+      trackerObj.activeUrl = null;
+      // exercises
+      trackerObj.addActiveTime(1000);
+      // test / check
+      expect(trackerObj.urlList).toHaveLength(0); // Ensure no changes to urlList
+    });
+
+    // Test Case 2: Adding a new URL
+    test('should add a new activeUrl to urlList if it does not exist', () => {
+      // setup
+      const newUrl = 'http://example.com/new-page';
+      const elapsedTime = 3000;
+      trackerObj.activeUrl = newUrl;
+      const initialLength = trackerObj.urlList.length;
+
+      // exercises
+      trackerObj.addActiveTime(elapsedTime);
+
+      // test / check
+      const finalLength = trackerObj.urlList.length;
+      const addedItem = trackerObj.urlList[finalLength - 1]; // The newly added item
+      expect(finalLength).toBe(initialLength + 1);
+      expect(addedItem.url).toBe(newUrl);
+      expect(addedItem.totalTime).toBe(elapsedTime);
+    });
+
+    // Test Case 3: Updating an existing URL
+    test('should update totalTime for an existing activeUrl in urlList', () => {
+      const existingUrl = 'http://example.com/page1';
+      const initialTime = 5000;
+      const elapsedTime = 2000;
+
+      // Set up existing URL in urlList
+      trackerObj.urlList.push({ url: existingUrl, totalTime: initialTime });
+      // Set activeUrl to the existing URL
+      trackerObj.activeUrl = existingUrl;
+      const initialLength = trackerObj.urlList.length;
+
+      trackerObj.addActiveTime(elapsedTime);
+
+      const finalLength = trackerObj.urlList.length;
+      const updatedItem = trackerObj.urlList.find(item => item.url === existingUrl);
+
+      expect(finalLength).toBe(initialLength); // Length should not change
+      expect(updatedItem.url).toBe(existingUrl);
+      expect(updatedItem.totalTime).toBe(initialTime + elapsedTime);
+    });
+
+    // Test Case 4: Adding a new URL when other URLs already exist
+    test('should add a new activeUrl without affecting other existing URLs in the list', () => {
+      const existingUrl1 = 'http://example.com/old-page-1';
+      const existingTime1 = 1000;
+      const existingUrl2 = 'http://example.com/old-page-2';
+      const existingTime2 = 2000;
+      const newUrl = 'http://example.com/brand-new-page';
+      const elapsedTime = 500;
+
+      trackerObj.urlList.push(
+        { url: existingUrl1, totalTime: existingTime1 },
+        { url: existingUrl2, totalTime: existingTime2 }
+      );
+      trackerObj.activeUrl = newUrl;
+      const initialLength = trackerObj.urlList.length;
+
+      trackerObj.addActiveTime(elapsedTime);
+
+      const finalLength = trackerObj.urlList.length;
+      const addedItem = trackerObj.urlList.find(item => item.url === newUrl);
+
+      expect(finalLength).toBe(initialLength + 1);
+      expect(trackerObj.urlList).toContainEqual({ url: existingUrl1, totalTime: existingTime1 });
+      expect(trackerObj.urlList).toContainEqual({ url: existingUrl2, totalTime: existingTime2 });
+      expect(addedItem.url).toBe(newUrl);
+      expect(addedItem.totalTime).toBe(elapsedTime);
+    });
+
+    // Test Case 5: elapsedTime is zero for an existing URL
+    test('should update totalTime correctly when elapsedTime is zero for an existing URL', () => {
+      const existingUrl = 'http://example.com/page-zero';
+      const initialTime = 10000;
+      const elapsedTime = 0;
+
+      trackerObj.activeUrl = existingUrl;
+      trackerObj.urlList.push({ url: existingUrl, totalTime: initialTime });
+
+      trackerObj.addActiveTime(elapsedTime);
+
+      const updatedItem = trackerObj.urlList.find(item => item.url === existingUrl);
+      expect(updatedItem.totalTime).toBe(initialTime); // Time should remain the same
+    });
+
+    // Test Case 6: elapsedTime is zero for a new URL
+    test('should add a new URL with totalTime zero when elapsedTime is zero', () => {
+      const newUrl = 'http://example.com/new-page-zero';
+      const elapsedTime = 0;
+
+      trackerObj.activeUrl = newUrl;
+      const initialLength = trackerObj.urlList.length;
+
+      trackerObj.addActiveTime(elapsedTime);
+
+      const finalLength = trackerObj.urlList.length;
+      const addedItem = trackerObj.urlList.find(item => item.url === newUrl);
+
+      expect(finalLength).toBe(initialLength + 1);
+      expect(addedItem.url).toBe(newUrl);
+      expect(addedItem.totalTime).toBe(0);
+    });
+  });
+
   describe('appendListItem', () => {
     test('should append a new URL to the list', () => {
       const initialLength = trackerObj.urlList.length;
@@ -52,20 +166,128 @@ describe('UrlDataObj Tests', () => {
       expect(trackerObj.activeUrl).toBe(testUrl);
       expect(trackerObj.lastActiveUrl).toBeNull();
     });
-
-    // test('should return false and not start a new session if one is already active', () => {
-    //   trackerObj.activeUrl = "initial.com";
-    //   trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0);
-    //   const newUrl = "new-session.com";
-    //   const newTime = new Date(2024, 0, 7, 10, 10, 0, 0);
-    //
-    //   const result = trackerObj.startSession(newUrl, newTime);
-    //
-    //   expect(result).toBe(false);
-    // });
   });
 
   describe('endSession', () => {
+    let trackerObj;
+
+    beforeEach(() => {
+      trackerObj = new UrlDataObj();
+    });
+
+    // Test Case 1: activeUrl is null
+    test('should log an error and return if activeUrl is null', () => {
+      trackerObj.activeUrl = null; // Ensure activeUrl is null
+      trackerObj.startTime = null; // Ensure startTime is null
+
+      trackerObj.endSession();
+
+      expect(trackerObj.urlList).toHaveLength(0); // urlList should remain unchanged
+      expect(trackerObj.activeUrl).toBeNull(); // Should still be null
+      expect(trackerObj.startTime).toBeNull(); // Should still be null
+      expect(trackerObj.lastActiveUrl).toBeNull(); // Should still be null
+    });
+
+    // Test Case 2: Ending session for an existing URL
+    test('should update totalTime, set lastActiveUrl, and reset activeUrl/startTime for an existing URL', () => {
+      const url = 'http://test.com/existing';
+      const initialTotalTime = 1000;
+      const sessionStartTime = new Date('2025-01-01T10:00:00.000Z');
+      const sessionEndTime = new Date('2025-01-01T10:00:05.000Z'); // 5 seconds later
+      const expectedElapsedTime = 5000;
+      const expectedNewTotalTime = initialTotalTime + expectedElapsedTime;
+
+      trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+
+      trackerObj.endSession(sessionEndTime);
+
+      const updatedItem = trackerObj.urlList.find(item => item.url === url);
+
+      expect(updatedItem.totalTime).toBe(expectedNewTotalTime);
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
+    });
+
+    // Test Case 3: Ending session for a new URL (not previously in urlList)
+    test('should add the activeUrl to urlList, set lastActiveUrl, and reset activeUrl/startTime for a new URL', () => {
+      const url = 'http://test.com/new-url';
+      const sessionStartTime = new Date('2025-01-01T11:00:00.000Z');
+      const sessionEndTime = new Date('2025-01-01T11:00:10.000Z'); // 10 seconds later
+      const expectedElapsedTime = 10000;
+
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+      // urlList is empty initially
+
+      trackerObj.endSession(sessionEndTime);
+
+      const newItem = trackerObj.urlList.find(item => item.url === url);
+
+      expect(newItem).toBeDefined();
+      expect(newItem.url).toBe(url);
+      expect(newItem.totalTime).toBe(expectedElapsedTime);
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
+    });
+
+    // Test Case 4: Elapsed time is zero (startTime === currentTime)
+    test('should correctly handle zero elapsed time for an existing URL', () => {
+      const url = 'http://test.com/zero-time';
+      const initialTotalTime = 2000;
+      const sessionTime = new Date('2025-01-01T12:00:00.000Z');
+
+      trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionTime;
+
+      trackerObj.endSession(sessionTime); // End at the same time as start
+
+      const updatedItem = trackerObj.urlList.find(item => item.url === url);
+
+      expect(updatedItem.totalTime).toBe(initialTotalTime); // totalTime should not change
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
+    });
+
+    // Test Case 5: Elapsed time is zero for a new URL
+    test('should add a new URL with totalTime zero if elapsed time is zero', () => {
+      const url = 'http://test.com/new-zero-time';
+      const sessionTime = new Date('2025-01-01T13:00:00.000Z');
+
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionTime;
+
+      trackerObj.endSession(sessionTime); // End at the same time as start
+
+      const newItem = trackerObj.urlList.find(item => item.url === url);
+
+      expect(newItem).toBeDefined();
+      expect(newItem.url).toBe(url);
+      expect(newItem.totalTime).toBe(0); // Should be added with 0 totalTime
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
+    });
+
+    // Test Case 6: Ensures lastActiveUrl is only set if activeUrl was not null
+    test('should not set lastActiveUrl if activeUrl was initially null', () => {
+      trackerObj.activeUrl = null;
+      trackerObj.startTime = null;
+      trackerObj.lastActiveUrl = 'http://previous.com'; // Some previous value
+
+      // Suppress console.error for this specific test case if it's expected behavior
+      // consoleErrorSpy.mockImplementation(() => {}); // Optional: suppress the error log for this test
+
+      trackerObj.endSession();
+
+      expect(trackerObj.lastActiveUrl).toBe('http://previous.com'); // lastActiveUrl should remain unchanged
+    });
+
     test('should update totalTime, set activeUrl to null, startTime to null, and lastActiveUrl', () => {
       const testUrl = 'test-url.com';
       trackerObj.activeUrl = testUrl;

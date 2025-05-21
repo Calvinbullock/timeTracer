@@ -20,7 +20,55 @@ class UrlDataObj {
     this.activeUrl = null;
     this.lastActiveUrl = null;
     this.startTime = null;
+    this.lastDateCheck = null;
     this.urlList = [];
+  }
+
+  /**
+  * Adds elapsed time to the currently active URL's total tracking time.
+  *
+  * If an `activeUrl` is set:
+  * - It finds the corresponding URL item in `urlList`.
+  * - If the URL exists, it increments its `totalTime` by the `elapsedTime`.
+  * - If the URL does not exist, it adds a new entry to `urlList` with the `activeUrl`
+  * and an initial `totalTime` equal to the `elapsedTime`.
+  *
+  * If `activeUrl` is null, an error is logged, and the function returns without
+  * making any changes.
+  *
+  * @param {number} elapsedTime - The time duration in milliseconds to add to the active URL's total time.
+  */
+  addActiveTime(elapsedTime) {
+    // check if there is an active url
+    if (this.activeUrl == null) {
+      __logger__('activeItem was null when addTime was called was called.');
+      return;
+    }
+
+    // find url item (if exists)
+    const activeItem = this.urlList.find((item) => item.url === this.activeUrl);
+
+    // update or add new url to urlList
+    if (activeItem) {
+      activeItem.totalTime += elapsedTime;
+      __logger__( `${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
+
+    } else {
+      // add item to list
+      this.urlList.push({
+        url: this.activeUrl,
+        totalTime: elapsedTime,
+      });
+      __logger__(`${this.activeUrl} added to urlList`);
+    }
+  }
+
+  /**
+   * Checks if an active URL is currently set (i.e., not null).
+   * @returns {boolean} True if an active URL string is present, false otherwise.
+   */
+  hasActiveUrl() {
+    return this.activeUrl !== null;
   }
 
   /**
@@ -39,6 +87,35 @@ class UrlDataObj {
    */
   getLastActiveUrl() {
     return this.lastActiveUrl;
+  }
+
+  /**
+   * Retrieves when the current url was set.
+   *
+   * @returns {Date|null} - The date the url was set as active.
+   */
+  getStartDate() {
+    return this.startTime;
+  }
+
+  /**
+  * Retrieves the last recorded date and time a check or update was performed.
+  * This is typically used to track when the data was last synchronized or refreshed.
+  *
+  * @returns {Date|null} - The last date and time of the check, or null if it has not been set.
+  */
+  getLastDateCheck() {
+    return this.lastDateCheck;
+  }
+
+  /**
+  * Sets the last recorded date and time a check or update was performed.
+  * This updates the internal timestamp for when the data was last synchronized or refreshed.
+  *
+  * @param {Date} date - The Date object representing the last check time.
+  */
+  setLastDateCheck(date) {
+    this.lastDateCheck = date;
   }
 
   /**
@@ -111,25 +188,11 @@ class UrlDataObj {
       return; // if null nothing to add or update
     }
 
-    const activeItem = this.urlList.find((item) => item.url === this.activeUrl);
+    // calculate and add elapsed time
     const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
+    this.addActiveTime(elapsedTime);
 
-    // update or add new url to urlList
-    if (activeItem) {
-      activeItem.totalTime += elapsedTime;
-      __logger__(
-        `${this.activeUrl} totalTime updated to ${activeItem.totalTime}`
-      );
-    } else {
-      // TODO: update tests to cover this case
-      // add item to list
-      this.urlList.push({
-        url: this.activeUrl,
-        totalTime: elapsedTime,
-      });
-      __logger__(`${this.activeUrl} added to urlList`);
-    }
-
+    // set active and last active urls
     __logger__(`ActiveUrl was: ${this.activeUrl}`);
     if (this.activeUrl != null) {
       this.lastActiveUrl = this.activeUrl;
@@ -190,9 +253,9 @@ class UrlDataObj {
         : null;
       trackingData.urlList = jsonObj.urlList
         ? jsonObj.urlList.map((item) => ({
-            url: item.url,
-            totalTime: item.totalTime,
-          }))
+          url: item.url,
+          totalTime: item.totalTime,
+        }))
         : [];
 
       return trackingData;
@@ -208,6 +271,7 @@ class UrlDataObj {
    * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
    * @returns {number} The time elapsed in milliseconds.
    */
+  // TODO: move this to a stand alone util
   calcTimeElapsed(startDate, endDate) {
     // check if startDate is valid
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
