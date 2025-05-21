@@ -10,11 +10,17 @@
  * @date Date of creation: April, 2025
  */
 
+// TODO: clean up
+//    - fix tests comments / file names
+//    - move calcTime function / tests (??)
+//    - test convertMinutesToMilliseconds
+//    - rename the other converstion func in utils
+
 // TODO: Release - 2
 // - block list - (site blocker dialog)
 //      - DONE - add
 //      - DONE - remove
-//      - HERE - redirect
+//      - ---- - redirect
 // - day selector - day selector right above the table as a carasell ` < day X   day Y >`
 // - storage - clear data button
 // - publicly list the extension

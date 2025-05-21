@@ -277,7 +277,7 @@ class UrlDataObj {
     // check if startDate is valid
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
       console.error(
-        'TypeError: Parameter "startDate" in calcTimeElapsed() must be a Date object.',
+        'TypeError: Parameter "startDate" in calcTimeElapsed() must be a Date object. DATE was',
         startDate
       );
       console.trace();
@@ -287,7 +287,7 @@ class UrlDataObj {
     // check if endDate is valid
     if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
       console.error(
-        'TypeError: Parameter "endDate" in calcTimeElapsed() must be a Date object.',
+        'TypeError: Parameter "endDate" in calcTimeElapsed() must be a Date object. DATE was',
         endDate
       );
       console.trace();
