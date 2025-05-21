@@ -1,6 +1,9 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
-import { cleanUrl, __logger__ } from '../utils/utils.js';
+import { cleanUrl, __logger__, checkTimeAcuraccy } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
+
+const TIME_CHECK_ALARM = 'timeCheck';
+const TME_CHECK_INTERVAL_MINUTES = 2;
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -53,11 +56,26 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 function tabEnterOrChangeAction(activeUrl, logMsg) {
   activeUrl = cleanUrl(activeUrl);
 
-  // check and redirect
+  // TODO: check and redirect
   //checkBlockedUrls(activeUrl);
 
   updateActiveUrlSession(activeUrl, false);
   __logger__(`${logMsg} ${activeUrl}`, true);
+}
+
+/**
+ * Asynchronously checks and updates the accuracy of the time spent on a website by
+ *  comparing time stamps at set time periods to see if the users device is active or
+ *  asleep.
+ *
+ * This function acts as a wrapper that allows the await key word.
+ *
+ * @returns {Promise<void>} A Promise that resolves when the operation is complete.
+ */
+async function checkTimeAcuraccyWraper() {
+  let urlData = await getSiteObjData();
+  urlData = checkTimeAcuraccy(urlData, TME_CHECK_INTERVAL_MINUTES);
+  setSiteObjData(urlData);
 }
 
 // ===================================================== \\
@@ -65,6 +83,40 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
 //              Chromium API Event Listeners             \\
 // ===================================================== \\
 // ===================================================== \\
+
+// ===================================================== \\
+//                         Alarm                         \\
+// ===================================================== \\
+
+// Function to create the timeCheck alarm
+function createRepeatingAlarm(alarmName, alarmInterval) {
+  chrome.alarms.create(alarmName, {
+    periodInMinutes: alarmInterval,
+  });
+  __logger__(
+    `Alarm '${alarmName}' created to fire every ${alarmInterval} minutes.`
+  );
+}
+
+// Listen for the alarm event
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === TIME_CHECK_ALARM) {
+    __logger__(
+      'Alarm fired! -------------------------------------------> Alarm'
+    );
+
+    checkTimeAcuraccyWraper();
+  }
+});
+
+// Create the alarm when the service worker starts or when the extension is installed/updated
+chrome.runtime.onStartup.addListener(() => {
+  createRepeatingAlarm(TIME_CHECK_ALARM, TME_CHECK_INTERVAL_MINUTES);
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  createRepeatingAlarm(TIME_CHECK_ALARM, TME_CHECK_INTERVAL_MINUTES);
+});
 
 // ===================================================== \\
 //                      Lock / Sleep                     \\
