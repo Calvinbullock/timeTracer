@@ -219,8 +219,14 @@ function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
   }
 
   // clac both elapsed times
-  const startElapsed = urlData.calcTimeElapsed(urlData.getStartDate(), currentTime);
-  const lastCheckElapsed = urlData.calcTimeElapsed(urlData.getLastDateCheck(), currentTime);
+  const startElapsed = urlData.calcTimeElapsed(
+    urlData.getStartDate(),
+    currentTime
+  );
+  const lastCheckElapsed = urlData.calcTimeElapsed(
+    urlData.getLastDateCheck(),
+    currentTime
+  );
 
   // get the smaller of start and lastCheck in (milli secs)
   timeInterval = convertMinutesToMilliseconds(timeInterval);
@@ -229,11 +235,11 @@ function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
   // check if time Elapsed is less then / grater then the interval
   if (timeElapsed <= timeInterval) {
     urlData.addActiveTime(timeElapsed);
-
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
-    __logger__(`timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`);
-
+    __logger__(
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`
+    );
   } else if (timeElapsed > timeInterval) {
     __logger__(
       `timeCheck was over timeInterval (${timeInterval} minutes) Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites.`

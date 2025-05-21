@@ -25,19 +25,19 @@ class UrlDataObj {
   }
 
   /**
-  * Adds elapsed time to the currently active URL's total tracking time.
-  *
-  * If an `activeUrl` is set:
-  * - It finds the corresponding URL item in `urlList`.
-  * - If the URL exists, it increments its `totalTime` by the `elapsedTime`.
-  * - If the URL does not exist, it adds a new entry to `urlList` with the `activeUrl`
-  * and an initial `totalTime` equal to the `elapsedTime`.
-  *
-  * If `activeUrl` is null, an error is logged, and the function returns without
-  * making any changes.
-  *
-  * @param {number} elapsedTime - The time duration in milliseconds to add to the active URL's total time.
-  */
+   * Adds elapsed time to the currently active URL's total tracking time.
+   *
+   * If an `activeUrl` is set:
+   * - It finds the corresponding URL item in `urlList`.
+   * - If the URL exists, it increments its `totalTime` by the `elapsedTime`.
+   * - If the URL does not exist, it adds a new entry to `urlList` with the `activeUrl`
+   * and an initial `totalTime` equal to the `elapsedTime`.
+   *
+   * If `activeUrl` is null, an error is logged, and the function returns without
+   * making any changes.
+   *
+   * @param {number} elapsedTime - The time duration in milliseconds to add to the active URL's total time.
+   */
   addActiveTime(elapsedTime) {
     // check if there is an active url
     if (this.activeUrl == null) {
@@ -51,8 +51,9 @@ class UrlDataObj {
     // update or add new url to urlList
     if (activeItem) {
       activeItem.totalTime += elapsedTime;
-      __logger__(`${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
-
+      __logger__(
+        `${this.activeUrl} totalTime updated to ${activeItem.totalTime}`
+      );
     } else {
       // add item to list
       this.urlList.push({
@@ -99,21 +100,21 @@ class UrlDataObj {
   }
 
   /**
-  * Retrieves the last recorded date and time a check or update was performed.
-  * This is typically used to track when the data was last synchronized or refreshed.
-  *
-  * @returns {Date|null} - The last date and time of the check, or null if it has not been set.
-  */
+   * Retrieves the last recorded date and time a check or update was performed.
+   * This is typically used to track when the data was last synchronized or refreshed.
+   *
+   * @returns {Date|null} - The last date and time of the check, or null if it has not been set.
+   */
   getLastDateCheck() {
     return this.lastDateCheck;
   }
 
   /**
-  * Sets the last recorded date and time a check or update was performed.
-  * This updates the internal timestamp for when the data was last synchronized or refreshed.
-  *
-  * @param {Date} date - The Date object representing the last check time.
-  */
+   * Sets the last recorded date and time a check or update was performed.
+   * This updates the internal timestamp for when the data was last synchronized or refreshed.
+   *
+   * @param {Date} date - The Date object representing the last check time.
+   */
   setLastDateCheck(date) {
     this.lastDateCheck = date;
   }
@@ -253,9 +254,9 @@ class UrlDataObj {
         : null;
       trackingData.urlList = jsonObj.urlList
         ? jsonObj.urlList.map((item) => ({
-          url: item.url,
-          totalTime: item.totalTime,
-        }))
+            url: item.url,
+            totalTime: item.totalTime,
+          }))
         : [];
 
       return trackingData;

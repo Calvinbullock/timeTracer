@@ -60,7 +60,9 @@ describe('UrlDataObj Tests', () => {
       trackerObj.addActiveTime(elapsedTime);
 
       const finalLength = trackerObj.urlList.length;
-      const updatedItem = trackerObj.urlList.find(item => item.url === existingUrl);
+      const updatedItem = trackerObj.urlList.find(
+        (item) => item.url === existingUrl
+      );
 
       expect(finalLength).toBe(initialLength); // Length should not change
       expect(updatedItem.url).toBe(existingUrl);
@@ -86,11 +88,17 @@ describe('UrlDataObj Tests', () => {
       trackerObj.addActiveTime(elapsedTime);
 
       const finalLength = trackerObj.urlList.length;
-      const addedItem = trackerObj.urlList.find(item => item.url === newUrl);
+      const addedItem = trackerObj.urlList.find((item) => item.url === newUrl);
 
       expect(finalLength).toBe(initialLength + 1);
-      expect(trackerObj.urlList).toContainEqual({ url: existingUrl1, totalTime: existingTime1 });
-      expect(trackerObj.urlList).toContainEqual({ url: existingUrl2, totalTime: existingTime2 });
+      expect(trackerObj.urlList).toContainEqual({
+        url: existingUrl1,
+        totalTime: existingTime1,
+      });
+      expect(trackerObj.urlList).toContainEqual({
+        url: existingUrl2,
+        totalTime: existingTime2,
+      });
       expect(addedItem.url).toBe(newUrl);
       expect(addedItem.totalTime).toBe(elapsedTime);
     });
@@ -106,7 +114,9 @@ describe('UrlDataObj Tests', () => {
 
       trackerObj.addActiveTime(elapsedTime);
 
-      const updatedItem = trackerObj.urlList.find(item => item.url === existingUrl);
+      const updatedItem = trackerObj.urlList.find(
+        (item) => item.url === existingUrl
+      );
       expect(updatedItem.totalTime).toBe(initialTime); // Time should remain the same
     });
 
@@ -121,7 +131,7 @@ describe('UrlDataObj Tests', () => {
       trackerObj.addActiveTime(elapsedTime);
 
       const finalLength = trackerObj.urlList.length;
-      const addedItem = trackerObj.urlList.find(item => item.url === newUrl);
+      const addedItem = trackerObj.urlList.find((item) => item.url === newUrl);
 
       expect(finalLength).toBe(initialLength + 1);
       expect(addedItem.url).toBe(newUrl);
@@ -203,7 +213,7 @@ describe('UrlDataObj Tests', () => {
 
       trackerObj.endSession(sessionEndTime);
 
-      const updatedItem = trackerObj.urlList.find(item => item.url === url);
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
 
       expect(updatedItem.totalTime).toBe(expectedNewTotalTime);
       expect(trackerObj.lastActiveUrl).toBe(url);
@@ -224,7 +234,7 @@ describe('UrlDataObj Tests', () => {
 
       trackerObj.endSession(sessionEndTime);
 
-      const newItem = trackerObj.urlList.find(item => item.url === url);
+      const newItem = trackerObj.urlList.find((item) => item.url === url);
 
       expect(newItem).toBeDefined();
       expect(newItem.url).toBe(url);
@@ -246,7 +256,7 @@ describe('UrlDataObj Tests', () => {
 
       trackerObj.endSession(sessionTime); // End at the same time as start
 
-      const updatedItem = trackerObj.urlList.find(item => item.url === url);
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
 
       expect(updatedItem.totalTime).toBe(initialTotalTime); // totalTime should not change
       expect(trackerObj.lastActiveUrl).toBe(url);
@@ -264,7 +274,7 @@ describe('UrlDataObj Tests', () => {
 
       trackerObj.endSession(sessionTime); // End at the same time as start
 
-      const newItem = trackerObj.urlList.find(item => item.url === url);
+      const newItem = trackerObj.urlList.find((item) => item.url === url);
 
       expect(newItem).toBeDefined();
       expect(newItem.url).toBe(url);
