@@ -9,8 +9,6 @@
  * @date Date of creation: April, 2025
  */
 
-import { UrlDataObj } from "./urlDataObj";
-
 // ===================================================== \\
 // ===================================================== \\
 //                      Utilities
@@ -234,10 +232,12 @@ function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
 
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
-    __logger__(`timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`)
+    __logger__(`timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`);
 
   } else if (timeElapsed > timeInterval) {
-    __logger__(`timeCheck was over timeInterval (${timeInterval} minutes) Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites.`)
+    __logger__(
+      `timeCheck was over timeInterval (${timeInterval} minutes) Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites.`
+    );
     urlData.addActiveTime(timeInterval);
   }
 

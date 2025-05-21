@@ -51,7 +51,7 @@ class UrlDataObj {
     // update or add new url to urlList
     if (activeItem) {
       activeItem.totalTime += elapsedTime;
-      __logger__( `${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
+      __logger__(`${this.activeUrl} totalTime updated to ${activeItem.totalTime}`);
 
     } else {
       // add item to list
