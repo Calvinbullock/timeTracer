@@ -3,7 +3,7 @@ import { cleanUrl, __logger__, checkInterval } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
-const TME_CHECK_INTERVAL_MINUTES = 1;
+const TiME_CHECK_INTERVAL_MINUTES = 1;
 // TODO: change this to 2 minutes
 // TODO: this should be in mili secs
 
@@ -35,7 +35,7 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     );
   }
 
-  siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
+  siteDataObj.endSession(TiME_CHECK_INTERVAL_MINUTES);
   if (!stopTracking) {
     siteDataObj.startSession(newActiveUrl);
   }
@@ -74,7 +74,7 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
 async function checkIntervalWraper() {
   __logger__('Alarm fired.');
   let urlData = await getSiteObjData();
-  urlData = checkInterval(urlData, TME_CHECK_INTERVAL_MINUTES);
+  urlData = checkInterval(urlData, TiME_CHECK_INTERVAL_MINUTES);
   setSiteObjData(urlData);
 }
 
@@ -113,11 +113,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Create the alarm when the service worker starts or when the extension is installed/updated
 chrome.runtime.onStartup.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TME_CHECK_INTERVAL_MINUTES);
+  createRepeatingAlarm(TIME_CHECK_ALARM, TiME_CHECK_INTERVAL_MINUTES);
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TME_CHECK_INTERVAL_MINUTES);
+  createRepeatingAlarm(TIME_CHECK_ALARM, TiME_CHECK_INTERVAL_MINUTES);
 });
 
 // ===================================================== \\
