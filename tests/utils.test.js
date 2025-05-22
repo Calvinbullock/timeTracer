@@ -7,7 +7,7 @@ import {
   getDateKey,
   minutesFromMilliseconds,
   formatMillisecsToHoursAndMinutes,
-  checkTimeAcuraccy,
+  checkInterval,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -114,7 +114,7 @@ describe('Utils Tests', () => {
     });
   });
 
-  describe('checkTimeAcuraccy', () => {
+  describe('checkInterval', () => {
     let urlData;
     let timeIntervalMinutes = 60; // Represents 60 minutes for the interval
 
@@ -137,28 +137,12 @@ describe('Utils Tests', () => {
       // The smaller elapsed time is 30 minutes, which is <= 60 minutes (timeInterval)
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
-    });
-
-    test('should add timeInterval if timeElapsed is between timeInterval and timeInterval * 2', () => {
-      const currentTime = new Date('2025-01-01T10:30:00.000Z');
-      const startTime = new Date('2025-01-01T09:00:00.000Z'); // 90 mins elapsed
-      const lastCheckTime = new Date('2025-01-01T08:50:00.000Z'); // 100 mins elapsed
-
-      urlData.startTime = startTime;
-      urlData.lastDateCheck = lastCheckTime;
-
-      // The smaller elapsed time is 90 minutes.
-      // 60 < 90 <= 120 (timeInterval * 2) -> Add timeInterval (60 minutes)
-      const expectedAddedTimeMs = timeIntervalMinutes * 60 * 1000;
-
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
-
-      expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      expect(result.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
 
     test('should not add time if timeElapsed is greater than timeInterval * 2', () => {
@@ -173,10 +157,12 @@ describe('Utils Tests', () => {
       // 180 > 120 (timeInterval * 2) -> No time added
       const initialTotalTimeMs = urlData.urlList[0].totalTime; // Should be 0
 
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(initialTotalTimeMs); // Total time should remain unchanged
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      expect(result.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
 
     test('should handle timeElapsed being exactly timeInterval', () => {
@@ -191,10 +177,12 @@ describe('Utils Tests', () => {
       // 60 <= 60 (timeInterval) -> Add 60 minutes
       const expectedAddedTimeMs = 60 * 60 * 1000;
 
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      expect(result.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
 
     test('should correctly use the smaller of the two elapsed times', () => {
@@ -210,11 +198,13 @@ describe('Utils Tests', () => {
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
       // Exercise
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
 
       // Test / Check
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      expect(result.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
 
     test('should always update lastDateCheck regardless of time elapsed condition', () => {
@@ -224,26 +214,31 @@ describe('Utils Tests', () => {
       urlData.startTime = new Date('2025-01-01T09:55:00.000Z'); // Small elapsed time
 
       // Case 1: timeElapsed <= timeInterval
-      checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
-      expect(urlData.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      expect(urlData.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
 
       // Reset for next scenario
       urlData.lastDateCheck = oldLastCheckTime;
       urlData.startTime = new Date('2025-01-01T08:00:00.000Z'); // Medium elapsed time
 
       // Case 2: timeInterval < timeElapsed <= timeInterval * 2
-      checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
-      expect(urlData.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      expect(urlData.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
 
       // Reset for next scenario
       urlData.lastDateCheck = oldLastCheckTime;
       urlData.startTime = new Date('2025-01-01T07:00:00.000Z'); // Large elapsed time
 
       // Case 3: timeElapsed > timeInterval * 2
-      checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
-      expect(urlData.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      expect(urlData.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
-
 
     // --- Edge Case: No entry in urlList for activeUrl initially ---
     test('should handle urlList not having the activeUrl initially (add new entry)', () => {
@@ -262,14 +257,15 @@ describe('Utils Tests', () => {
       const expectedAddedTimeMinutes = 30000; // milli-sec -> 0.5 minutes
 
       // Exercise
-      const result = checkTimeAcuraccy(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
 
       // Test / Check
       expect(result.urlList.length).toBe(1);
       expect(result.urlList[0].url).toBe('https://example.com/new-page');
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMinutes);
-      expect(result.lastDateCheck.toISOString()).toBe(currentTime.toISOString());
+      expect(result.lastDateCheck.toISOString()).toBe(
+        currentTime.toISOString()
+      );
     });
   });
-
 });

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach, assert } from 'vitest';
 import { UrlDataObj } from './../TimeTracer/utils/urlDataObj.js';
 
 describe('UrlDataObj Tests', () => {
@@ -339,66 +339,103 @@ describe('UrlDataObj Tests', () => {
   });
 
   describe('calcTimeElapsed', () => {
-    test('should calculate time elapsed in milliseconds (minutes)', () => {
-      // setup
-      const startDate = new Date(2024, 0, 7, 10, 30, 0, 0);
-      const endDate = new Date(2024, 0, 7, 10, 40, 0, 0);
-      // exercises
-      const time = trackerObj.calcTimeElapsed(startDate, endDate);
-      // test / check
-      expect(time).toBe(600000);
+    let trackerObj;
+    let fixedStartTime;
+    let fixedLastCheckTime;
+
+    beforeEach(() => {
+      trackerObj = new UrlDataObj();
+      // Set fixed times for consistent testing
+      fixedStartTime = new Date(2024, 0, 7, 10, 0, 0, 0); // Jan 7, 2024, 10:00:00
+      fixedLastCheckTime = new Date(2024, 0, 7, 10, 0, 0, 0); // Jan 7, 2024, 10:00:00
+      trackerObj.startTime = fixedStartTime;
+      trackerObj.lastDateCheck = fixedLastCheckTime;
     });
 
-    test('should calculate time elapsed in milliseconds (hours)', () => {
+    test('should return the smaller of startElapsed and lastCheckElapsed when both are positive', () => {
       // setup
-      const startDate = new Date(2024, 0, 7, 10, 30, 0, 0);
-      const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);
-      // exercises
-      const time = trackerObj.calcTimeElapsed(startDate, endDate);
+      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10 minutes later
+
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
+
       // test / check
-      expect(time).toBe(3600000);
+      expect(time).toBe(600000); // 10 minutes in milliseconds
     });
 
-    test('should return null for an invalid startDate', () => {
+    test('should return startElapsed when it is smaller', () => {
       // setup
-      const invalidStartDate = 'not a date';
-      const endDate = new Date();
-      // exercises
-      const time = trackerObj.calcTimeElapsed(invalidStartDate, endDate);
+
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Start: 5 mins elapsed)
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0);   // 10:00:00 (Last Check: 10 mins elapsed)
+      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0);   // 10:10:00
+
+
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
+
       // test / check
-      expect(time).toBeNull();
+      expect(time).toBe(300000); // 5 minutes (currentTime - lastDateCheck)
     });
 
-    test('should return null for an invalid endDate', () => {
+    test('should return lastCheckElapsed when it is smaller', () => {
       // setup
-      const startDate = new Date();
-      const invalidEndDate = 'also not a date';
-      // exercises
-      const time = trackerObj.calcTimeElapsed(startDate, invalidEndDate);
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0);   // 10:00:00 (Start: 10 mins elapsed)
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Last Check: 5 mins elapsed)
+      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0);   // 10:10:00
+
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
+
       // test / check
-      expect(time).toBeNull();
+      expect(time).toBe(300000); // 5 minutes (currentTime - lastDateCheck)
     });
 
-    test('should return null if startDate is not a Date object', () => {
-      // setup
-      const startDate = 'January 7, 2024, 11:00 AM';
-      const endDate = new Date(2024, 0, 7, 11, 30, 0, 0);
-      // exercises
-      const time = trackerObj.calcTimeElapsed(startDate, endDate);
-      // test / check
-      expect(time).toBeNull();
+    test('should use current system time if no currentTime is provided', () => {
+      // This test relies on a stable time window, which can be tricky.
+      // For a more robust test, consider mocking `new Date()`.
+      const tolerance = 50; // milliseconds
+      const now = new Date();
+      trackerObj.startTime = new Date(now.getTime() - 1000); // 1 second ago
+      trackerObj.lastDateCheck = new Date(now.getTime() - 500); // 0.5 seconds ago
+
+      const time = trackerObj.calcTimeElapsed();
+      expect(time).toBeGreaterThanOrEqual(450); // Should be around 500ms, allowing for execution time
+      expect(time).toBeLessThanOrEqual(550);
     });
 
-    test('should correctly calculate time elapsed when startDate is a Date object created from JSON', () => {
+    test('should throw AssertionError if startTime is in the future relative to currentTime', () => {
       // setup
-      let startDate = new Date(2024, 0, 7, 11, 0, 0, 0);
-      const endDate = new Date(2024, 0, 7, 11, 0, 0, 0);
-      startDate = JSON.stringify(startDate.toISOString());
-      startDate = JSON.parse(startDate);
-      startDate = new Date(startDate);
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00
+      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (earlier than startTime)
 
-      // exercises
-      const time = trackerObj.calcTimeElapsed(startDate, endDate);
+      // exercise & test
+      expect(() => trackerObj.calcTimeElapsed(currentTime)).toThrow(
+        assert.AssertionError,
+        'startElapsed cannot be negative'
+      );
+    });
+
+    test('should throw AssertionError if lastDateCheck is in the future relative to currentTime', () => {
+      // setup
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
+      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (earlier than lastDateCheck)
+
+      // exercise & test
+      expect(() => trackerObj.calcTimeElapsed(currentTime)).toThrow(
+        assert.AssertionError,
+        'lastCheckElapsed cannot be negative'
+      );
+    });
+
+    test('should handle zero elapsed time correctly', () => {
+      // setup
+      const currentTime = new Date(2024, 0, 7, 10, 0, 0, 0); // Same as start and last check times
+
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
 
       // test / check
       expect(time).toBe(0);
