@@ -7,8 +7,7 @@
  * @date Date of creation: April, 2025
  */
 
-import { assert } from 'vitest';
-import { __logger__ } from './utils.js';
+import { __logger__, isTimeElapsedWithinInterval } from './utils.js';
 
 // ===================================================== \\
 // ===================================================== \\
@@ -171,18 +170,21 @@ class UrlDataObj {
   }
 
   /**
-   * Ends the currently active tracking session and records the elapsed time.
-   * It finds the active URL in the urlList, calculates the time elapsed since
-   * the 'startTime', adds it to the 'totalTime' of the corresponding item,
-   * and resets the 'startDate' and 'isActive' properties of that item.
-   * It also resets the 'activeUrl' and 'startTime' of the TrackingData object.
-   * Logs an error if no active item is found.
+   * Ends the currently active URL tracking session and updates the tracked time.
+   * This function calculates the elapsed time using `calcTimeElapsed` (which considers
+   * both `startTime` and `lastDateCheck`). If this elapsed time falls within a
+   * specified `timeInterval`, it adds the time to the active URL's total duration.
+   * Finally, it updates the `lastActiveUrl`, clears the `activeUrl` and `startTime`
+   * for this tracking object, and logs relevant status messages.
    *
+   * @param {number} timeInterval - The expected interval (in minutes) used for comparison
+   * when determining whether to add active time.
    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
-   * ending time of the session. Defaults to the current timestamp if not provided,
-   * allowing for easier testing.
+   * current time to use for calculations. Defaults
+   * to the current timestamp if not provided.
    */
-  endSession(currentTime = new Date()) {
+  // TODO: might be a better way to access timeInterval then passing it here
+  endSession(timeInterval, currentTime = new Date()) {
     __logger__(`Tracking exits for ${this.activeUrl}`);
 
     if (this.activeUrl == null) {
@@ -190,10 +192,11 @@ class UrlDataObj {
       return; // if null nothing to add or update
     }
 
-    // calculate and add elapsed time
-    const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
-    //const elapsedTime = this.calcTimeElapsed2(currentTime);
-    this.addActiveTime(elapsedTime);
+    // find time elapsed, if its within timeInterval add the time
+    let timeElapsed = this.calcTimeElapsed(timeInterval, currentTime);
+    if (isTimeElapsedWithinInterval(timeElapsed, timeInterval)) {
+      this.addActiveTime(timeElapsed);
+    }
 
     // set active and last active urls
     __logger__(`ActiveUrl was: ${this.activeUrl}`);
@@ -276,46 +279,34 @@ class UrlDataObj {
     }
   }
 
-  // TODO: TODO: finish replacing calcTime - og with this version
-  calcTimeElapsed2(currentTime = new Date()) {
+  /**
+   * Calculates the smaller of two elapsed times:
+   * 1. Time elapsed since an initial start time (`this.startTime`).
+   * 2. Time elapsed since the last recorded check time (`this.lastDateCheck`).
+   *
+   * @param {Date} [currentTime=new Date()] - The current time to use for calculations.
+   *    Defaults to the current system time if not provided.
+   * @returns {number} The minimum elapsed time in milliseconds.
+   * @throws {AssertionError} If either `startElapsed` or `lastCheckElapsed` is
+   *    negative, indicating a logical error where `currentTime` is earlier than a stored time.
+   */
+  calcTimeElapsed(currentTime = new Date()) {
     // clac both elapsed times
-    const startElapsed = currentTime - this.startTime;
-    const lastCheckElapsed = currentTime - this.lastDateCheck;
+    let startElapsed = currentTime - this.startTime;
+    let lastCheckElapsed = currentTime - this.lastDateCheck;
 
-    assert(startElapsed >= 0);
-    assert(lastCheckElapsed >= 0);
+    // error check logs
+    if(startElapsed < 0) {
+      console.error('startElapsed was negative in calc elapsed time');
+      startElapsed = 0;
+    }
+    if (lastCheckElapsed < 0) {
+      console.error('lastCheckElapsed was negative in calc elapsed time');
+      lastCheckElapsed = 0;
+    }
 
     // return the smaller of start and lastCheck in (milli secs)
     return Math.min(startElapsed, lastCheckElapsed);
-  }
-
-  /**
-   * Calculates the time elapsed between a given start date and the current time, in milliseconds.
-   *
-   * @param {Date} useStartDate - The starting date to calculate the elapsed time from.
-   * @returns {number} The time elapsed in milliseconds.
-   */
-  // TODO: move this to a stand alone util
-  calcTimeElapsed(startDate, endDate) {
-    // check if startDate is valid
-    if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
-      console.error(
-        `TypeError: calcTimeElapsed: startDate should be Date, got ${startDate}`
-      );
-      console.trace();
-      return null;
-    }
-
-    // check if endDate is valid
-    if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
-      console.error(
-        `TypeError: calcTimeElapsed: startDate should be Date, got ${endDate}`
-      );
-      console.trace();
-      return null;
-    }
-
-    return endDate - startDate;
   }
 }
 

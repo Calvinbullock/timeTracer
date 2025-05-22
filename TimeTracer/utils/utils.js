@@ -185,54 +185,83 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
   }
 }
 
+
+/**
+ * Determines if the `timeElapsed` falls within an acceptable range relative to the `timeInterval`.
+ * This function handles three main scenarios:
+ * 1. If `timeElapsed` is less than or equal to `timeInterval`, it's considered normal.
+ * 2. If `timeElapsed` is more than double the `timeInterval`, it's considered an
+ * "over" time, possibly indicating inactivity (e.g., user is asleep), and no time should be added.
+ * 3. If `timeElapsed` is greater than `timeInterval` but not more than double,
+ * it's still considered within an acceptable range for adding time.
+ *
+ * @param {number} timeElapsed - The actual time that has elapsed, in milliseconds.
+ * @param {number} timeInterval - The expected interval, also in milliseconds.
+ * @returns {boolean} `true` if the elapsed time is considered valid for adding
+ * to the active duration, `false` otherwise.
+ */
+// TODO: WARN: need tests
+// TODO: this maybey should return values as insted, 
+//    ex little over interval return timeElapsed / 2
+//    ex lot over interval return timeElapsed / 4
+function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
+  // check if time Elapsed is less then / grater then the interval
+  if (timeElapsed <= timeInterval) {
+    __logger__(
+      `timeCheck was normal, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+    );
+    return true;
+  } else if (timeElapsed > timeInterval * 2) {
+    // no time is added here, this is invalid time path
+    __logger__(
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep.`
+    );
+    return false;
+  } else if (timeElapsed > timeInterval) {
+    __logger__(
+      `timeCheck was over timeInterval, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+    );
+    return true;
+  } else {
+    console.error('timeCheck did not add time, fell into final else.');
+    return false;
+  }
+}
+
 /**
  * Adjusts and updates URL activity time based on elapsed time since the last check.
- * This function calculates the time elapsed since the URL's start date and its last check,
- * then adds "active time" to the URL data based on whether this elapsed time falls
- * within or exceeds a specified interval. It also logs diagnostic messages for
- * significant time discrepancies.
+ * This function calculates the time elapsed since the URL's `startTime` and its `lastDateCheck`.
+ * It then adds "active time" to the URL data if the calculated elapsed time is
+ * within or exceeds a specified `timeInterval`. It also updates the `lastDateCheck`
+ * to the `currentTime`.
  *
  * @param {UrlDataObj} urlData - An object containing URL-related data and methods.
- * Expected methods:
- * - `getStartDate()`: Returns the initial start date/timestamp of the URL.
- * - `getLastDateCheck()`: Returns the timestamp of the last time this URL was checked.
- * - `calcTimeElapsed(diff)`: Calculates elapsed time from a given difference (e.g., milliseconds to minutes).
- * - `addActiveTime(time)`: Adds the specified time (in minutes) to the URL's total active duration.
- * - `setLastDateCheck(date)`: Updates the last check date for the URL.
- * @param {number} timeInterval - The expected interval (in minutes) between checks.
+ * Expected properties and methods:
+ * - `startTime`: The initial start date/timestamp of the URL.
+ * - `lastDateCheck`: The timestamp of the last time this URL was checked.
+ * - `hasActiveUrl()`: A method that returns `true` if there's an active URL, `false` otherwise.
+ * - `calcTimeElapsed(currentTime)`: Calculates the minimum elapsed time in milliseconds
+ * between `currentTime` and both `startTime` and `lastDateCheck`.
+ * - `addActiveTime(time)`: Adds the specified time (in milliseconds) to the URL's total active duration.
+ * - `setLastDateCheck(date)`: Updates the `lastDateCheck` for the URL.
+ * @param {number} timeInterval - The expected interval in **minutes** between checks.
  * @param {Date} [currentTime=new Date()] - The current time used for calculations. Defaults to the current system time.
  * @returns {UrlDataObj} The updated `urlData` object.
  */
-// TODO: change this to checkInterval?
-// BUG: endSssion needs to also check if timeElapsed is over the interval
-function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
+function checkInterval(urlData, timeInterval, currentTime = new Date()) {
+  // TODO: have this be passed in as millisecs-> update tests
+  timeInterval = convertMinutesToMilliseconds(timeInterval);
+
   // return if no active url
   if (!urlData.hasActiveUrl()) {
     __logger__('timeCheck: activeUrl was null return with out change.');
     return urlData;
   }
 
-  let timeElapsed = urlData.calcTimeElapsed2(currentTime);
-
-  // check if time Elapsed is less then / grater then the interval
-  timeInterval = convertMinutesToMilliseconds(timeInterval); // TODO: have this be passed in as millisecs-> update tests
-  if (timeElapsed <= timeInterval) {
+  // find time elapsed, if its within timeInterval add the time
+  let timeElapsed = urlData.calcTimeElapsed(currentTime);
+  if (isTimeElapsedWithinInterval(timeElapsed, timeInterval)) {
     urlData.addActiveTime(timeElapsed);
-    __logger__(
-      `timeCheck was normal, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
-    );
-  } else if (timeElapsed > timeInterval * 2) {
-    // no time is added here, this is invalid time path
-    __logger__(
-      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep.`
-    );
-  } else if (timeElapsed > timeInterval) {
-    __logger__(
-      `timeCheck was over timeInterval, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
-    );
-    urlData.addActiveTime(timeInterval);
-  } else {
-    console.error('timeCheck did not add time, fell into final else.');
   }
 
   urlData.setLastDateCheck(currentTime);
@@ -248,5 +277,6 @@ export {
   minutesFromMilliseconds,
   convertMinutesToMilliseconds,
   formatMillisecsToHoursAndMinutes,
-  checkTimeAcuraccy,
+  checkInterval,
+  isTimeElapsedWithinInterval,
 };

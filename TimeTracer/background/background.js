@@ -1,5 +1,5 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
-import { cleanUrl, __logger__, checkTimeAcuraccy } from '../utils/utils.js';
+import { cleanUrl, __logger__, checkInterval } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
@@ -35,9 +35,9 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
 
   // exit session
   if (stopTracking) {
-    siteDataObj.endSession();
+    siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
   } else {
-    siteDataObj.endSession();
+    siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
     siteDataObj.startSession(newActiveUrl);
   }
 
@@ -72,10 +72,26 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
  *
  * @returns {Promise<void>} A Promise that resolves when the operation is complete.
  */
-async function checkTimeAcuraccyWraper() {
+async function checkIntervalWraper() {
   let urlData = await getSiteObjData();
-  urlData = checkTimeAcuraccy(urlData, TME_CHECK_INTERVAL_MINUTES);
+  urlData = checkInterval(urlData, TME_CHECK_INTERVAL_MINUTES);
   setSiteObjData(urlData);
+}
+
+/**
+ * Creates a repeating alarm using the Chrome Alarms API.
+ * This alarm will fire periodically at the specified interval.
+ *
+ * @param {string} alarmName - The unique name for the alarm.
+ * @param {number} alarmInterval - The interval in minutes after which the alarm should repeat.
+ */
+function createRepeatingAlarm(alarmName, alarmInterval) {
+  chrome.alarms.create(alarmName, {
+    periodInMinutes: alarmInterval,
+  });
+  __logger__(
+    `Alarm '${alarmName}' created to fire every ${alarmInterval} minutes.`
+  );
 }
 
 // ===================================================== \\
@@ -88,24 +104,12 @@ async function checkTimeAcuraccyWraper() {
 //                         Alarm                         \\
 // ===================================================== \\
 
-// Function to create the timeCheck alarm
-function createRepeatingAlarm(alarmName, alarmInterval) {
-  chrome.alarms.create(alarmName, {
-    periodInMinutes: alarmInterval,
-  });
-  __logger__(
-    `Alarm '${alarmName}' created to fire every ${alarmInterval} minutes.`
-  );
-}
-
 // Listen for the alarm event
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === TIME_CHECK_ALARM) {
-    __logger__(
-      'Alarm fired! -------------------------------------------> Alarm'
-    );
+    __logger__('Alarm fired! -----------------------------------> Alarm');
 
-    checkTimeAcuraccyWraper();
+    checkIntervalWraper();
   }
 });
 
