@@ -367,9 +367,8 @@ describe('UrlDataObj Tests', () => {
       // setup
 
       trackerObj.startTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Start: 5 mins elapsed)
-      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0);   // 10:00:00 (Last Check: 10 mins elapsed)
-      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0);   // 10:10:00
-
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00 (Last Check: 10 mins elapsed)
+      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
 
       // exercise
       const time = trackerObj.calcTimeElapsed(currentTime);
@@ -380,9 +379,9 @@ describe('UrlDataObj Tests', () => {
 
     test('should return lastCheckElapsed when it is smaller', () => {
       // setup
-      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0);   // 10:00:00 (Start: 10 mins elapsed)
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00 (Start: 10 mins elapsed)
       trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Last Check: 5 mins elapsed)
-      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0);   // 10:10:00
+      const currentTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
 
       // exercise
       const time = trackerObj.calcTimeElapsed(currentTime);
@@ -394,7 +393,6 @@ describe('UrlDataObj Tests', () => {
     test('should use current system time if no currentTime is provided', () => {
       // This test relies on a stable time window, which can be tricky.
       // For a more robust test, consider mocking `new Date()`.
-      const tolerance = 50; // milliseconds
       const now = new Date();
       trackerObj.startTime = new Date(now.getTime() - 1000); // 1 second ago
       trackerObj.lastDateCheck = new Date(now.getTime() - 500); // 0.5 seconds ago
