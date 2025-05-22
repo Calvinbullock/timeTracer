@@ -3,7 +3,7 @@ import { cleanUrl, __logger__, checkTimeAcuraccy } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
-const TME_CHECK_INTERVAL_MINUTES = 2;
+const TME_CHECK_INTERVAL_MINUTES = 1;
 
 /**
  * Manages the tracking session for the currently active URL.

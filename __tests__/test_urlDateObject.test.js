@@ -381,10 +381,12 @@ describe('UrlDataObj Tests', () => {
       const testUrl1 = 'test-url-1.com';
       const testUrl2 = 'test-url-2.com';
       const startTime = new Date(2024, 0, 1, 10, 0, 0);
+      const lastDateCheck = new Date(2024, 0, 15, 12, 30, 0); // Added
 
       trackerObj.activeUrl = testUrl1;
       trackerObj.lastActiveUrl = 'last-active.com';
       trackerObj.startTime = startTime;
+      trackerObj.lastDateCheck = lastDateCheck; // Added
       trackerObj.urlList = [
         { url: testUrl1, totalTime: 1800 },
         { url: testUrl2, totalTime: 0 },
@@ -395,12 +397,28 @@ describe('UrlDataObj Tests', () => {
         activeUrl: testUrl1,
         lastActiveUrl: 'last-active.com',
         startTime: startTime.toISOString(),
+        lastDateCheck: lastDateCheck.toISOString(), // Added
         urlList: [
           { url: testUrl1, totalTime: 1800 },
           { url: testUrl2, totalTime: 0 },
         ],
       });
 
+      expect(jsonOutput).toBe(expectedOutput);
+    });
+
+    test('should handle null dates gracefully when converting to JSON', () => {
+      trackerObj.activeUrl = 'some-url.com';
+      trackerObj.urlList = [];
+
+      const jsonOutput = trackerObj.toJSONString();
+      const expectedOutput = JSON.stringify({
+        activeUrl: 'some-url.com',
+        lastActiveUrl: null,
+        startTime: null,
+        lastDateCheck: null,
+        urlList: [],
+      });
       expect(jsonOutput).toBe(expectedOutput);
     });
   });
@@ -410,11 +428,13 @@ describe('UrlDataObj Tests', () => {
       const testUrl1 = 'test-url-1.com';
       const testUrl2 = 'test-url-2.com';
       const startTime = new Date(2024, 0, 1, 10, 0, 0);
+      const lastDateCheck = new Date(2024, 0, 15, 12, 30, 0); // Added
 
       const jsonString = JSON.stringify({
         activeUrl: testUrl1,
         lastActiveUrl: 'lastActiveUrl',
         startTime: startTime.toISOString(),
+        lastDateCheck: lastDateCheck.toISOString(), // Added
         urlList: [
           { url: testUrl1, totalTime: 1800 },
           { url: testUrl2, totalTime: 0 },
@@ -426,10 +446,31 @@ describe('UrlDataObj Tests', () => {
       expect(parsedTrackerObj.activeUrl).toBe(testUrl1);
       expect(parsedTrackerObj.lastActiveUrl).toBe('lastActiveUrl');
       expect(parsedTrackerObj.startTime?.getTime()).toBe(startTime.getTime());
+      expect(parsedTrackerObj.lastDateCheck?.getTime()).toBe(
+        lastDateCheck.getTime()
+      ); // Added
       expect(parsedTrackerObj.urlList).toEqual([
         { url: testUrl1, totalTime: 1800 },
         { url: testUrl2, totalTime: 0 },
       ]);
+    });
+
+    test('should handle null dates gracefully when parsing from JSON', () => {
+      const jsonString = JSON.stringify({
+        activeUrl: 'another-url.com',
+        lastActiveUrl: null,
+        startTime: null,
+        lastDateCheck: null,
+        urlList: [],
+      });
+
+      const parsedTrackerObj = new UrlDataObj().fromJSONString(jsonString);
+
+      expect(parsedTrackerObj.activeUrl).toBe('another-url.com');
+      expect(parsedTrackerObj.lastActiveUrl).toBeNull();
+      expect(parsedTrackerObj.startTime).toBeNull();
+      expect(parsedTrackerObj.lastDateCheck).toBeNull();
+      expect(parsedTrackerObj.urlList).toEqual([]);
     });
   });
 
@@ -438,11 +479,13 @@ describe('UrlDataObj Tests', () => {
       const testUrl1 = 'test-url-1.com';
       const testUrl2 = 'test-url-2.com';
       const startTime = new Date(2024, 0, 1, 10, 0, 0);
+      const lastDateCheck = new Date(2024, 0, 15, 12, 30, 0); // Added
 
       const originalTrackerObj = new UrlDataObj();
       originalTrackerObj.activeUrl = testUrl1;
       originalTrackerObj.lastActiveUrl = 'lastActiveUrl';
       originalTrackerObj.startTime = startTime;
+      originalTrackerObj.lastDateCheck = lastDateCheck; // Added
       originalTrackerObj.urlList = [
         { url: testUrl1, totalTime: 1800 },
         { url: testUrl2, totalTime: 0 },
@@ -462,9 +505,30 @@ describe('UrlDataObj Tests', () => {
       expect(reconstructedTrackerObj.startTime?.getTime()).toBe(
         originalTrackerObj.startTime?.getTime()
       );
+      expect(reconstructedTrackerObj.lastDateCheck?.getTime()).toBe(
+        // Added
+        originalTrackerObj.lastDateCheck?.getTime()
+      );
       expect(reconstructedTrackerObj.urlList).toEqual(
         originalTrackerObj.urlList
       );
+    });
+
+    test('should handle serialization and deserialization with null dates', () => {
+      const originalTrackerObj = new UrlDataObj();
+      originalTrackerObj.activeUrl = 'null-date-url.com';
+      originalTrackerObj.urlList = [];
+
+      const jsonString = originalTrackerObj.toJSONString();
+      const reconstructedTrackerObj = new UrlDataObj().fromJSONString(
+        jsonString
+      );
+
+      expect(reconstructedTrackerObj.activeUrl).toBe('null-date-url.com');
+      expect(reconstructedTrackerObj.lastActiveUrl).toBeNull();
+      expect(reconstructedTrackerObj.startTime).toBeNull();
+      expect(reconstructedTrackerObj.lastDateCheck).toBeNull();
+      expect(reconstructedTrackerObj.urlList).toEqual([]);
     });
   });
 });

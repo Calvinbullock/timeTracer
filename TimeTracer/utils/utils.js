@@ -212,39 +212,36 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
  * @param {Date} [currentTime=new Date()] - The current time used for calculations. Defaults to the current system time.
  * @returns {UrlDataObj} The updated `urlData` object.
  */
+// TODO: change this to checkInterval?
+// BUG: endSssion needs to also check if timeElapsed is over the interval
 function checkTimeAcuraccy(urlData, timeInterval, currentTime = new Date()) {
   // return if no active url
   if (!urlData.hasActiveUrl()) {
+    __logger__('timeCheck: activeUrl was null return with out change.');
     return urlData;
   }
 
-  // clac both elapsed times
-  const startElapsed = urlData.calcTimeElapsed(
-    urlData.getStartDate(),
-    currentTime
-  );
-  const lastCheckElapsed = urlData.calcTimeElapsed(
-    urlData.getLastDateCheck(),
-    currentTime
-  );
-
-  // get the smaller of start and lastCheck in (milli secs)
-  timeInterval = convertMinutesToMilliseconds(timeInterval);
-  let timeElapsed = Math.min(startElapsed, lastCheckElapsed);
+  let timeElapsed = urlData.calcTimeElapsed2(currentTime);
 
   // check if time Elapsed is less then / grater then the interval
+  timeInterval = convertMinutesToMilliseconds(timeInterval); // TODO: have this be passed in as millisecs-> update tests
   if (timeElapsed <= timeInterval) {
     urlData.addActiveTime(timeElapsed);
+    __logger__(
+      `timeCheck was normal, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+    );
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
     __logger__(
-      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites, likly asleep.`
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep.`
     );
   } else if (timeElapsed > timeInterval) {
     __logger__(
-      `timeCheck was over timeInterval (${timeInterval} minutes) Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minites.`
+      `timeCheck was over timeInterval, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
     );
     urlData.addActiveTime(timeInterval);
+  } else {
+    console.error('timeCheck did not add time, fell into final else.');
   }
 
   urlData.setLastDateCheck(currentTime);

@@ -7,6 +7,7 @@
  * @date Date of creation: April, 2025
  */
 
+import { assert } from 'vitest';
 import { __logger__ } from './utils.js';
 
 // ===================================================== \\
@@ -191,6 +192,7 @@ class UrlDataObj {
 
     // calculate and add elapsed time
     const elapsedTime = this.calcTimeElapsed(this.startTime, currentTime);
+    //const elapsedTime = this.calcTimeElapsed2(currentTime);
     this.addActiveTime(elapsedTime);
 
     // set active and last active urls
@@ -216,6 +218,9 @@ class UrlDataObj {
       activeUrl: this.activeUrl,
       lastActiveUrl: this.lastActiveUrl,
       startTime: this.startTime ? this.startTime.toISOString() : null,
+      lastDateCheck: this.lastDateCheck
+        ? this.lastDateCheck.toISOString()
+        : null,
       urlList: this.urlList.map((item) => ({
         url: item.url,
         totalTime: item.totalTime,
@@ -249,6 +254,11 @@ class UrlDataObj {
       const trackingData = new UrlDataObj();
       trackingData.activeUrl = jsonObj.activeUrl;
       trackingData.lastActiveUrl = jsonObj.lastActiveUrl;
+
+      trackingData.lastDateCheck = jsonObj.lastDateCheck
+        ? new Date(jsonObj.lastDateCheck)
+        : null;
+
       trackingData.startTime = jsonObj.startTime
         ? new Date(jsonObj.startTime)
         : null;
@@ -266,6 +276,19 @@ class UrlDataObj {
     }
   }
 
+  // TODO: TODO: finish replacing calcTime - og with this version
+  calcTimeElapsed2(currentTime = new Date()) {
+    // clac both elapsed times
+    const startElapsed = currentTime - this.startTime;
+    const lastCheckElapsed = currentTime - this.lastDateCheck;
+
+    assert(startElapsed >= 0);
+    assert(lastCheckElapsed >= 0);
+
+    // return the smaller of start and lastCheck in (milli secs)
+    return Math.min(startElapsed, lastCheckElapsed);
+  }
+
   /**
    * Calculates the time elapsed between a given start date and the current time, in milliseconds.
    *
@@ -277,8 +300,7 @@ class UrlDataObj {
     // check if startDate is valid
     if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
       console.error(
-        'TypeError: Parameter "startDate" in calcTimeElapsed() must be a Date object. DATE was',
-        startDate
+        `TypeError: calcTimeElapsed: startDate should be Date, got ${startDate}`
       );
       console.trace();
       return null;
@@ -287,8 +309,7 @@ class UrlDataObj {
     // check if endDate is valid
     if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
       console.error(
-        'TypeError: Parameter "endDate" in calcTimeElapsed() must be a Date object. DATE was',
-        endDate
+        `TypeError: calcTimeElapsed: startDate should be Date, got ${endDate}`
       );
       console.trace();
       return null;
