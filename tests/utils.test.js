@@ -8,6 +8,7 @@ import {
   minutesFromMilliseconds,
   formatMillisecsToHoursAndMinutes,
   checkInterval,
+  convertMinutesToMilliseconds,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -43,6 +44,44 @@ describe('Utils Tests', () => {
       const dirtyUrl = 'https://gemini.google.com/app/';
       const cleanedUrl = cleanUrl(dirtyUrl);
       expect(cleanedUrl).toBe('gemini.google.com');
+    });
+  });
+
+  describe('convertMinutesToMilliseconds', () => {
+    test('should correctly convert minutes to milliseconds', () => {
+      // setup
+      const minutes = 10;
+      // exercise
+      const milliseconds = convertMinutesToMilliseconds(minutes);
+      // test / check
+      expect(milliseconds).toBe(600000); // 10 minutes * 60 seconds/minute * 1000 milliseconds/second
+    });
+
+    test('should return 0 for 0 minutes', () => {
+      // setup
+      const minutes = 0;
+      // exercise
+      const milliseconds = convertMinutesToMilliseconds(minutes);
+      // test / check
+      expect(milliseconds).toBe(0);
+    });
+
+    test('should handle fractional minutes correctly', () => {
+      // setup
+      const minutes = 0.5; // 30 seconds
+      // exercise
+      const milliseconds = convertMinutesToMilliseconds(minutes);
+      // test / check
+      expect(milliseconds).toBe(30000); // 0.5 * 60 * 1000
+    });
+
+    test('should handle negative minutes (though unlikely in real use, ensures mathematical correctness)', () => {
+      // setup
+      const minutes = -5;
+      // exercise
+      const milliseconds = convertMinutesToMilliseconds(minutes);
+      // test / check
+      expect(milliseconds).toBe(-300000); // -5 * 60 * 1000
     });
   });
 
