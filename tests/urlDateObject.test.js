@@ -402,30 +402,36 @@ describe('UrlDataObj Tests', () => {
       expect(time).toBeLessThanOrEqual(550);
     });
 
-    test('should throw AssertionError if startTime is in the future relative to currentTime', () => {
+    test('should return 0 if startTime is in the future relative to currentTime', () => {
       // setup
-      trackerObj.startTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
-      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00
-      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (earlier than startTime)
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00 (Future start time)
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00 (Past check time)
+      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Earlier than startTime)
 
-      // exercise & test
-      expect(() => trackerObj.calcTimeElapsed(currentTime)).toThrow(
-        assert.AssertionError,
-        'startElapsed cannot be negative'
-      );
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
+
+      // test / check
+      // startElapsed becomes (10:05 - 10:10) = -5 minutes, then clamped to 0.
+      // lastCheckElapsed becomes (10:05 - 10:00) = 5 minutes.
+      // Math.min(0, 5 minutes) should be 0.
+      expect(time).toBe(0);
     });
 
-    test('should throw AssertionError if lastDateCheck is in the future relative to currentTime', () => {
+    test('should return 0 if lastDateCheck is in the future relative to currentTime', () => {
       // setup
-      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00
-      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00
-      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (earlier than lastDateCheck)
+      trackerObj.startTime = new Date(2024, 0, 7, 10, 0, 0, 0); // 10:00:00 (Past start time)
+      trackerObj.lastDateCheck = new Date(2024, 0, 7, 10, 10, 0, 0); // 10:10:00 (Future check time)
+      const currentTime = new Date(2024, 0, 7, 10, 5, 0, 0); // 10:05:00 (Earlier than lastDateCheck)
 
-      // exercise & test
-      expect(() => trackerObj.calcTimeElapsed(currentTime)).toThrow(
-        assert.AssertionError,
-        'lastCheckElapsed cannot be negative'
-      );
+      // exercise
+      const time = trackerObj.calcTimeElapsed(currentTime);
+
+      // test / check
+      // startElapsed becomes (10:05 - 10:00) = 5 minutes.
+      // lastCheckElapsed becomes (10:05 - 10:10) = -5 minutes, then clamped to 0.
+      // Math.min(5 minutes, 0) should be 0.
+      expect(time).toBe(0);
     });
 
     test('should handle zero elapsed time correctly', () => {

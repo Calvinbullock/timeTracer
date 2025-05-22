@@ -185,7 +185,6 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
   }
 }
 
-
 /**
  * Determines if the `timeElapsed` falls within an acceptable range relative to the `timeInterval`.
  * This function handles three main scenarios:
@@ -201,7 +200,7 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
  * to the active duration, `false` otherwise.
  */
 // TODO: WARN: need tests
-// TODO: this maybey should return values as insted, 
+// TODO: this maybe should return values as instead,
 //    ex little over interval return timeElapsed / 2
 //    ex lot over interval return timeElapsed / 4
 function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {

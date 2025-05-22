@@ -296,7 +296,7 @@ class UrlDataObj {
     let lastCheckElapsed = currentTime - this.lastDateCheck;
 
     // error check logs
-    if(startElapsed < 0) {
+    if (startElapsed < 0) {
       console.error('startElapsed was negative in calc elapsed time');
       startElapsed = 0;
     }
