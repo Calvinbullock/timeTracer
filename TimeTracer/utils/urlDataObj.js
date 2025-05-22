@@ -41,7 +41,7 @@ class UrlDataObj {
   addActiveTime(elapsedTime) {
     // check if there is an active url
     if (this.activeUrl == null) {
-      __logger__('activeItem was null when addTime was called was called.');
+      __logger__('activeItem was null when addTime was called.');
       return;
     }
 

@@ -4,6 +4,8 @@ import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
 const TME_CHECK_INTERVAL_MINUTES = 1;
+// TODO: change this to 2 minutes
+// TODO: this should be in mili secs
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -33,11 +35,8 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     );
   }
 
-  // exit session
-  if (stopTracking) {
-    siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
-  } else {
-    siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
+  siteDataObj.endSession(TME_CHECK_INTERVAL_MINUTES);
+  if (!stopTracking) {
     siteDataObj.startSession(newActiveUrl);
   }
 
@@ -73,6 +72,7 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
  * @returns {Promise<void>} A Promise that resolves when the operation is complete.
  */
 async function checkIntervalWraper() {
+  __logger__('Alarm fired.');
   let urlData = await getSiteObjData();
   urlData = checkInterval(urlData, TME_CHECK_INTERVAL_MINUTES);
   setSiteObjData(urlData);
@@ -107,8 +107,6 @@ function createRepeatingAlarm(alarmName, alarmInterval) {
 // Listen for the alarm event
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === TIME_CHECK_ALARM) {
-    __logger__('Alarm fired! -----------------------------------> Alarm');
-
     checkIntervalWraper();
   }
 });
