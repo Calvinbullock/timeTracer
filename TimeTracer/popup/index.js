@@ -42,22 +42,24 @@
 //          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
 //          local this will be easy to clean up and check if days need to be cleaned
 
-// import { UrlDataObj } from "../utils/urlDataObj.js";
+import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   __logger__,
   convertMillisecondsToMinutes,
   filterDateKeys,
   formatMillisecsToHoursAndMinutes,
+  sortByUrlUsageTime,
 } from '../utils/utils.js';
 import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
   getAllChromeLocalStorageKeys,
+  getChromeLocalDataByKey,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
 
-const URL__DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
+const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
 
 // ===================================================== \\
 // ===================================================== \\
@@ -82,36 +84,6 @@ function setHtmlById(htmlId, htmlContent) {
   }
 }
 
-// ===================================================== \\
-// ===================================================== \\
-//                WeeklySum Page JS
-// ===================================================== \\
-// ===================================================== \\
-
-async function displayWeeklySumPage() {
-  // get a list of dates in storage
-  const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateList = filterDateKeys(chromeKeyList);
-
-  // get data for each day
-  // TODO: TODO: working here!!!
-  dateList;
-
-  // parse the data into html tables
-
-  // build the carousel of data
-  let html = '';
-
-  // inject the data / carousel
-  setHtmlById('content-div', html);
-}
-
-// ===================================================== \\
-// ===================================================== \\
-//                TimeTracking Page JS
-// ===================================================== \\
-// ===================================================== \\
-
 /**
  * Generates an HTML table string from an array of URL objects.
  * The table includes columns for an example index, the site URL, and the time spent (in hours).
@@ -128,7 +100,7 @@ function getUrlListAsTable(urlList) {
   display += '<tbody>';
 
   // take the list size or max at 20
-  let tableSize = Math.min(URL__DISPLAY_LIST_LENGTH, urlList.length);
+  let tableSize = Math.min(MAX_URL_DISPLAY_LIST_LENGTH, urlList.length);
 
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
@@ -148,6 +120,95 @@ function getUrlListAsTable(urlList) {
   return display;
 }
 
+// ===================================================== \\
+// ===================================================== \\
+//                WeeklySum Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Creates an HTML string representing a carousel container populated with weekly summary data.
+ * Each slide in the carousel corresponds to a date key and displays a table of URL usage for that day.
+ *
+ * @param {Array<object>} dataList - An array of objects, where each object represents a day's data.
+ * Each object should have the following structure:
+ * - `dateKey`: {string} The date string (e.g., "2023-10-27") for the slide's heading.
+ * - `data`: {Array<object>} An array of URL data objects for that day,
+ * which will be used by `getUrlListAsTable` to generate the table content.
+ * @returns {string} A complete HTML string for the carousel container, including slides and navigation buttons.
+ */
+function createWeeklySumContainer(dataList) {
+  let slides = '';
+
+  // create each carousel-slide
+  dataList.forEach(element => {
+    let slide = ''
+    slide += '   <div class="carousel-slide">'
+    slide += `     <h2>${element.dateKey}</h2>`
+    slide += getUrlListAsTable(element.data);
+    slide += '   </div>'
+
+    slides += slide;
+  });
+
+  // create the main carousel-container
+  let container = '';
+  container += '<div class="carousel-container">'
+  container += ' <div class="carousel-wrapper">'
+  container += ' <button class="carousel-button prev" aria-label="Previous slide">&#10094;</button>'
+  container += ' <button class="carousel-button next" aria-label="Next slide">&#10095;</button>'
+  container += slides;
+  container += ' </div>'
+  container += '</div>'
+
+  return container;
+}
+
+
+/**
+ * Asynchronously retrieves and displays weekly summary data of URL usage.
+ * parse it into html and injects that html into the proper page.
+ *
+ * @async
+ * @function displayWeeklySumPage
+ * @returns {Promise<void>} A promise that resolves when the page content has been updated.
+ */
+// TODO: have this or a part or it calc the total time for each day and
+//    graph it for at a glance? --- OR just have total time shown each day
+async function displayWeeklySumPage() {
+  // get a list of dates in storage
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let dateKeyList = filterDateKeys(chromeKeyList);
+
+  // map each key data pair to a promise
+  const dataPromises = dateKeyList.map(async (key) => {
+    const urlObj = new UrlDataObj();
+    const urlData = urlObj.fromJSONString(await getChromeLocalDataByKey(key));
+    let urlList = sortByUrlUsageTime(urlData.urlList);
+
+    // return the obj that we want to add to dataList
+    return {
+      dateKey: key,
+      data: urlList,
+    };
+  })
+
+  // resolve each promise and add the dateKey / data obj to the list
+  const dataList = await Promise.all(dataPromises);
+
+  // build the carousel of data
+  let carousel = createWeeklySumContainer(dataList);
+
+  // inject the data / carousel
+  setHtmlById('content-div', carousel);
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//                TimeTracking Page JS
+// ===================================================== \\
+// ===================================================== \\
+
 /**
  * Asynchronously retrieves website tracking data and displays it in an HTML table
  * within the element having the ID 'content-div'.
@@ -165,16 +226,7 @@ async function dispayUrlTimePage() {
   data.endSession();
 
   // sort by highest usage time
-  let sortedUrlList = data.urlList.sort((a, b) => {
-    // Compare the totalTime property of the two objects
-    if (a.totalTime < b.totalTime) {
-      return 1; // a comes before b
-    }
-    if (a.totalTime > b.totalTime) {
-      return -1; // a comes after b
-    }
-    return 0; // a and b are equal
-  });
+  let sortedUrlList = sortByUrlUsageTime(data.urlList);
 
   // format the data
   let html = getUrlListAsTable(sortedUrlList);
@@ -350,9 +402,8 @@ timeSpentLink.addEventListener('click', function (event) {
 
 weeklySum.addEventListener('click', function (event) {
   event.preventDefault();
-  // TODO: build page
-  setHtmlById('content-div', 'Work In Progress');
 
+  // BUG: just need to get carasole JS script to work
   displayWeeklySumPage();
 
   // set active link item

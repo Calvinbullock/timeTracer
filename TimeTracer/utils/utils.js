@@ -302,6 +302,28 @@ function checkInterval(urlData, timeInterval, currentTime = new Date()) {
   return urlData;
 }
 
+/**
+ * Sorts a list of URL data objects by their total usage time in descending order.
+ *
+ * @param {Array<object>} urlList - An array of URL objects. Each object
+ * is expected to have a 'totalTime' property (e.g., `{ url: "example.com", totalTime: 120 }`).
+ * @returns {Array<object>} The `urlList` array, sorted in-place, with objects
+ * ordered from highest 'totalTime' to lowest.
+ */
+// TODO: needs tests
+function sortByUrlUsageTime(urlList) {
+  return urlList.sort((a, b) => {
+    // Compare the totalTime property of the two objects
+    if (a.totalTime < b.totalTime) {
+      return 1;
+    }
+    if (a.totalTime > b.totalTime) {
+      return -1
+    }
+    return 0;
+  });
+}
+
 export {
   filterDateKeys,
   formatDateTime,
@@ -314,4 +336,5 @@ export {
   formatMillisecsToHoursAndMinutes,
   checkInterval,
   isTimeElapsedWithinInterval,
+  sortByUrlUsageTime,
 };

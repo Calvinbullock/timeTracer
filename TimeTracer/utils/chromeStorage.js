@@ -29,20 +29,23 @@ const BLOCK_LIST_DATA_KEY = 'blockedUrlList';
  *
  * @returns {Promise<string[]>} A Promise that resolves with an array of strings,
  * where each string is a key found in `chrome.storage.local`.
- * The Promise will reject if there's an error during the retrieval process,
- * logging the error using `__logger__` and rejecting with `null`.
+ * If an error occurs during retrieval, the Promise will reject with an empty array (`[]`)
+ * and the error details will be logged using the `__logger__` function.
  *
  * @example
  * // Usage in an async function:
- * async function retrieveAndLogKeys() {
- * try {
- * const keys = await getAllChromeLocalStorageKeys();
- * console.log("All local storage keys:", keys);
- * } catch (error) {
- * console.error("Failed to get local storage keys:", error);
+ * async function fetchAndProcessKeys() {
+ *  try {
+ *    const keys = await getAllChromeLocalStorageKeys();
+ *    console.log("Successfully retrieved all local storage keys:", keys);
+ *    // Process your keys here
+ *  } catch (error) {
+ *    // 'error' will be an empty array if the rejection is handled as per the function's definition.
+ *    // The actual error details would have been logged by __logger__.
+ *    console.error("Failed to retrieve local storage keys. Check logs for details.");
+ *  }
  * }
- * }
- * retrieveAndLogKeys();
+ * fetchAndProcessKeys();
  */
 async function getAllChromeLocalStorageKeys() {
   return new Promise((resolve, reject) => {
@@ -52,7 +55,7 @@ async function getAllChromeLocalStorageKeys() {
           'Error retrieving all chrome local storage keys. Runtime Error:',
           chrome.runtime.lastError
         );
-        reject(null);
+        reject([]);
         return;
       }
       resolve(Object.keys(items));
@@ -162,7 +165,7 @@ async function setBlockedSiteList(blockedUrlList) {
  * @returns {Promise<any | undefined>} A Promise that resolves with the retrieved
  *      data, or undefined if an error occurred.
  */
-async function getChromeLocalData(key) {
+async function getChromeLocalDataByKey(key) {
   try {
     const result = await chrome.storage.local.get([key]);
     //console.log(`LOG - retrieve: key: ${key}, value: ${result[key]}`);
@@ -183,7 +186,7 @@ async function getChromeLocalData(key) {
  * @returns {Promise<UrlDataObj>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
-  let siteDataString = await getChromeLocalData(getDateKey());
+  let siteDataString = await getChromeLocalDataByKey(getDateKey());
 
   let siteDataObj = new UrlDataObj();
 
@@ -212,7 +215,7 @@ async function getSiteObjData() {
  * Returns an empty array `[]` if no list is found or if parsing fails.
  */
 async function getBlockedSiteList() {
-  let blockedSiteList = await getChromeLocalData(BLOCK_LIST_DATA_KEY);
+  let blockedSiteList = await getChromeLocalDataByKey(BLOCK_LIST_DATA_KEY);
 
   // create blockList if empty
   if (!blockedSiteList) {
@@ -236,6 +239,7 @@ async function getBlockedSiteList() {
 
 export {
   getAllChromeLocalStorageKeys,
+  getChromeLocalDataByKey,
   removeChromeLocalStorageItem,
   setSiteObjData,
   setBlockedSiteList,
