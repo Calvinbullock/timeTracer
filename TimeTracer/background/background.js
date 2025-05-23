@@ -3,7 +3,7 @@ import {
   cleanUrl,
   __logger__,
   checkInterval,
-  minutesFromMilliseconds,
+  convertMillisecondsToMinutes,
 } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
@@ -89,7 +89,7 @@ async function checkIntervalWraper() {
  * @param {number} alarmIntervalMilliSec - The interval in milliseconds after which the alarm should repeat.
  */
 function createRepeatingAlarm(alarmName, alarmIntervalMilliSec) {
-  const alarmIntervalMin = minutesFromMilliseconds(alarmIntervalMilliSec);
+  const alarmIntervalMin = convertMillisecondsToMinutes(alarmIntervalMilliSec);
 
   chrome.alarms.create(alarmName, {
     periodInMinutes: alarmIntervalMin,

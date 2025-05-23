@@ -5,10 +5,10 @@ import {
   searchDataUrls,
   cleanUrl,
   getDateKey,
-  minutesFromMilliseconds,
   formatMillisecsToHoursAndMinutes,
   checkInterval,
   convertMinutesToMilliseconds,
+  convertMillisecondsToMinutes,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -85,10 +85,10 @@ describe('Utils Tests', () => {
     });
   });
 
-  describe('minutesFromMilliseconds', () => {
+  describe('convertMillisecondsToMinutes', () => {
     test('should correctly convert milliseconds to minutes', () => {
       const milliSecs = 600000;
-      const time = minutesFromMilliseconds(milliSecs);
+      const time = convertMillisecondsToMinutes(milliSecs);
       expect(time).toBe(10);
     });
   });
