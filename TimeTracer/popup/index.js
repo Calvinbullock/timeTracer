@@ -45,6 +45,7 @@
 // import { UrlDataObj } from "../utils/urlDataObj.js";
 import {
   __logger__,
+  convertMillisecondsToMinutes,
   formatMillisecsToHoursAndMinutes,
 } from '../utils/utils.js';
 import {
@@ -53,6 +54,8 @@ import {
   setBlockedSiteList,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
+
+const URL__DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
 
 // ===================================================== \\
 // ===================================================== \\
@@ -99,16 +102,18 @@ function getUrlListAsTable(urlList) {
   display += '<tbody>';
 
   // take the list size or max at 20
-  let tableSize = Math.min(20, urlList.length);
+  let tableSize = Math.min(URL__DISPLAY_LIST_LENGTH, urlList.length);
 
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
-    const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
-    display += '<tr>';
-    display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
-    display += `<td>${urlList[i].url}</td>`;
-    display += `<td>${totalTime}</td>`;
-    display += '</tr>';
+    if (convertMillisecondsToMinutes(urlList[i].totalTime) > 1) {
+      const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
+      display += '<tr>';
+      display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
+      display += `<td>${urlList[i].url}</td>`;
+      display += `<td>${totalTime}</td>`;
+      display += '</tr>';
+    }
   }
 
   display += '</tbody>';
@@ -167,43 +172,43 @@ async function dispayUrlTimePage() {
  */
 function createBlockedUrlTable(blockedUrlList, activeUrl) {
   let html = `
-<p id='blockUrl-sentance'>Block
-<button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
-</p>
-<table id='blockListTable'>
-<thead>
-<tr>
-<th>Blocked URL</th>
-<th>Remove Item</th>
-</tr>
-</thead>
-<tbody>
-`;
+    <p id='blockUrl-sentance'>Block
+      <button class="addNewBlockedUrlBtn outlined-button" id="addNewBlockedUrlBtn" value="${activeUrl}">${activeUrl}</button>
+    </p>
+    <table id='blockListTable'>
+    <thead>
+    <tr>
+    <th>Blocked URL</th>
+    <th>Remove Item</th>
+    </tr>
+    </thead>
+    <tbody>
+    `;
 
   // if blockedUrlList is empty add a row letting the usr know its empty
   if (blockedUrlList.length === 0) {
     html += `
-<tr>
-<td>No blocked URLs</td>
-<td><button class="outlined-button">-</button></td>
-</tr>
-`;
+        <tr>
+          <td>No blocked URLs</td>
+          <td><button class="outlined-button">-</button></td>
+        </tr>
+        `;
   } else {
     // add all the list items into the table rows
     for (let index = 0; index < blockedUrlList.length; index++) {
-      const blockedUrl = blockedUrlList[index];
+      const blockedItem = blockedUrlList[index];
       html += `
-<tr>
-<td>${blockedUrl}</td>
-<td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedUrl}">X</button></td>
-</tr>
-`;
+        <tr>
+          <td>${blockedItem}</td>
+          <td><button class="removeBlockedUrlBtn outlined-button" data-url="${blockedItem}">X</button></td>
+        </tr>
+      `;
     }
   }
   html += `
-</tbody>
-</table>
-`;
+    </tbody>
+    </table>
+  `;
   return html;
 }
 
