@@ -94,7 +94,6 @@ function searchDataUrls(targetUrl, dataList) {
  * // Returns "example.com"
  * cleanUrl("https://example.com/path/to/resource?query=string#hash");
  */
-// TODO: maybe change this function name??
 function cleanUrl(url) {
   if (!url) {
     return null;

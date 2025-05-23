@@ -4,16 +4,12 @@
  * As well as the entry point for displaying the data for each website
  * and its time data.
  *
- * NOTE: all code in this file has no automated tests.
- *
  * @author: Calvin Bullock
  * @date Date of creation: April, 2025
  */
 
 // TODO: clean up
 //    - move calcTime function / tests (??)
-//    - test convertMinutesToMilliseconds
-//    - rename the other converstion func in utils
 
 // TODO: Release - 2
 // - block list - (site blocker dialog)
