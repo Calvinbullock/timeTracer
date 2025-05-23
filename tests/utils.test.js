@@ -10,6 +10,7 @@ import {
   convertMinutesToMilliseconds,
   convertMillisecondsToMinutes,
   filterDateKeys,
+  sortByUrlUsageTime,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -428,6 +429,182 @@ describe('Utils Tests', () => {
       const result = filterDateKeys(chromeKeyList);
       // test / check
       expect(result).toEqual(expectedDateKeys);
+    });
+  });
+
+  describe('sortByUrlUsageTime', () => {
+    // Test case 1: Basic sorting with distinct totalTime values
+    test('should sort urlList by totalTime in descending order', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'example.com/b',
+          totalTime: 50,
+        },
+        {
+          url: 'example.com/a',
+          totalTime: 100,
+        },
+        {
+          url: 'example.com/c',
+          totalTime: 25,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'example.com/a',
+          totalTime: 100,
+        },
+        {
+          url: 'example.com/b',
+          totalTime: 50,
+        },
+        {
+          url: 'example.com/c',
+          totalTime: 25,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      // Also check that it's the same array instance (sorts in-place)
+      expect(result).toBe(urlList);
+    });
+
+    // Test case 2: Sorting with duplicate totalTime values
+    test('should handle duplicate totalTime values gracefully (maintain relative order if equal)', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'example.com/d',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/e',
+          totalTime: 30,
+        },
+        {
+          url: 'example.com/f',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/g',
+          totalTime: 10,
+        },
+      ];
+      // When totalTime is equal, the original relative order is maintained by `sort`
+      const expectedSortedList = [
+        {
+          url: 'example.com/d',
+          totalTime: 70,
+        }, // d comes before f in original, so it should stay that way
+        {
+          url: 'example.com/f',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/e',
+          totalTime: 30,
+        },
+        {
+          url: 'example.com/g',
+          totalTime: 10,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+
+    // Test case 3: Empty array input
+    test('should return an empty array if an empty array is provided', () => {
+      // Setup
+      const urlList = [];
+      const expectedSortedList = [];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      expect(result).toBe(urlList); // Still the same array instance
+    });
+
+    // Test case 4: Array with a single element
+    test('should return the same array if it contains only one element', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'single.com',
+          totalTime: 42,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'single.com',
+          totalTime: 42,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      expect(result).toBe(urlList);
+    });
+
+    // Test case 5: Array with zero totalTime values or mixed values
+    test('should correctly sort with zero or mixed totalTime values', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'zero.com',
+          totalTime: 0,
+        },
+        {
+          url: 'high.com',
+          totalTime: 999,
+        },
+        {
+          url: 'mid.com',
+          totalTime: 50,
+        },
+        {
+          url: 'another_zero.com',
+          totalTime: 0,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'high.com',
+          totalTime: 999,
+        },
+        {
+          url: 'mid.com',
+          totalTime: 50,
+        },
+        {
+          url: 'zero.com',
+          totalTime: 0,
+        }, // Retains relative order for equal totalTime
+        {
+          url: 'another_zero.com',
+          totalTime: 0,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
     });
   });
 });
