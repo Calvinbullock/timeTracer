@@ -260,7 +260,9 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
     );
     return true;
   } else {
-    console.error(`timeCheck did not add time, fell into final else. Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes. Interval = ${timeInterval}`);
+    console.error(
+      `timeCheck did not add time, fell into final else. Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes. Interval = ${timeInterval}`
+    );
     return false;
   }
 }
