@@ -1,12 +1,26 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi} from 'vitest';
 import { UrlDataObj } from './../TimeTracer/utils/urlDataObj.js';
 
 describe('UrlDataObj Tests', () => {
   let trackerObj;
+  let consoleLogSpy;
+  let consoleErrorSpy;
+  let consoleWarnSpy;
 
   beforeEach(() => {
     trackerObj = new UrlDataObj();
-    // Replace muteConsole/unmuteConsole with vi.spyOn for console.log
+
+    // silence / mock all logs
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    // Restore the original implementations of console methods
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
   });
 
   // ===================================================== \\
@@ -258,7 +272,6 @@ describe('UrlDataObj Tests', () => {
       trackerObj.lastCheckDate = sessionStartTime;
 
       trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
-      console.log(trackerObj);
 
       const updatedItem = trackerObj.urlList.find((item) => item.url === url);
 
