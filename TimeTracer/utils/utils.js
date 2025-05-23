@@ -153,8 +153,7 @@ function convertMinutesToMilliseconds(minutes) {
  * @param {number} milliseconds - The number of milliseconds.
  * @returns {number} The number of minutes.
  */
-// TODO: add a converts to the name here
-function minutesFromMilliseconds(milliseconds) {
+function convertMillisecondsToMinutes(milliseconds) {
   return milliseconds / (1000 * 60);
 }
 
@@ -166,7 +165,7 @@ function minutesFromMilliseconds(milliseconds) {
  * Returns "0 minutes" if the input is invalid.
  */
 function formatMillisecsToHoursAndMinutes(miliSecs) {
-  let minutes = minutesFromMilliseconds(miliSecs);
+  let minutes = convertMillisecondsToMinutes(miliSecs);
 
   // Input validation: Check if minutes is a valid number and is not negative
   if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
@@ -207,18 +206,18 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
   // check if time Elapsed is less then / grater then the interval
   if (timeElapsed <= timeInterval) {
     __logger__(
-      `timeCheck was normal, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+      `timeCheck was normal, Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes.`
     );
     return true;
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
     __logger__(
-      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep, interval ${minutesFromMilliseconds(timeElapsed)}.`
+      `timeCheck was over, Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes, likly asleep, interval ${convertMillisecondsToMinutes(timeElapsed)}.`
     );
     return false;
   } else if (timeElapsed > timeInterval) {
     __logger__(
-      `timeCheck was over timeInterval, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+      `timeCheck was over timeInterval, Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes.`
     );
     return true;
   } else {
@@ -270,7 +269,7 @@ export {
   searchDataUrls,
   cleanUrl,
   getDateKey,
-  minutesFromMilliseconds,
+  convertMillisecondsToMinutes,
   convertMinutesToMilliseconds,
   formatMillisecsToHoursAndMinutes,
   checkInterval,

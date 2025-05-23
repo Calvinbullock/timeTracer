@@ -11,7 +11,6 @@
  */
 
 // TODO: clean up
-//    - fix tests comments / file names
 //    - move calcTime function / tests (??)
 //    - test convertMinutesToMilliseconds
 //    - rename the other converstion func in utils
