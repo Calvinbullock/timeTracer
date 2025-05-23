@@ -31,7 +31,6 @@ describe('Utils Tests', () => {
     consoleWarnSpy.mockRestore();
   });
 
-
   describe('searchDataUrls', () => {
     test('should return the index of the object containing the target URL', () => {
       const target = 'google.com';
@@ -359,13 +358,13 @@ describe('Utils Tests', () => {
         'another_key_123',
         '1999-12-31',
         'invalid-date-format',
-        '2023-02-29' // This format matches, even if date is invalid in calendar
+        '2023-02-29', // This format matches, even if date is invalid in calendar
       ];
       const expectedDateKeys = [
         '2025-05-18',
         '2024-10-01',
         '1999-12-31',
-        '2023-02-29'
+        '2023-02-29',
       ];
       // Exercises
       const result = filterDateKeys(chromeKeyList);
@@ -376,12 +375,7 @@ describe('Utils Tests', () => {
     // Test case 2: Should return an empty array if no date keys are present
     test('should return an empty array if no date keys are found', () => {
       //setup
-      const chromeKeyList = [
-        'key1',
-        'key2',
-        'item_abc',
-        'data_xyz'
-      ];
+      const chromeKeyList = ['key1', 'key2', 'item_abc', 'data_xyz'];
       const expectedDateKeys = [];
       // Exercise
       const result = filterDateKeys(chromeKeyList);
@@ -404,17 +398,14 @@ describe('Utils Tests', () => {
     test('should distinguish between valid and invalid date formats', () => {
       //setup
       const chromeKeyList = [
-        '2020-01-01',    // Valid
-        '2020-1-1',      // Invalid format (month/day not two digits)
-        '2020/01/01',    // Invalid format (wrong separator)
-        '2020-13-01',    // Invalid month
-        '2020-01-32',    // Invalid day
-        '2020-02-29'     // Valid format (leap year or not, regex matches format)
+        '2020-01-01', // Valid
+        '2020-1-1', // Invalid format (month/day not two digits)
+        '2020/01/01', // Invalid format (wrong separator)
+        '2020-13-01', // Invalid month
+        '2020-01-32', // Invalid day
+        '2020-02-29', // Valid format (leap year or not, regex matches format)
       ];
-      const expectedDateKeys = [
-        '2020-01-01',
-        '2020-02-29'
-      ];
+      const expectedDateKeys = ['2020-01-01', '2020-02-29'];
       // Exercise
       const result = filterDateKeys(chromeKeyList);
       // test / check
@@ -430,17 +421,13 @@ describe('Utils Tests', () => {
         true, // Non-string
         null, // Non-string
         undefined, // Non-string
-        '2024-11-20'
+        '2024-11-20',
       ];
-      const expectedDateKeys = [
-        '2025-01-01',
-        '2024-11-20'
-      ];
+      const expectedDateKeys = ['2025-01-01', '2024-11-20'];
       // Exercise
       const result = filterDateKeys(chromeKeyList);
       // test / check
       expect(result).toEqual(expectedDateKeys);
     });
   });
-
 });
