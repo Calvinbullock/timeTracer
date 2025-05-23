@@ -33,6 +33,7 @@
 // TODO: - Future..
 // - MAINTENANCE -- see if there is a way to easily test extension performance impact
 // - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
+// - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
 //
 // - FEATURE -- add a button to clear / reset all local data (check the chrome API)
 // - FEATURE -- add % of total time spent on each site (later)
