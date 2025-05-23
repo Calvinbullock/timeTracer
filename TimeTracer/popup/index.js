@@ -401,7 +401,7 @@ timeSpentLink.addEventListener('click', function (event) {
 weeklySum.addEventListener('click', function (event) {
   event.preventDefault();
 
-  // BUG: just need to get carasole JS script to work
+  // BUG: just need to get carousel JS script to work
   displayWeeklySumPage();
 
   // set active link item
