@@ -310,7 +310,6 @@ function checkInterval(urlData, timeInterval, currentTime = new Date()) {
  * @returns {Array<object>} The `urlList` array, sorted in-place, with objects
  * ordered from highest 'totalTime' to lowest.
  */
-// TODO: needs tests
 function sortByUrlUsageTime(urlList) {
   return urlList.sort((a, b) => {
     // Compare the totalTime property of the two objects

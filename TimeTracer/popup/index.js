@@ -10,20 +10,16 @@
 
 // TODO: clean up
 //    - move calcTime function / tests (??)
+//    - isTimeElapsedWithinInterval needs tests (and re-design?)
 
 // TODO: Release - 2
 // - block list - (site blocker dialog)
 //      - DONE - add
 //      - DONE - remove
 //      - ---- - redirect
-// - day selector - day selector right above the table as a carasell ` < day X   day Y >`
 // - storage - clear data button
-// - publicly list the extension
 //
 // TODO: Release - 3
-// - data continuity - run exit session when computer sleeps ( NOTE: is this possible? )
-// - data continuity - when opening report pop up the data for current tab's time session is not shown until you leave that tab
-// - data continuity - set a heart beat check the elapsed time every x amount of time and trough away values outside that range
 // - data continuity - clean up old data (Date based)
 // - build DoNotTrack ui page
 // - add a total time count?
