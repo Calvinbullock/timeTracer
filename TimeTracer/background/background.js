@@ -8,9 +8,7 @@ import {
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
-const TIME_CHECK_INTERVAL_MILLISEC = 1 * 60000; // minutes * milliseconds
-// TODO: change this to 2 minutes
-// TODO: this should be in mili secs
+const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 
 /**
  * Manages the tracking session for the currently active URL.
