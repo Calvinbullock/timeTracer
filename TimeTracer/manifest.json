@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TimeTracer",
   "description": "Tracks the time spent on different websites.",
-  "version": "0.1",
+  "version": "1.1.1",
   "permissions": ["tabs", "storage", "idle", "alarms"],
   "background": {
     "service_worker": "background/background.js",
