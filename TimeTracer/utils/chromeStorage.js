@@ -92,7 +92,7 @@ function storeChromeLocalData(key, data) {
  *
  * @async
  * @function setSiteObjData
- * @param {any} siteDataObj - The site data object to store.
+ * @param {UrlDataObj} siteDataObj - The site data object to store.
  * @returns {Promise<void>} A Promise that resolves when the data is successfully stored.
  */
 async function setSiteObjData(siteDataObj) {
@@ -142,7 +142,7 @@ async function getChromeLocalData(key) {
  *
  * @async
  * @function getSiteObjData
- * @returns {Promise<any>} A Promise that resolves with the site data object.
+ * @returns {Promise<UrlDataObj>} A Promise that resolves with the site data object.
  */
 async function getSiteObjData() {
   let siteDataString = await getChromeLocalData(getDateKey());

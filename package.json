@@ -8,11 +8,11 @@
     "test": "tests"
   },
   "scripts": {
+    "clean": "npm run format; npm run lint",
     "test": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint . --ext .js,.mjs",
-    "lint:fix": "eslint . --ext .js,.mjs --fix"
+    "lint": "eslint . --ext .js,.mjs"
   },
   "author": "Calvin Bullock",
   "license": "ISC",

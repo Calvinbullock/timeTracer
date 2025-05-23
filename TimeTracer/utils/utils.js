@@ -138,11 +138,22 @@ function getDateKey(dateKey = new Date()) {
 }
 
 /**
+ * Converts a given number of minutes into milliseconds.
+ *
+ * @param {number} minutes - The duration in minutes that needs to be converted.
+ * @returns {number} The equivalent duration in milliseconds.
+ */
+function convertMinutesToMilliseconds(minutes) {
+  return minutes * 60 * 1000;
+}
+
+/**
  * Calculates the number of minutes from a given number of milliseconds.
  *
  * @param {number} milliseconds - The number of milliseconds.
  * @returns {number} The number of minutes.
  */
+// TODO: add a converts to the name here
 function minutesFromMilliseconds(milliseconds) {
   return milliseconds / (1000 * 60);
 }
@@ -174,6 +185,85 @@ function formatMillisecsToHoursAndMinutes(miliSecs) {
   }
 }
 
+/**
+ * Determines if the `timeElapsed` falls within an acceptable range relative to the `timeInterval`.
+ * This function handles three main scenarios:
+ * 1. If `timeElapsed` is less than or equal to `timeInterval`, it's considered normal.
+ * 2. If `timeElapsed` is more than double the `timeInterval`, it's considered an
+ * "over" time, possibly indicating inactivity (e.g., user is asleep), and no time should be added.
+ * 3. If `timeElapsed` is greater than `timeInterval` but not more than double,
+ * it's still considered within an acceptable range for adding time.
+ *
+ * @param {number} timeElapsed - The actual time that has elapsed, in milliseconds.
+ * @param {number} timeInterval - The expected interval, also in milliseconds.
+ * @returns {boolean} `true` if the elapsed time is considered valid for adding
+ * to the active duration, `false` otherwise.
+ */
+// TODO: WARN: need tests
+// TODO: this maybe should return values as instead,
+//    ex little over interval return timeElapsed / 2
+//    ex lot over interval return timeElapsed / 4
+function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
+  // check if time Elapsed is less then / grater then the interval
+  if (timeElapsed <= timeInterval) {
+    __logger__(
+      `timeCheck was normal, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+    );
+    return true;
+  } else if (timeElapsed > timeInterval * 2) {
+    // no time is added here, this is invalid time path
+    __logger__(
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep, interval ${minutesFromMilliseconds(timeElapsed)}.`
+    );
+    return false;
+  } else if (timeElapsed > timeInterval) {
+    __logger__(
+      `timeCheck was over timeInterval, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes.`
+    );
+    return true;
+  } else {
+    console.error('timeCheck did not add time, fell into final else.');
+    return false;
+  }
+}
+
+/**
+ * Adjusts and updates URL activity time based on elapsed time since the last check.
+ * This function calculates the time elapsed since the URL's `startTime` and its `lastDateCheck`.
+ * It then adds "active time" to the URL data if the calculated elapsed time is
+ * within or exceeds a specified `timeInterval`. It also updates the `lastDateCheck`
+ * to the `currentTime`.
+ *
+ * @param {UrlDataObj} urlData - An object containing URL-related data and methods.
+ * Expected properties and methods:
+ * - `startTime`: The initial start date/timestamp of the URL.
+ * - `lastDateCheck`: The timestamp of the last time this URL was checked.
+ * - `hasActiveUrl()`: A method that returns `true` if there's an active URL, `false` otherwise.
+ * - `calcTimeElapsed(currentTime)`: Calculates the minimum elapsed time in milliseconds
+ * between `currentTime` and both `startTime` and `lastDateCheck`.
+ * - `addActiveTime(time)`: Adds the specified time (in milliseconds) to the URL's total active duration.
+ * - `setLastDateCheck(date)`: Updates the `lastDateCheck` for the URL.
+ * @param {number} timeInterval - The expected interval in **milliSeconds** between checks.
+ * @param {Date} [currentTime=new Date()] - The current time used for calculations. Defaults to the current system time.
+ * @returns {UrlDataObj} The updated `urlData` object.
+ */
+function checkInterval(urlData, timeInterval, currentTime = new Date()) {
+  // return if no active url
+  if (!urlData.hasActiveUrl()) {
+    __logger__('timeCheck: activeUrl was null return with out change.');
+    return urlData;
+  }
+
+  // find time elapsed, if its within timeInterval add the time
+  let timeElapsed = urlData.calcTimeElapsed(currentTime);
+  if (isTimeElapsedWithinInterval(timeElapsed, timeInterval)) {
+    urlData.addActiveTime(timeElapsed);
+  }
+
+  urlData.setLastDateCheck(currentTime);
+  return urlData;
+}
+
 export {
   formatDateTime,
   __logger__,
@@ -181,5 +271,8 @@ export {
   cleanUrl,
   getDateKey,
   minutesFromMilliseconds,
+  convertMinutesToMilliseconds,
   formatMillisecsToHoursAndMinutes,
+  checkInterval,
+  isTimeElapsedWithinInterval,
 };
