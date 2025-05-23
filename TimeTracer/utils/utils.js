@@ -213,7 +213,7 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
     __logger__(
-      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep, interval ${timeInterval}.`
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep, interval ${minutesFromMilliseconds(timeElapsed)}.`
     );
     return false;
   } else if (timeElapsed > timeInterval) {
