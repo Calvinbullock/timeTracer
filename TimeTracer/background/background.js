@@ -1,5 +1,10 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
-import { cleanUrl, __logger__, checkInterval, minutesFromMilliseconds } from '../utils/utils.js';
+import {
+  cleanUrl,
+  __logger__,
+  checkInterval,
+  minutesFromMilliseconds,
+} from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';

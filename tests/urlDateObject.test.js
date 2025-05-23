@@ -220,8 +220,11 @@ describe('UrlDataObj Tests', () => {
       const initialTotalTime = 1000;
       const sessionStartTime = new Date('2025-01-01T10:00:00.000Z');
       // End time 5 minutes after start (within 15 min interval)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + FIVE_MINUTES_MS);
-      const expectedElapsedTime = sessionEndTime.getTime() - sessionStartTime.getTime(); // 5 minutes in ms
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + FIVE_MINUTES_MS
+      );
+      const expectedElapsedTime =
+        sessionEndTime.getTime() - sessionStartTime.getTime(); // 5 minutes in ms
       const expectedNewTotalTime = initialTotalTime + expectedElapsedTime;
 
       trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
@@ -245,7 +248,9 @@ describe('UrlDataObj Tests', () => {
       const initialTotalTime = 1000;
       const sessionStartTime = new Date('2025-01-01T10:00:00.000Z');
       // End time 2x the DEFAULT_TIME_INTERVAL_MS after start (30 minutes after start)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + (DEFAULT_TIME_INTERVAL_MS * 2 + 1));
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + (DEFAULT_TIME_INTERVAL_MS * 2 + 1)
+      );
 
       trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
       trackerObj.activeUrl = url;
@@ -253,7 +258,7 @@ describe('UrlDataObj Tests', () => {
       trackerObj.lastCheckDate = sessionStartTime;
 
       trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
-      console.log(trackerObj)
+      console.log(trackerObj);
 
       const updatedItem = trackerObj.urlList.find((item) => item.url === url);
 
@@ -268,8 +273,11 @@ describe('UrlDataObj Tests', () => {
       const url = 'http://test.com/new-url';
       const sessionStartTime = new Date('2025-01-01T11:00:00.000Z');
       // End time 10 minutes after start (within 15 min interval)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS);
-      const expectedElapsedTime = sessionEndTime.getTime() - sessionStartTime.getTime(); // 10 minutes in ms
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + TEN_MINUTES_MS
+      );
+      const expectedElapsedTime =
+        sessionEndTime.getTime() - sessionStartTime.getTime(); // 10 minutes in ms
 
       trackerObj.activeUrl = url;
       trackerObj.startTime = sessionStartTime;
@@ -293,7 +301,9 @@ describe('UrlDataObj Tests', () => {
       const url = 'http://test.com/new-url-added';
       const sessionStartTime = new Date('2025-01-01T13:00:00.000Z');
       // End time 20 minutes after start (outside 15 min interval)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + TWENTY_MINUTES_MS);
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + TWENTY_MINUTES_MS
+      );
 
       trackerObj.activeUrl = url;
       trackerObj.startTime = sessionStartTime;
@@ -331,7 +341,9 @@ describe('UrlDataObj Tests', () => {
       const url = 'http://test.com/custom-interval';
       const sessionStartTime = new Date('2025-01-01T15:00:00.000Z');
       // End 10 minutes later (within 30 min interval)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS);
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + TEN_MINUTES_MS
+      );
 
       trackerObj.activeUrl = url;
       trackerObj.startTime = sessionStartTime;
@@ -341,7 +353,9 @@ describe('UrlDataObj Tests', () => {
 
       // Expect time to be added because 10 minutes is <= 30 minutes
       const updatedItem = trackerObj.urlList.find((item) => item.url === url);
-      expect(updatedItem.totalTime).toBe(sessionEndTime.getTime() - sessionStartTime.getTime());
+      expect(updatedItem.totalTime).toBe(
+        sessionEndTime.getTime() - sessionStartTime.getTime()
+      );
 
       expect(trackerObj.lastActiveUrl).toBe(url);
       expect(trackerObj.activeUrl).toBeNull();
@@ -354,7 +368,9 @@ describe('UrlDataObj Tests', () => {
       const url = 'http://test.com/over-interval';
       const sessionStartTime = new Date('2025-01-01T16:00:00.000Z');
       // End 10 minutes and 1 millisecond later (slightly over 10 min interval)
-      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS + 1);
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + TEN_MINUTES_MS + 1
+      );
 
       trackerObj.urlList.push({ url: url, totalTime: 5000 }); // Existing total time
       trackerObj.activeUrl = url;
@@ -365,7 +381,9 @@ describe('UrlDataObj Tests', () => {
 
       // Expect totalTime to remain unchanged
       const updatedItem = trackerObj.urlList.find((item) => item.url === url);
-      expect(updatedItem.totalTime).toBe(sessionEndTime - sessionStartTime + 5000); // totalTime + elapsedTime calculation
+      expect(updatedItem.totalTime).toBe(
+        sessionEndTime - sessionStartTime + 5000
+      ); // totalTime + elapsedTime calculation
 
       expect(trackerObj.lastActiveUrl).toBe(url);
       expect(trackerObj.activeUrl).toBeNull();
@@ -378,7 +396,9 @@ describe('UrlDataObj Tests', () => {
       const url = 'http://test.com/exact-interval';
       const sessionStartTime = new Date('2025-01-01T17:00:00.000Z');
       // End exactly 5 minutes later
-      const sessionEndTime = new Date(sessionStartTime.getTime() + FIVE_MINUTES_MS);
+      const sessionEndTime = new Date(
+        sessionStartTime.getTime() + FIVE_MINUTES_MS
+      );
       const expectedElapsedTime = FIVE_MINUTES_MS;
 
       trackerObj.urlList.push({ url: url, totalTime: 2000 }); // Existing total time
@@ -397,9 +417,6 @@ describe('UrlDataObj Tests', () => {
       expect(trackerObj.startTime).toBeNull();
     });
   });
-
-
-
 
   describe('calcTimeElapsed', () => {
     let trackerObj;

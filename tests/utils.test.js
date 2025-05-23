@@ -176,7 +176,11 @@ describe('Utils Tests', () => {
       // The smaller elapsed time is 30 minutes, which is <= 60 minutes (timeInterval)
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
-      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
+      const result = checkInterval(
+        urlData,
+        timeIntervalMilliseconds,
+        currentTime
+      );
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -196,7 +200,11 @@ describe('Utils Tests', () => {
       // 180 * 60 * 1000 > 120 * 60 * 1000 (timeInterval * 2) -> No time added
       const initialTotalTimeMs = urlData.urlList[0].totalTime; // Should be 0
 
-      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
+      const result = checkInterval(
+        urlData,
+        timeIntervalMilliseconds,
+        currentTime
+      );
 
       expect(result.urlList[0].totalTime).toBe(initialTotalTimeMs); // Total time should remain unchanged
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -216,7 +224,11 @@ describe('Utils Tests', () => {
       // 60 * 60 * 1000 <= 60 * 60 * 1000 (timeInterval) -> Add 60 minutes
       const expectedAddedTimeMs = 60 * 60 * 1000;
 
-      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
+      const result = checkInterval(
+        urlData,
+        timeIntervalMilliseconds,
+        currentTime
+      );
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -237,7 +249,11 @@ describe('Utils Tests', () => {
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
       // Exercise
-      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
+      const result = checkInterval(
+        urlData,
+        timeIntervalMilliseconds,
+        currentTime
+      );
 
       // Test / Check
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
@@ -296,7 +312,11 @@ describe('Utils Tests', () => {
       const expectedAddedTimeMs = 30 * 1000; // 30 seconds in milliseconds
 
       // Exercise
-      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
+      const result = checkInterval(
+        urlData,
+        timeIntervalMilliseconds,
+        currentTime
+      );
 
       // Test / Check
       expect(result.urlList.length).toBe(1);

@@ -297,13 +297,19 @@ class UrlDataObj {
 
     // error check logs
     if (startElapsed < 0) {
-      console.error(`currTIme: ${currentTime} startTime: ${this.startTime}`)
-      console.error(`startElapsed was negative in calc elapsed time ${startElapsed}`);
+      console.error(`currTIme: ${currentTime} startTime: ${this.startTime}`);
+      console.error(
+        `startElapsed was negative in calc elapsed time ${startElapsed}`
+      );
       startElapsed = 0;
     }
     if (lastCheckElapsed < 0) {
-      console.error(`currTIme: ${currentTime} lastCheckDate: ${this.lastCheckDate}`)
-      console.error(`lastCheckElapsed was negative in calc elapsed time ${lastCheckElapsed}`);
+      console.error(
+        `currTIme: ${currentTime} lastCheckDate: ${this.lastCheckDate}`
+      );
+      console.error(
+        `lastCheckElapsed was negative in calc elapsed time ${lastCheckElapsed}`
+      );
       lastCheckElapsed = 0;
     }
 
