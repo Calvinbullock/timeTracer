@@ -46,12 +46,14 @@
 import {
   __logger__,
   convertMillisecondsToMinutes,
+  filterDateKeys,
   formatMillisecsToHoursAndMinutes,
 } from '../utils/utils.js';
 import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
+  getAllChromeLocalStorageKeys,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
 
@@ -79,6 +81,29 @@ function setHtmlById(htmlId, htmlContent) {
     console.error(`HTML element with ID "${htmlId}" not found.`);
   }
 }
+
+// ===================================================== \\
+// ===================================================== \\
+//                WeeklySum Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+async function displayWeeklySumPage() {
+
+  // get a list of dates in storage
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let dateList = filterDateKeys(chromeKeyList);
+
+  // get data for each day
+
+  // parse the data into html tables
+
+  // build the carousel of data
+
+  // inject the data / carousel
+  setHtmlById('content-div', html);
+}
+
 
 // ===================================================== \\
 // ===================================================== \\
@@ -326,6 +351,8 @@ weeklySum.addEventListener('click', function (event) {
   event.preventDefault();
   // TODO: build page
   setHtmlById('content-div', 'Work In Progress');
+
+  displayWeeklySumPage();
 
   // set active link item
   removeActiveClassFromAll();

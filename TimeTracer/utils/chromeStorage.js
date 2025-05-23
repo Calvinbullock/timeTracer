@@ -23,6 +23,44 @@ const BLOCK_LIST_DATA_KEY = 'blockedUrlList';
 // ==================================================== \\
 
 /**
+ * Asynchronously retrieves all keys stored in the Chrome extension's local storage.
+ * This function utilizes the `chrome.storage.local` API, which is specifically designed
+ * for extensions to persist user data locally.
+ *
+ * @returns {Promise<string[]>} A Promise that resolves with an array of strings,
+ * where each string is a key found in `chrome.storage.local`.
+ * The Promise will reject if there's an error during the retrieval process,
+ * logging the error using `__logger__` and rejecting with `null`.
+ *
+ * @example
+ * // Usage in an async function:
+ * async function retrieveAndLogKeys() {
+ * try {
+ * const keys = await getAllChromeLocalStorageKeys();
+ * console.log("All local storage keys:", keys);
+ * } catch (error) {
+ * console.error("Failed to get local storage keys:", error);
+ * }
+ * }
+ * retrieveAndLogKeys();
+ */
+async function getAllChromeLocalStorageKeys() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(null, function(items) {
+      if (chrome.runtime.lastError) {
+        __logger__(
+          'Error retrieving all chrome local storage keys. Runtime Error:',
+          chrome.runtime.lastError
+        );
+        reject(null);
+        return;
+      }
+      resolve(Object.keys(items));
+    });
+  })
+}
+
+/**
  * Asynchronously removes a single item from the Chrome extension's local storage.
  *
  * This function attempts to remove the item associated with the provided key.
@@ -197,6 +235,7 @@ async function getBlockedSiteList() {
 // }
 
 export {
+  getAllChromeLocalStorageKeys,
   removeChromeLocalStorageItem,
   setSiteObjData,
   setBlockedSiteList,
