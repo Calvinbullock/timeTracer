@@ -55,17 +55,15 @@ function __logger__(msg, buffer = false) {
   }
 }
 
-
 function filterDateKeys(chromeKeyList) {
   // filter out strings that match this 2025-05-18, or 2024-10-18, etc
   const dateKeys = chromeKeyList.filter((string) => {
-    const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
-    return regex.test(string)
-  })
+    const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    return regex.test(string);
+  });
 
   return dateKeys;
 }
-
 
 /**
  * Searches an array of data objects for a specific URL and returns its index.

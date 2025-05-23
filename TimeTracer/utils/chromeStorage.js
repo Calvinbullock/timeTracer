@@ -46,7 +46,7 @@ const BLOCK_LIST_DATA_KEY = 'blockedUrlList';
  */
 async function getAllChromeLocalStorageKeys() {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get(null, function(items) {
+    chrome.storage.local.get(null, function (items) {
       if (chrome.runtime.lastError) {
         __logger__(
           'Error retrieving all chrome local storage keys. Runtime Error:',
@@ -57,7 +57,7 @@ async function getAllChromeLocalStorageKeys() {
       }
       resolve(Object.keys(items));
     });
-  })
+  });
 }
 
 /**

@@ -89,21 +89,22 @@ function setHtmlById(htmlId, htmlContent) {
 // ===================================================== \\
 
 async function displayWeeklySumPage() {
-
   // get a list of dates in storage
   const chromeKeyList = await getAllChromeLocalStorageKeys();
   let dateList = filterDateKeys(chromeKeyList);
 
   // get data for each day
+  // TODO: TODO: working here!!!
+  dateList;
 
   // parse the data into html tables
 
   // build the carousel of data
+  let html = '';
 
   // inject the data / carousel
   setHtmlById('content-div', html);
 }
-
 
 // ===================================================== \\
 // ===================================================== \\
