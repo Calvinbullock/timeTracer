@@ -106,6 +106,8 @@ function getUrlListAsTable(urlList) {
 
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
+
+    // only show items that have more then 1 minute total
     if (convertMillisecondsToMinutes(urlList[i].totalTime) > 1) {
       const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
       display += '<tr>';
