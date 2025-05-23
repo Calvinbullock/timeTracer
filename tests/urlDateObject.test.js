@@ -185,6 +185,15 @@ describe('UrlDataObj Tests', () => {
 
   describe('endSession', () => {
     let trackerObj;
+    // Define time intervals in milliseconds
+    const FIVE_MINUTES_MS = 5 * 60 * 1000;
+    const TEN_MINUTES_MS = 10 * 60 * 1000;
+    const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
+    const TWENTY_MINUTES_MS = 20 * 60 * 1000;
+    const THIRTY_MINUTES_MS = 30 * 60 * 1000;
+
+    // Use a default time interval in milliseconds for the tests
+    const DEFAULT_TIME_INTERVAL_MS = FIFTEEN_MINUTES_MS;
 
     beforeEach(() => {
       trackerObj = new UrlDataObj();
@@ -192,10 +201,12 @@ describe('UrlDataObj Tests', () => {
 
     // Test Case 1: activeUrl is null
     test('should log an error and return if activeUrl is null', () => {
+      const testCurrentDate = new Date('2025-01-01T10:00:00.000Z'); // Always pass a date
       trackerObj.activeUrl = null; // Ensure activeUrl is null
       trackerObj.startTime = null; // Ensure startTime is null
+      trackerObj.lastCheckDate = null; // Ensure lastCheckDate is null
 
-      trackerObj.endSession();
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, testCurrentDate);
 
       expect(trackerObj.urlList).toHaveLength(0); // urlList should remain unchanged
       expect(trackerObj.activeUrl).toBeNull(); // Should still be null
@@ -203,20 +214,22 @@ describe('UrlDataObj Tests', () => {
       expect(trackerObj.lastActiveUrl).toBeNull(); // Should still be null
     });
 
-    // Test Case 2: Ending session for an existing URL
-    test('should update totalTime, set lastActiveUrl, and reset activeUrl/startTime for an existing URL', () => {
+    // Test Case 2: Ending session for an existing URL when time is within interval
+    test('should update totalTime, set lastActiveUrl, and reset activeUrl/startTime for an existing URL when time is within interval', () => {
       const url = 'http://test.com/existing';
       const initialTotalTime = 1000;
       const sessionStartTime = new Date('2025-01-01T10:00:00.000Z');
-      const sessionEndTime = new Date('2025-01-01T10:00:05.000Z'); // 5 seconds later
-      const expectedElapsedTime = 5000;
+      // End time 5 minutes after start (within 15 min interval)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + FIVE_MINUTES_MS);
+      const expectedElapsedTime = sessionEndTime.getTime() - sessionStartTime.getTime(); // 5 minutes in ms
       const expectedNewTotalTime = initialTotalTime + expectedElapsedTime;
 
       trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
       trackerObj.activeUrl = url;
       trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime; // For calcTimeElapsed to work correctly
 
-      trackerObj.endSession(sessionEndTime);
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
 
       const updatedItem = trackerObj.urlList.find((item) => item.url === url);
 
@@ -226,18 +239,44 @@ describe('UrlDataObj Tests', () => {
       expect(trackerObj.startTime).toBeNull();
     });
 
-    // Test Case 3: Ending session for a new URL (not previously in urlList)
-    test('should add the activeUrl to urlList, set lastActiveUrl, and reset activeUrl/startTime for a new URL', () => {
+    // Test Case 3: Ending session for an existing URL when time is NOT within interval (factor of 2)
+    test('should NOT update totalTime if elapsed time is NOT within interval for an existing URL (factor of 2 and a bit..)', () => {
+      const url = 'http://test.com/existing-outside-factor-2';
+      const initialTotalTime = 1000;
+      const sessionStartTime = new Date('2025-01-01T10:00:00.000Z');
+      // End time 2x the DEFAULT_TIME_INTERVAL_MS after start (30 minutes after start)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + (DEFAULT_TIME_INTERVAL_MS * 2 + 1));
+
+      trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime;
+
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
+      console.log(trackerObj)
+
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
+
+      expect(updatedItem.totalTime).toBe(initialTotalTime); // totalTime should remain unchanged
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
+    });
+
+    // Test Case 4: Ending session for a new URL when time is within interval
+    test('should add the activeUrl to urlList and update time, set lastActiveUrl, and reset activeUrl/startTime for a new URL when time is within interval', () => {
       const url = 'http://test.com/new-url';
       const sessionStartTime = new Date('2025-01-01T11:00:00.000Z');
-      const sessionEndTime = new Date('2025-01-01T11:00:10.000Z'); // 10 seconds later
-      const expectedElapsedTime = 10000;
+      // End time 10 minutes after start (within 15 min interval)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS);
+      const expectedElapsedTime = sessionEndTime.getTime() - sessionStartTime.getTime(); // 10 minutes in ms
 
       trackerObj.activeUrl = url;
       trackerObj.startTime = sessionStartTime;
-      // urlList is empty initially
+      trackerObj.lastCheckDate = sessionStartTime; // For calcTimeElapsed to work correctly
+      trackerObj.urlList = []; // Ensure it's empty
 
-      trackerObj.endSession(sessionEndTime);
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
 
       const newItem = trackerObj.urlList.find((item) => item.url === url);
 
@@ -249,94 +288,118 @@ describe('UrlDataObj Tests', () => {
       expect(trackerObj.startTime).toBeNull();
     });
 
-    // Test Case 4: Elapsed time is zero (startTime === currentTime)
-    test('should correctly handle zero elapsed time for an existing URL', () => {
-      const url = 'http://test.com/zero-time';
-      const initialTotalTime = 2000;
-      const sessionTime = new Date('2025-01-01T12:00:00.000Z');
-
-      trackerObj.urlList.push({ url: url, totalTime: initialTotalTime });
-      trackerObj.activeUrl = url;
-      trackerObj.startTime = sessionTime;
-
-      trackerObj.endSession(sessionTime); // End at the same time as start
-
-      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
-
-      expect(updatedItem.totalTime).toBe(initialTotalTime); // totalTime should not change
-      expect(trackerObj.lastActiveUrl).toBe(url);
-      expect(trackerObj.activeUrl).toBeNull();
-      expect(trackerObj.startTime).toBeNull();
-    });
-
-    // Test Case 5: Elapsed time is zero for a new URL
-    test('should add a new URL with totalTime zero if elapsed time is zero', () => {
-      const url = 'http://test.com/new-zero-time';
-      const sessionTime = new Date('2025-01-01T13:00:00.000Z');
+    // Test Case 5: Ending session for a new URL when time is NOT within interval
+    test('Should add the activeUrl to urlList if elapsed time is within interval * 2 for a new URL', () => {
+      const url = 'http://test.com/new-url-added';
+      const sessionStartTime = new Date('2025-01-01T13:00:00.000Z');
+      // End time 20 minutes after start (outside 15 min interval)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + TWENTY_MINUTES_MS);
 
       trackerObj.activeUrl = url;
-      trackerObj.startTime = sessionTime;
+      trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime;
+      trackerObj.urlList = []; // Ensure it's empty
 
-      trackerObj.endSession(sessionTime); // End at the same time as start
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, sessionEndTime);
 
       const newItem = trackerObj.urlList.find((item) => item.url === url);
 
-      expect(newItem).toBeDefined();
-      expect(newItem.url).toBe(url);
-      expect(newItem.totalTime).toBe(0); // Should be added with 0 totalTime
+      expect(trackerObj.urlList).toHaveLength(1);
       expect(trackerObj.lastActiveUrl).toBe(url);
       expect(trackerObj.activeUrl).toBeNull();
       expect(trackerObj.startTime).toBeNull();
+      expect(newItem.url).toBe(url);
+      expect(newItem.totalTime).toBe(1200000);
     });
 
     // Test Case 6: Ensures lastActiveUrl is only set if activeUrl was not null
     test('should not set lastActiveUrl if activeUrl was initially null', () => {
+      const testCurrentDate = new Date('2025-01-01T10:00:00.000Z'); // Always pass a date
       trackerObj.activeUrl = null;
       trackerObj.startTime = null;
+      trackerObj.lastCheckDate = null;
       trackerObj.lastActiveUrl = 'http://previous.com'; // Some previous value
 
-      // Suppress console.error for this specific test case if it's expected behavior
-      // consoleErrorSpy.mockImplementation(() => {}); // Optional: suppress the error log for this test
-
-      trackerObj.endSession();
+      trackerObj.endSession(DEFAULT_TIME_INTERVAL_MS, testCurrentDate);
 
       expect(trackerObj.lastActiveUrl).toBe('http://previous.com'); // lastActiveUrl should remain unchanged
     });
 
-    test('should update totalTime, set activeUrl to null, startTime to null, and lastActiveUrl', () => {
-      // setup
-      const testUrl = 'test-url.com';
-      trackerObj.activeUrl = testUrl;
-      trackerObj.startTime = new Date(2024, 0, 1, 10, 0, 0);
-      trackerObj.urlList.push({ url: testUrl, totalTime: 4 });
-      const endTime = new Date(2024, 0, 1, 10, 30, 0);
-      const expectedElapsedTime = endTime - trackerObj.startTime + 4;
+    // Test Case 7: When timeInterval parameter is used correctly (custom interval in MS)
+    test('should correctly apply a custom timeInterval in milliseconds', () => {
+      const customTimeIntervalMs = THIRTY_MINUTES_MS; // 30 minutes in milliseconds
+      const url = 'http://test.com/custom-interval';
+      const sessionStartTime = new Date('2025-01-01T15:00:00.000Z');
+      // End 10 minutes later (within 30 min interval)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS);
 
-      // exercises
-      trackerObj.endSession(endTime);
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime;
 
-      // test / check
-      const targetItem = trackerObj.urlList.find(
-        (item) => item.url === testUrl
-      );
+      trackerObj.endSession(customTimeIntervalMs, sessionEndTime);
+
+      // Expect time to be added because 10 minutes is <= 30 minutes
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
+      expect(updatedItem.totalTime).toBe(sessionEndTime.getTime() - sessionStartTime.getTime());
+
+      expect(trackerObj.lastActiveUrl).toBe(url);
       expect(trackerObj.activeUrl).toBeNull();
       expect(trackerObj.startTime).toBeNull();
-      expect(trackerObj.lastActiveUrl).toBe(testUrl);
-      expect(targetItem).toBeDefined();
-      expect(targetItem.totalTime).toBe(expectedElapsedTime);
     });
 
-    test('should handle ending a session when no session is active', () => {
-      // setup
-      // exercises
-      trackerObj.endSession();
-      // test / check
-      expect(trackerObj.urlList.length).toBe(0);
+    // Test Case 8: Custom timeInterval in MS, elapsed time slightly over the interval
+    test('Item should update totalTime if elapsed time is slightly over the custom timeInterval (in MS)', () => {
+      const customTimeIntervalMs = TEN_MINUTES_MS; // 10 minutes in milliseconds
+      const url = 'http://test.com/over-interval';
+      const sessionStartTime = new Date('2025-01-01T16:00:00.000Z');
+      // End 10 minutes and 1 millisecond later (slightly over 10 min interval)
+      const sessionEndTime = new Date(sessionStartTime.getTime() + TEN_MINUTES_MS + 1);
+
+      trackerObj.urlList.push({ url: url, totalTime: 5000 }); // Existing total time
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime;
+
+      trackerObj.endSession(customTimeIntervalMs, sessionEndTime);
+
+      // Expect totalTime to remain unchanged
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
+      expect(updatedItem.totalTime).toBe(sessionEndTime - sessionStartTime + 5000); // totalTime + elapsedTime calculation
+
+      expect(trackerObj.lastActiveUrl).toBe(url);
       expect(trackerObj.activeUrl).toBeNull();
       expect(trackerObj.startTime).toBeNull();
-      expect(trackerObj.lastActiveUrl).toBeNull();
+    });
+
+    // Test Case 9: Custom timeInterval in MS, elapsed time exactly at the interval limit
+    test('should update totalTime if elapsed time is exactly at the custom timeInterval limit (in MS)', () => {
+      const customTimeIntervalMs = FIVE_MINUTES_MS; // 5 minutes in milliseconds
+      const url = 'http://test.com/exact-interval';
+      const sessionStartTime = new Date('2025-01-01T17:00:00.000Z');
+      // End exactly 5 minutes later
+      const sessionEndTime = new Date(sessionStartTime.getTime() + FIVE_MINUTES_MS);
+      const expectedElapsedTime = FIVE_MINUTES_MS;
+
+      trackerObj.urlList.push({ url: url, totalTime: 2000 }); // Existing total time
+      trackerObj.activeUrl = url;
+      trackerObj.startTime = sessionStartTime;
+      trackerObj.lastCheckDate = sessionStartTime;
+
+      trackerObj.endSession(customTimeIntervalMs, sessionEndTime);
+
+      // Expect totalTime to be updated
+      const updatedItem = trackerObj.urlList.find((item) => item.url === url);
+      expect(updatedItem.totalTime).toBe(2000 + expectedElapsedTime);
+
+      expect(trackerObj.lastActiveUrl).toBe(url);
+      expect(trackerObj.activeUrl).toBeNull();
+      expect(trackerObj.startTime).toBeNull();
     });
   });
+
+
+
 
   describe('calcTimeElapsed', () => {
     let trackerObj;

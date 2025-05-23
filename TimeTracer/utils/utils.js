@@ -213,7 +213,7 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
   } else if (timeElapsed > timeInterval * 2) {
     // no time is added here, this is invalid time path
     __logger__(
-      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep.`
+      `timeCheck was over, Elapsed = ${minutesFromMilliseconds(timeElapsed)} Minutes, likly asleep, interval ${timeInterval}.`
     );
     return false;
   } else if (timeElapsed > timeInterval) {
@@ -243,14 +243,11 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
  * between `currentTime` and both `startTime` and `lastDateCheck`.
  * - `addActiveTime(time)`: Adds the specified time (in milliseconds) to the URL's total active duration.
  * - `setLastDateCheck(date)`: Updates the `lastDateCheck` for the URL.
- * @param {number} timeInterval - The expected interval in **minutes** between checks.
+ * @param {number} timeInterval - The expected interval in **milliSeconds** between checks.
  * @param {Date} [currentTime=new Date()] - The current time used for calculations. Defaults to the current system time.
  * @returns {UrlDataObj} The updated `urlData` object.
  */
 function checkInterval(urlData, timeInterval, currentTime = new Date()) {
-  // TODO: have this be passed in as millisecs-> update tests
-  timeInterval = convertMinutesToMilliseconds(timeInterval);
-
   // return if no active url
   if (!urlData.hasActiveUrl()) {
     __logger__('timeCheck: activeUrl was null return with out change.');

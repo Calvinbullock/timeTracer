@@ -177,14 +177,14 @@ class UrlDataObj {
    * Finally, it updates the `lastActiveUrl`, clears the `activeUrl` and `startTime`
    * for this tracking object, and logs relevant status messages.
    *
-   * @param {number} timeInterval - The expected interval (in minutes) used for comparison
+   * @param {number} timeInterval - The expected interval (in milliseconds) used for comparison
    * when determining whether to add active time.
    * @param {Date} [currentTime=new Date()] - An optional Date object representing the
    * current time to use for calculations. Defaults
    * to the current timestamp if not provided.
    */
   // TODO: might be a better way to access timeInterval then passing it here
-  endSession(timeInterval, currentTime = new Date()) {
+  endSession(timeInterval, currentDate = new Date()) {
     __logger__(`Tracking exits for ${this.activeUrl}`);
 
     if (this.activeUrl == null) {
@@ -193,7 +193,7 @@ class UrlDataObj {
     }
 
     // find time elapsed, if its within timeInterval add the time
-    let timeElapsed = this.calcTimeElapsed(timeInterval, currentTime);
+    let timeElapsed = this.calcTimeElapsed(currentDate);
     if (isTimeElapsedWithinInterval(timeElapsed, timeInterval)) {
       this.addActiveTime(timeElapsed);
     }
@@ -297,11 +297,13 @@ class UrlDataObj {
 
     // error check logs
     if (startElapsed < 0) {
-      console.error('startElapsed was negative in calc elapsed time');
+      console.error(`currTIme: ${currentTime} startTime: ${this.startTime}`)
+      console.error(`startElapsed was negative in calc elapsed time ${startElapsed}`);
       startElapsed = 0;
     }
     if (lastCheckElapsed < 0) {
-      console.error('lastCheckElapsed was negative in calc elapsed time');
+      console.error(`currTIme: ${currentTime} lastCheckDate: ${this.lastCheckDate}`)
+      console.error(`lastCheckElapsed was negative in calc elapsed time ${lastCheckElapsed}`);
       lastCheckElapsed = 0;
     }
 

@@ -1,9 +1,9 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
-import { cleanUrl, __logger__, checkInterval } from '../utils/utils.js';
+import { cleanUrl, __logger__, checkInterval, minutesFromMilliseconds } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
-const TiME_CHECK_INTERVAL_MINUTES = 1;
+const TIME_CHECK_INTERVAL_MILLISEC = 1 * 60000; // minutes * milliseconds
 // TODO: change this to 2 minutes
 // TODO: this should be in mili secs
 
@@ -35,7 +35,7 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
     );
   }
 
-  siteDataObj.endSession(TiME_CHECK_INTERVAL_MINUTES);
+  siteDataObj.endSession(TIME_CHECK_INTERVAL_MILLISEC);
   if (!stopTracking) {
     siteDataObj.startSession(newActiveUrl);
   }
@@ -74,7 +74,7 @@ function tabEnterOrChangeAction(activeUrl, logMsg) {
 async function checkIntervalWraper() {
   __logger__('Alarm fired.');
   let urlData = await getSiteObjData();
-  urlData = checkInterval(urlData, TiME_CHECK_INTERVAL_MINUTES);
+  urlData = checkInterval(urlData, TIME_CHECK_INTERVAL_MILLISEC);
   setSiteObjData(urlData);
 }
 
@@ -83,14 +83,16 @@ async function checkIntervalWraper() {
  * This alarm will fire periodically at the specified interval.
  *
  * @param {string} alarmName - The unique name for the alarm.
- * @param {number} alarmInterval - The interval in minutes after which the alarm should repeat.
+ * @param {number} alarmIntervalMilliSec - The interval in milliseconds after which the alarm should repeat.
  */
-function createRepeatingAlarm(alarmName, alarmInterval) {
+function createRepeatingAlarm(alarmName, alarmIntervalMilliSec) {
+  const alarmIntervalMin = minutesFromMilliseconds(alarmIntervalMilliSec);
+
   chrome.alarms.create(alarmName, {
-    periodInMinutes: alarmInterval,
+    periodInMinutes: alarmIntervalMin,
   });
   __logger__(
-    `Alarm '${alarmName}' created to fire every ${alarmInterval} minutes.`
+    `Alarm '${alarmName}' created to fire every ${alarmIntervalMin} minutes.`
   );
 }
 
@@ -113,11 +115,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Create the alarm when the service worker starts or when the extension is installed/updated
 chrome.runtime.onStartup.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TiME_CHECK_INTERVAL_MINUTES);
+  createRepeatingAlarm(TIME_CHECK_ALARM, TIME_CHECK_INTERVAL_MILLISEC);
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TiME_CHECK_INTERVAL_MINUTES);
+  createRepeatingAlarm(TIME_CHECK_ALARM, TIME_CHECK_INTERVAL_MILLISEC);
 });
 
 // ===================================================== \\

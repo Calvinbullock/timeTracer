@@ -155,7 +155,7 @@ describe('Utils Tests', () => {
 
   describe('checkInterval', () => {
     let urlData;
-    let timeIntervalMinutes = 60; // Represents 60 minutes for the interval
+    let timeIntervalMilliseconds = 60 * 60 * 1000; // Represents 60 minutes for the interval, converted to milliseconds
 
     beforeEach(() => {
       // Initialize a fresh UrlDataObj before each test
@@ -167,8 +167,8 @@ describe('Utils Tests', () => {
 
     test('should add exact timeElapsed if it is less than or equal to timeInterval', () => {
       const currentTime = new Date('2025-01-01T10:30:00.000Z');
-      const startTime = new Date('2025-01-01T10:00:00.000Z'); // 30 mins elapsed
-      const lastCheckTime = new Date('2025-01-01T09:50:00.000Z'); // 40 mins elapsed
+      const startTime = new Date('2025-01-01T10:00:00.000Z'); // 30 minutes elapsed
+      const lastCheckTime = new Date('2025-01-01T09:50:00.000Z'); // 40 minutes elapsed
 
       urlData.startTime = startTime;
       urlData.lastDateCheck = lastCheckTime;
@@ -176,7 +176,7 @@ describe('Utils Tests', () => {
       // The smaller elapsed time is 30 minutes, which is <= 60 minutes (timeInterval)
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
-      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -186,17 +186,17 @@ describe('Utils Tests', () => {
 
     test('should not add time if timeElapsed is greater than timeInterval * 2', () => {
       const currentTime = new Date('2025-01-01T10:30:00.000Z');
-      const startTime = new Date('2025-01-01T07:30:00.000Z'); // 180 mins elapsed
-      const lastCheckTime = new Date('2025-01-01T07:00:00.000Z'); // 210 mins elapsed
+      const startTime = new Date('2025-01-01T07:30:00.000Z'); // 180 minutes elapsed
+      const lastCheckTime = new Date('2025-01-01T07:00:00.000Z'); // 210 minutes elapsed
 
       urlData.startTime = startTime;
       urlData.lastDateCheck = lastCheckTime;
 
       // The smaller elapsed time is 180 minutes.
-      // 180 > 120 (timeInterval * 2) -> No time added
+      // 180 * 60 * 1000 > 120 * 60 * 1000 (timeInterval * 2) -> No time added
       const initialTotalTimeMs = urlData.urlList[0].totalTime; // Should be 0
 
-      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(initialTotalTimeMs); // Total time should remain unchanged
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -206,17 +206,17 @@ describe('Utils Tests', () => {
 
     test('should handle timeElapsed being exactly timeInterval', () => {
       const currentTime = new Date('2025-01-01T10:00:00.000Z');
-      const startTime = new Date('2025-01-01T09:00:00.000Z'); // 60 mins elapsed
-      const lastCheckTime = new Date('2025-01-01T08:50:00.000Z'); // 70 mins elapsed
+      const startTime = new Date('2025-01-01T09:00:00.000Z'); // 60 minutes elapsed
+      const lastCheckTime = new Date('2025-01-01T08:50:00.000Z'); // 70 minutes elapsed
 
       urlData.startTime = startTime;
       urlData.lastDateCheck = lastCheckTime;
 
       // The smaller elapsed time is 60 minutes.
-      // 60 <= 60 (timeInterval) -> Add 60 minutes
+      // 60 * 60 * 1000 <= 60 * 60 * 1000 (timeInterval) -> Add 60 minutes
       const expectedAddedTimeMs = 60 * 60 * 1000;
 
-      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
 
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
       expect(result.lastDateCheck.toISOString()).toBe(
@@ -227,17 +227,17 @@ describe('Utils Tests', () => {
     test('should correctly use the smaller of the two elapsed times', () => {
       // Setup
       const currentTime = new Date('2025-01-01T10:00:00.000Z');
-      const startTime = new Date('2025-01-01T08:00:00.000Z'); // 120 mins elapsed
-      const lastCheckTime = new Date('2025-01-01T09:30:00.000Z'); // 30 mins elapsed
+      const startTime = new Date('2025-01-01T08:00:00.000Z'); // 120 minutes elapsed
+      const lastCheckTime = new Date('2025-01-01T09:30:00.000Z'); // 30 minutes elapsed
 
       urlData.startTime = startTime;
       urlData.lastDateCheck = lastCheckTime;
 
-      // Math.min(120, 30) = 30 minutes. 30 <= 60 (timeInterval).
+      // Math.min(120 * 60 * 1000, 30 * 60 * 1000) = 30 minutes. 30 * 60 * 1000 <= 60 * 60 * 1000 (timeInterval).
       const expectedAddedTimeMs = 30 * 60 * 1000;
 
       // Exercise
-      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
 
       // Test / Check
       expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
@@ -253,7 +253,7 @@ describe('Utils Tests', () => {
       urlData.startTime = new Date('2025-01-01T09:55:00.000Z'); // Small elapsed time
 
       // Case 1: timeElapsed <= timeInterval
-      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      checkInterval(urlData, timeIntervalMilliseconds, currentTime);
       expect(urlData.lastDateCheck.toISOString()).toBe(
         currentTime.toISOString()
       );
@@ -263,7 +263,7 @@ describe('Utils Tests', () => {
       urlData.startTime = new Date('2025-01-01T08:00:00.000Z'); // Medium elapsed time
 
       // Case 2: timeInterval < timeElapsed <= timeInterval * 2
-      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      checkInterval(urlData, timeIntervalMilliseconds, currentTime);
       expect(urlData.lastDateCheck.toISOString()).toBe(
         currentTime.toISOString()
       );
@@ -273,7 +273,7 @@ describe('Utils Tests', () => {
       urlData.startTime = new Date('2025-01-01T07:00:00.000Z'); // Large elapsed time
 
       // Case 3: timeElapsed > timeInterval * 2
-      checkInterval(urlData, timeIntervalMinutes, currentTime);
+      checkInterval(urlData, timeIntervalMilliseconds, currentTime);
       expect(urlData.lastDateCheck.toISOString()).toBe(
         currentTime.toISOString()
       );
@@ -282,26 +282,26 @@ describe('Utils Tests', () => {
     // --- Edge Case: No entry in urlList for activeUrl initially ---
     test('should handle urlList not having the activeUrl initially (add new entry)', () => {
       // setup
-      timeIntervalMinutes = 2.0;
+      timeIntervalMilliseconds = 2.0 * 60 * 1000; // 2 minutes in milliseconds
       urlData = new UrlDataObj(); // Reset to an empty UrlDataObj
       urlData.activeUrl = 'https://example.com/new-page'; // A new active URL
 
       const currentTime = new Date('2025-05-21T10:30:00.000Z');
-      const startTime = new Date('2025-05-21T10:29:30.000Z'); // 0.5 mins elapsed
-      const lastCheckTime = new Date('2025-05-21T10:29:00.000Z'); // 1 min elapsed
+      const startTime = new Date('2025-05-21T10:29:30.000Z'); // 30 seconds elapsed
+      const lastCheckTime = new Date('2025-05-21T10:29:00.000Z'); // 1 minute elapsed
 
       urlData.startTime = startTime;
       urlData.lastDateCheck = lastCheckTime;
 
-      const expectedAddedTimeMinutes = 30000; // milli-sec -> 0.5 minutes
+      const expectedAddedTimeMs = 30 * 1000; // 30 seconds in milliseconds
 
       // Exercise
-      const result = checkInterval(urlData, timeIntervalMinutes, currentTime);
+      const result = checkInterval(urlData, timeIntervalMilliseconds, currentTime);
 
       // Test / Check
       expect(result.urlList.length).toBe(1);
       expect(result.urlList[0].url).toBe('https://example.com/new-page');
-      expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMinutes);
+      expect(result.urlList[0].totalTime).toBe(expectedAddedTimeMs);
       expect(result.lastDateCheck.toISOString()).toBe(
         currentTime.toISOString()
       );
