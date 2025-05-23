@@ -12,14 +12,14 @@
 //    - move calcTime function / tests (??)
 //    - isTimeElapsedWithinInterval needs tests (and re-design?)
 
-// TODO: Release - 2
+// TODO: Release - 3
 // - block list - (site blocker dialog)
 //      - DONE - add
 //      - DONE - remove
 //      - ---- - redirect
 // - storage - clear data button
 //
-// TODO: Release - 3
+// TODO: Release - 4
 // - data continuity - clean up old data (Date based)
 // - build DoNotTrack ui page
 // - add a total time count?
