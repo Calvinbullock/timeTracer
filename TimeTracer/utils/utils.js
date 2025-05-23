@@ -318,7 +318,7 @@ function sortByUrlUsageTime(urlList) {
       return 1;
     }
     if (a.totalTime > b.totalTime) {
-      return -1
+      return -1;
     }
     return 0;
   });

@@ -141,29 +141,30 @@ function createWeeklySumContainer(dataList) {
   let slides = '';
 
   // create each carousel-slide
-  dataList.forEach(element => {
-    let slide = ''
-    slide += '   <div class="carousel-slide">'
-    slide += `     <h2>${element.dateKey}</h2>`
+  dataList.forEach((element) => {
+    let slide = '';
+    slide += '   <div class="carousel-slide">';
+    slide += `     <h2>${element.dateKey}</h2>`;
     slide += getUrlListAsTable(element.data);
-    slide += '   </div>'
+    slide += '   </div>';
 
     slides += slide;
   });
 
   // create the main carousel-container
   let container = '';
-  container += '<div class="carousel-container">'
-  container += ' <div class="carousel-wrapper">'
-  container += ' <button class="carousel-button prev" aria-label="Previous slide">&#10094;</button>'
-  container += ' <button class="carousel-button next" aria-label="Next slide">&#10095;</button>'
+  container += '<div class="carousel-container">';
+  container += ' <div class="carousel-wrapper">';
+  container +=
+    ' <button class="carousel-button prev" aria-label="Previous slide">&#10094;</button>';
+  container +=
+    ' <button class="carousel-button next" aria-label="Next slide">&#10095;</button>';
   container += slides;
-  container += ' </div>'
-  container += '</div>'
+  container += ' </div>';
+  container += '</div>';
 
   return container;
 }
-
 
 /**
  * Asynchronously retrieves and displays weekly summary data of URL usage.
@@ -191,7 +192,7 @@ async function displayWeeklySumPage() {
       dateKey: key,
       data: urlList,
     };
-  })
+  });
 
   // resolve each promise and add the dateKey / data obj to the list
   const dataList = await Promise.all(dataPromises);

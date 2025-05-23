@@ -1,6 +1,3 @@
-
-
-
 // BUG: this needs to check that all this is loaded before looking for ti in the dom
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentIndex = 0;
   const totalSlides = carouselSlides.length;
-  const slideWidth = carouselSlides[0].clientWidth; // Get the width of a single slide
+  let slideWidth = carouselSlides[0].clientWidth; // Get the width of a single slide
 
   // Function to update the carousel position
   function updateCarousel() {
