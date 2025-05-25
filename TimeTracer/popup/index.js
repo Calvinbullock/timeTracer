@@ -396,7 +396,9 @@ async function displayYesterdaysPage() {
 
   // get yesterdays data
   const urlObj = new UrlDataObj();
-  const yesterdaysData = urlObj.fromJSONString(await getChromeLocalDataByKey(yesterdaysDateKey));
+  const yesterdaysData = urlObj.fromJSONString(
+    await getChromeLocalDataByKey(yesterdaysDateKey)
+  );
 
   let html = '';
 
