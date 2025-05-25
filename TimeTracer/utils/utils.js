@@ -9,6 +9,12 @@
  * @date Date of creation: April, 2025
  */
 
+// ===================================================== \\
+// ===================================================== \\
+//                        Start Utils                    \\
+// ===================================================== \\
+// ===================================================== \\
+
 /**
  * Formats a given date and time into a string with the format "YYYY/MM/DD HH:MM:SS".
  * If no date is provided, the current date and time will be used.
@@ -47,6 +53,40 @@ function __logger__(msg, buffer = false) {
   } else {
     console.log(`${timeStamp} - ${msg}`);
   }
+}
+
+/**
+ * Filters a list of strings to return only those that match the 'YYYY-MM-DD' date format.
+ *
+ * This function uses a regular expression to identify strings that strictly adhere to
+ * the 4-digit year, 2-digit month (01-12), and 2-digit day (01-31) pattern, separated by hyphens.
+ * It does not validate if the extracted date is a mathematically valid calendar date
+ * (e.g., '2023-02-30' would match the format even though February doesn't have 30 days).
+ *
+ * @param {string[]} chromeKeyList An array of strings, typically representing keys
+ * retrieved from Chrome's local storage or similar lists.
+ * @returns {string[]} A new array containing only the strings from the input list
+ * that match the 'YYYY-MM-DD' date format. If no matches are found,
+ * an empty array is returned.
+ *
+ * @example
+ * const keys = ['2025-05-18', 'userName', '2024-10-01', 'item_id_123', '1999-12-31'];
+ * const dateKeys = filterDateKeys(keys);
+ * // dateKeys will be ['2025-05-18', '2024-10-01', '1999-12-31']
+ *
+ * @example
+ * const noDateKeys = ['apple', 'banana', 'orange'];
+ * const result = filterDateKeys(noDateKeys);
+ * // result will be []
+ */
+function filterDateKeys(chromeKeyList) {
+  // filter out strings that match this 2025-05-18, or 2024-10-18, etc
+  const dateKeys = chromeKeyList.filter((string) => {
+    const regex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    return regex.test(string);
+  });
+
+  return dateKeys;
 }
 
 /**
@@ -220,7 +260,9 @@ function isTimeElapsedWithinInterval(timeElapsed, timeInterval) {
     );
     return true;
   } else {
-    console.error('timeCheck did not add time, fell into final else.');
+    console.error(
+      `timeCheck did not add time, fell into final else. Elapsed = ${convertMillisecondsToMinutes(timeElapsed)} Minutes. Interval = ${timeInterval}`
+    );
     return false;
   }
 }
@@ -262,7 +304,29 @@ function checkInterval(urlData, timeInterval, currentTime = new Date()) {
   return urlData;
 }
 
+/**
+ * Sorts a list of URL data objects by their total usage time in descending order.
+ *
+ * @param {Array<object>} urlList - An array of URL objects. Each object
+ * is expected to have a 'totalTime' property (e.g., `{ url: "example.com", totalTime: 120 }`).
+ * @returns {Array<object>} The `urlList` array, sorted in-place, with objects
+ * ordered from highest 'totalTime' to lowest.
+ */
+function sortByUrlUsageTime(urlList) {
+  return urlList.sort((a, b) => {
+    // Compare the totalTime property of the two objects
+    if (a.totalTime < b.totalTime) {
+      return 1;
+    }
+    if (a.totalTime > b.totalTime) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
 export {
+  filterDateKeys,
   formatDateTime,
   __logger__,
   searchDataUrls,
@@ -273,4 +337,5 @@ export {
   formatMillisecsToHoursAndMinutes,
   checkInterval,
   isTimeElapsedWithinInterval,
+  sortByUrlUsageTime,
 };
