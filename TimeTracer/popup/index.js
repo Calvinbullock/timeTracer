@@ -45,6 +45,7 @@ import {
   convertMillisecondsToMinutes,
   filterDateKeys,
   formatMillisecsToHoursAndMinutes,
+  getDateKey,
   sortByUrlUsageTime,
 } from '../utils/utils.js';
 import {
@@ -124,46 +125,6 @@ function getUrlListAsTable(urlList) {
 // ===================================================== \\
 
 /**
- * Creates an HTML string representing a carousel container populated with weekly summary data.
- * Each slide in the carousel corresponds to a date key and displays a table of URL usage for that day.
- *
- * @param {Array<object>} dataList - An array of objects, where each object represents a day's data.
- * Each object should have the following structure:
- * - `dateKey`: {string} The date string (e.g., "2023-10-27") for the slide's heading.
- * - `data`: {Array<object>} An array of URL data objects for that day,
- * which will be used by `getUrlListAsTable` to generate the table content.
- * @returns {string} A complete HTML string for the carousel container, including slides and navigation buttons.
- */
-function createWeeklySumContainer(dataList) {
-  let slides = '';
-
-  // create each carousel-slide
-  dataList.forEach((element) => {
-    let slide = '';
-    slide += '   <div class="carousel-slide">';
-    slide += `     <h2>${element.dateKey}</h2>`;
-    slide += getUrlListAsTable(element.data);
-    slide += '   </div>';
-
-    slides += slide;
-  });
-
-  // create the main carousel-container
-  let container = '';
-  container += '<div class="carousel-container">';
-  container += ' <div class="carousel-wrapper">';
-  container +=
-    ' <button class="carousel-button prev" aria-label="Previous slide">&#10094;</button>';
-  container +=
-    ' <button class="carousel-button next" aria-label="Next slide">&#10095;</button>';
-  container += slides;
-  container += ' </div>';
-  container += '</div>';
-
-  return container;
-}
-
-/**
  * Asynchronously retrieves and displays weekly summary data of URL usage.
  * parse it into html and injects that html into the proper page.
  *
@@ -182,7 +143,6 @@ async function displayWeeklySumPage() {
   const dataPromises = dateKeyList.map(async (key) => {
     const urlObj = new UrlDataObj();
     const urlData = urlObj.fromJSONString(await getChromeLocalDataByKey(key));
-    let urlList = sortByUrlUsageTime(urlData.urlList);
 
     // return the obj that we want to add to dataList
     return {
@@ -194,43 +154,14 @@ async function displayWeeklySumPage() {
   // resolve each promise and add the dateKey / data obj to the list
   const dataList = await Promise.all(dataPromises);
 
+  // dateKeyList.sort();
+  //let urlList = sortByUrlUsageTime(urlData.urlList);
+
   // build the carousel of data
   let carousel = createWeeklySumContainer(dataList);
 
   // inject the data / carousel
   setHtmlById('content-div', carousel);
-}
-
-// ===================================================== \\
-// ===================================================== \\
-//                TimeTracking Page JS
-// ===================================================== \\
-// ===================================================== \\
-
-/**
- * Asynchronously retrieves website tracking data and displays it in an HTML table
- * within the element having the ID 'content-div'.
- * It fetches the data using 'getSiteObjData', formats it into an HTML table using
- * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
- *
- * @async
- * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
- */
-async function dispayUrlTimePage() {
-  // get the data on display (live update???)
-  let data = await getSiteObjData();
-
-  // update the data for display (this data is never re-stored to local - non persistent )
-  data.endSession();
-
-  // sort by highest usage time
-  let sortedUrlList = sortByUrlUsageTime(data.urlList);
-
-  // format the data
-  let html = getUrlListAsTable(sortedUrlList);
-
-  // inject the data
-  setHtmlById('content-div', html);
 }
 
 // ===================================================== \\
@@ -455,9 +386,8 @@ async function dispayUrlTimePage() {
 // ===================================================== \\
 
 const timeSpentLink = document.getElementById('timeSpentLink');
-const weeklySum = document.getElementById('weeklySum');
-const doNotTrackLink = document.getElementById('doNotTrackLink');
-const blockListkLink = document.getElementById('blockListLink');
+const yesterday = document.getElementById('yesterday');
+const weekAvg = document.getElementById('weekAvg');
 const menuLinks = document.querySelectorAll('.menu-link');
 
 // Function to remove 'active' from all menu links
@@ -474,16 +404,36 @@ timeSpentLink.addEventListener('click', function (event) {
   this.classList.add('active');
 });
 
-weeklySum.addEventListener('click', function (event) {
+yesterday.addEventListener('click', function (event) {
   event.preventDefault();
+  displayYesterdaysPage();
 
-  // BUG: just need to get carousel JS script to work
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
+});
+
+weekAvg.addEventListener('click', function (event) {
+  event.preventDefault();
   displayWeeklySumPage();
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
 });
+
+// first function that is called on enter
+dispayUrlTimePage();
+
+// ======================================== \\
+// ======================================== \\
+//           __THIS IS FOR LATER__          \\
+// ======================================== \\
+// ======================================== \\
+/*
+
+const doNotTrackLink = document.getElementById('doNotTrackLink');
+const blockListkLink = document.getElementById('blockListLink');
 
 doNotTrackLink.addEventListener('click', function (event) {
   event.preventDefault();
@@ -506,5 +456,4 @@ blockListkLink.addEventListener('click', function (event) {
   this.classList.add('active');
 });
 
-// first function that is called on enter
-dispayUrlTimePage();
+*/
