@@ -374,6 +374,80 @@ document.addEventListener('click', (event) => {
 
 // ===================================================== \\
 // ===================================================== \\
+//                Yesterday Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Fetches, processes, and displays yesterday's Browse data.
+ * It retrieves the date key for yesterday, then uses it to fetch stored URL data.
+ * If data is found, it sorts the URLs by usage time and formats them into an HTML table.
+ * If no data is found, a "No data" message is displayed. Finally, the generated HTML
+ * is injected into the 'content-div' element on the page.
+ * @async
+ * @returns {Promise<void>} A promise that resolves when the data has been displayed.
+ */
+async function displayYesterdaysPage() {
+  // get yesterdays date key
+  const today = new Date();
+  let yesterdaysDate = new Date();
+  yesterdaysDate.setDate(today.getDate() - 1);
+  const yesterdaysDateKey = getDateKey(yesterdaysDate);
+
+  // get yesterdays data
+  const urlObj = new UrlDataObj();
+  const yesterdaysData = urlObj.fromJSONString(await getChromeLocalDataByKey(yesterdaysDateKey));
+
+  let html = '';
+
+  // check if the data was found
+  if (yesterdaysData) {
+    // sort by highest usage time
+    let sortedUrlList = sortByUrlUsageTime(yesterdaysData.urlList);
+    // format the data
+    html = getUrlListAsTable(sortedUrlList);
+  } else {
+    html = 'No data for yesterday found';
+  }
+
+  // inject the data
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//             TimeTracking (today) Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Asynchronously retrieves website tracking data and displays it in an HTML table
+ * within the element having the ID 'content-div'.
+ * It fetches the data using 'getSiteObjData', formats it into an HTML table using
+ * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
+ *
+ * @async
+ * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
+ */
+async function dispayUrlTimePage() {
+  // get the data on display (live update???)
+  let data = await getSiteObjData();
+
+  // update the data for display (this data is never re-stored to local - non persistent )
+  data.endSession();
+
+  // sort by highest usage time
+  let sortedUrlList = sortByUrlUsageTime(data.urlList);
+
+  // format the data
+  let html = getUrlListAsTable(sortedUrlList);
+
+  // inject the data
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
 //                  Nav Script / Listeners
 // ===================================================== \\
 // ===================================================== \\
