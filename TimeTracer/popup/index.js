@@ -42,6 +42,8 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   __logger__,
+  calcAverages,
+  combineAndSumTimesWithOccurrences,
   convertMillisecondsToMinutes,
   filterDateKeys,
   formatMillisecsToHoursAndMinutes,
@@ -83,15 +85,20 @@ function setHtmlById(htmlId, htmlContent) {
 }
 
 /**
- * Generates an HTML table string from an array of URL objects.
- * The table includes columns for an example index, the site URL, and the time spent (in hours).
- * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
+ * Generates an HTML table string from a list of URL objects, displaying usage data.
+ * The table includes columns for the entry number, the site URL, and the time spent.
+ * Only URLs with a total time greater than 1 minute are included in the table.
+ * The table display is limited to a maximum length defined by `MAX_URL_DISPLAY_LIST_LENGTH`.
  *
- * @param {Array<object>} urlList - An array of objects, where each object contains
- * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
- * @returns {string} - An HTML string representing a table displaying the URL data.
+ * @param {Array<object>} urlList - An array of objects, where each object is expected to have
+ * a 'url' (string) and a property identified by the 'key' parameter,
+ * representing time in milliseconds.
+ * @param {string} [key='totalTime'] - The name of the property in each URL object that holds
+ * the time in milliseconds. Defaults to 'totalTime'.
+ * @returns {string} - An HTML string representing a table displaying the filtered and formatted URL data.
  */
-function getUrlListAsTable(urlList) {
+// TODO: is this more clear if I remove the default (change every default call)?
+function getUrlListAsTable(urlList, key = 'totalTime') {
   let display = '<table>';
   display +=
     '<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>';
@@ -103,12 +110,12 @@ function getUrlListAsTable(urlList) {
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
     // only show items that have more then 1 minute total
-    if (convertMillisecondsToMinutes(urlList[i].totalTime) > 1) {
-      const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
+    if (convertMillisecondsToMinutes(urlList[i][key]) > 1) {
+      const time = formatMillisecsToHoursAndMinutes(urlList[i][key]);
       display += '<tr>';
       display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
       display += `<td>${urlList[i].url}</td>`;
-      display += `<td>${totalTime}</td>`;
+      display += `<td>${time}</td>`;
       display += '</tr>';
     }
   }
@@ -116,52 +123,6 @@ function getUrlListAsTable(urlList) {
   display += '</tbody>';
   display += '</table>';
   return display;
-}
-
-// ===================================================== \\
-// ===================================================== \\
-//                WeeklySum Page JS
-// ===================================================== \\
-// ===================================================== \\
-
-/**
- * Asynchronously retrieves and displays weekly summary data of URL usage.
- * parse it into html and injects that html into the proper page.
- *
- * @async
- * @function displayWeeklySumPage
- * @returns {Promise<void>} A promise that resolves when the page content has been updated.
- */
-// TODO: have this or a part or it calc the total time for each day and
-//    graph it for at a glance? --- OR just have total time shown each day
-async function displayWeeklySumPage() {
-  // get a list of dates in storage
-  const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateKeyList = filterDateKeys(chromeKeyList);
-
-  // map each key data pair to a promise
-  const dataPromises = dateKeyList.map(async (key) => {
-    const urlObj = new UrlDataObj();
-    const urlData = urlObj.fromJSONString(await getChromeLocalDataByKey(key));
-
-    // return the obj that we want to add to dataList
-    return {
-      dateKey: key,
-      data: urlList,
-    };
-  });
-
-  // resolve each promise and add the dateKey / data obj to the list
-  const dataList = await Promise.all(dataPromises);
-
-  // dateKeyList.sort();
-  //let urlList = sortByUrlUsageTime(urlData.urlList);
-
-  // build the carousel of data
-  let carousel = createWeeklySumContainer(dataList);
-
-  // inject the data / carousel
-  setHtmlById('content-div', carousel);
 }
 
 // ===================================================== \\
@@ -305,6 +266,58 @@ document.addEventListener('click', (event) => {
 
 // ===================================================== \\
 // ===================================================== \\
+//                WeeklySum Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+// TODO: func comment / clean up func
+async function displayWeeklyAvgPage() {
+  // get a list of dates in storage
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let dateKeyList = filterDateKeys(chromeKeyList);
+  dateKeyList.sort();
+
+  // check today's date is at the top
+  const todaysDateKey = getDateKey(); // default is today's key
+  if (dateKeyList[0] !== todaysDateKey) {
+    __logger__('weeklyAvg - Todays date was not in the right place.');
+  }
+
+  // get last 7 days or up to dateKeyList length if shorter
+  let itLength = Math.min(dateKeyList.length, 7);
+  let dataList = [];
+
+  // get the data for each key up to itLength
+  for (let index = 0; index < itLength; index++) {
+    const key = dateKeyList[index];
+
+    const urlObj = new UrlDataObj();
+    const promise = await getChromeLocalDataByKey(key);
+    dataList.push(urlObj.fromJSONString(promise));
+  }
+
+  // resolve promises and grab only what we need (urlList)
+  dataList = await Promise.all(dataList);
+  dataList = dataList.map((item) => {
+    return item.urlList;
+  });
+
+  dataList = combineAndSumTimesWithOccurrences(dataList);
+  dataList = calcAverages(dataList);
+
+  // sort: highest avg time at top
+  dataList.sort((a, b) => {
+    return b.avg - a.avg;
+  });
+
+  let html = getUrlListAsTable(dataList, 'avg');
+
+  // inject the data / carousel
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
 //                Yesterday Page JS
 // ===================================================== \\
 // ===================================================== \\
@@ -415,7 +428,7 @@ yesterday.addEventListener('click', function (event) {
 
 weekAvg.addEventListener('click', function (event) {
   event.preventDefault();
-  displayWeeklySumPage();
+  displayWeeklyAvgPage();
 
   // set active link item
   removeActiveClassFromAll();

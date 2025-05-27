@@ -325,6 +325,79 @@ function sortByUrlUsageTime(urlList) {
   });
 }
 
+/**
+ * Consolidates URL usage data from an array of arrays, summing total times
+ * and counting occurrences for each unique URL, then sorts the result by total time.
+ *
+ * @param {Array<Array<{url: string, totalTime: number}>>} arrays - An array where each element
+ * is another array containing objects with 'url' (string) and 'totalTime' (number).
+ * @returns {Array<{url: string, totalTime: number, occurrences: number}>} An array of
+ * objects, each representing a unique URL with its combined 'totalTime' and 'occurrences'
+ * across all input arrays.
+ */
+function combineAndSumTimesWithOccurrences(arrays) {
+  // The value associated with each URL will be an object: { totalTime: number, count: number }
+  const combinedData = new Map();
+
+  arrays.forEach((arr) => {
+    arr.forEach((obj) => {
+      const url = obj.url;
+      const totalTime = obj.totalTime;
+
+      if (combinedData.has(url)) {
+        // If URL already exists, update totalTime and increment count
+        const data = combinedData.get(url);
+        data.totalTime += totalTime;
+        data.occurrences += 1;
+      } else {
+        // If URL is new, initialize with current totalTime and count of 1
+        combinedData.set(url, { totalTime: totalTime, occurrences: 1 });
+      }
+    });
+  });
+
+  // Convert Map back to an array of objects
+  const resultArray = Array.from(combinedData.entries()).map(([url, data]) => ({
+    url: url,
+    totalTime: data.totalTime,
+    occurrences: data.occurrences,
+  }));
+
+  return resultArray;
+}
+
+/**
+ * Calculates the average time spent per occurrence for each URL in a given list.
+ * The average is computed as `totalTime / occurrences`.
+ *
+ * @param {Array<{url: string, totalTime: number, occurrences: number}>} dataArray - An array of
+ * URL objects, where each object has a 'url' (string), 'totalTime' (number), and 'occurrences' (number).
+ * @returns {Array<{url: string, avg: number}>} A new array of objects, each containing the 'url'
+ * and its calculated 'avg' (average time). If 'occurrences' is 0, 'avg' will be 0 to prevent
+ * division by zero errors.
+ */
+function calcAverages(dataArray) {
+  let avgArray = [];
+
+  dataArray.forEach((element) => {
+    let occurrences = element.occurrences;
+    let totalTime = element.totalTime;
+    let avg = 0;
+
+    // ensure no divide by zero
+    if (occurrences > 0) {
+      avg = totalTime / occurrences;
+    }
+
+    avgArray.push({
+      url: element.url,
+      avg: avg,
+    });
+  });
+
+  return avgArray;
+}
+
 export {
   filterDateKeys,
   formatDateTime,
@@ -338,4 +411,6 @@ export {
   checkInterval,
   isTimeElapsedWithinInterval,
   sortByUrlUsageTime,
+  combineAndSumTimesWithOccurrences,
+  calcAverages,
 };
