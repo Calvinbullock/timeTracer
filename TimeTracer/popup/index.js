@@ -310,7 +310,7 @@ async function displayWeeklyAvgPage() {
     return b.avg - a.avg;
   });
 
-  // inject the data 
+  // inject the data
   let html = getUrlListAsTable(dataList, 'avg');
   setHtmlById('content-div', html);
 }
