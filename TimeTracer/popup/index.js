@@ -93,12 +93,12 @@ function setHtmlById(htmlId, htmlContent) {
  * @param {Array<object>} urlList - An array of objects, where each object is expected to have
  * a 'url' (string) and a property identified by the 'key' parameter,
  * representing time in milliseconds.
- * @param {string} [key='totalTime'] - The name of the property in each URL object that holds
- * the time in milliseconds. Defaults to 'totalTime'.
+ * @param {string} [key] - The name of the property in each URL object that holds
+ * the time in milliseconds.
  * @returns {string} - An HTML string representing a table displaying the filtered and formatted URL data.
  */
 // TODO: is this more clear if I remove the default (change every default call)?
-function getUrlListAsTable(urlList, key = 'totalTime') {
+function getUrlListAsTable(urlList, key) {
   let display = '<table>';
   display +=
     '<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>';
@@ -350,7 +350,7 @@ async function displayYesterdaysPage() {
     // sort by highest usage time
     let sortedUrlList = sortByUrlUsageTime(yesterdaysData.urlList);
     // format the data
-    html = getUrlListAsTable(sortedUrlList);
+    html = getUrlListAsTable(sortedUrlList, 'totalTime');
   } else {
     html = 'No data for yesterday found';
   }
@@ -385,7 +385,7 @@ async function dispayUrlTimePage() {
   let sortedUrlList = sortByUrlUsageTime(data.urlList);
 
   // format the data
-  let html = getUrlListAsTable(sortedUrlList);
+  let html = getUrlListAsTable(sortedUrlList, 'totalTime');
 
   // inject the data
   setHtmlById('content-div', html);
