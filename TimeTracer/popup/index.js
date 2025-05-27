@@ -97,7 +97,6 @@ function setHtmlById(htmlId, htmlContent) {
  * the time in milliseconds.
  * @returns {string} - An HTML string representing a table displaying the filtered and formatted URL data.
  */
-// TODO: is this more clear if I remove the default (change every default call)?
 function getUrlListAsTable(urlList, key) {
   let display = '<table>';
   display +=
