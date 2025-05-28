@@ -28,16 +28,11 @@
 
 // TODO: - Future..
 // - MAINTENANCE -- see if there is a way to easily test extension performance impact
-// - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
 // - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
 //
 // - FEATURE -- add a button to clear / reset all local data (check the chrome API)
 // - FEATURE -- add % of total time spent on each site (later)
-// - FEATURE -- get the data on display (live update???)
 // - FEATURE -- allow pausing of tracking
-// - FEATURE -- store dates in a obj and use dates as the key for a days url tracking
-//          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
-//          local this will be easy to clean up and check if days need to be cleaned
 
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
