@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { UrlDataObj } from '../TimeTracer/utils/urlDataObj.js';
 
 import {
@@ -9,9 +9,31 @@ import {
   checkInterval,
   convertMinutesToMilliseconds,
   convertMillisecondsToMinutes,
+  filterDateKeys,
+  sortByUrlUsageTime,
+  combineAndSumTimesWithOccurrences,
+  calcAverages,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
+  let consoleLogSpy;
+  let consoleErrorSpy;
+  let consoleWarnSpy;
+
+  beforeEach(() => {
+    // silence / mock all logs
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    // Restore the original implementations of console methods
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+  });
+
   describe('searchDataUrls', () => {
     test('should return the index of the object containing the target URL', () => {
       const target = 'google.com';
@@ -325,6 +347,467 @@ describe('Utils Tests', () => {
       expect(result.lastDateCheck.toISOString()).toBe(
         currentTime.toISOString()
       );
+    });
+  });
+
+  describe('filterDateKeys', () => {
+    // Test case 1: Should correctly filter out valid date strings
+    test('should return an array containing only valid date keys', () => {
+      //setup
+      const chromeKeyList = [
+        '2025-05-18',
+        'some_other_key',
+        '2024-10-01',
+        'another_key_123',
+        '1999-12-31',
+        'invalid-date-format',
+        '2023-02-29', // This format matches, even if date is invalid in calendar
+      ];
+      const expectedDateKeys = [
+        '2025-05-18',
+        '2024-10-01',
+        '1999-12-31',
+        '2023-02-29',
+      ];
+      // Exercises
+      const result = filterDateKeys(chromeKeyList);
+      // test / check
+      expect(result).toEqual(expectedDateKeys);
+    });
+
+    // Test case 2: Should return an empty array if no date keys are present
+    test('should return an empty array if no date keys are found', () => {
+      //setup
+      const chromeKeyList = ['key1', 'key2', 'item_abc', 'data_xyz'];
+      const expectedDateKeys = [];
+      // Exercise
+      const result = filterDateKeys(chromeKeyList);
+      // test / check
+      expect(result).toEqual(expectedDateKeys);
+    });
+
+    // Test case 3: Should handle an empty input array
+    test('should return an empty array when given an empty input list', () => {
+      //setup
+      const chromeKeyList = [];
+      const expectedDateKeys = [];
+      // Exercise
+      const result = filterDateKeys(chromeKeyList);
+      // test / check
+      expect(result).toEqual(expectedDateKeys);
+    });
+
+    // Test case 4: Should correctly handle mixed valid and invalid formats
+    test('should distinguish between valid and invalid date formats', () => {
+      //setup
+      const chromeKeyList = [
+        '2020-01-01', // Valid
+        '2020-1-1', // Invalid format (month/day not two digits)
+        '2020/01/01', // Invalid format (wrong separator)
+        '2020-13-01', // Invalid month
+        '2020-01-32', // Invalid day
+        '2020-02-29', // Valid format (leap year or not, regex matches format)
+      ];
+      const expectedDateKeys = ['2020-01-01', '2020-02-29'];
+      // Exercise
+      const result = filterDateKeys(chromeKeyList);
+      // test / check
+      expect(result).toEqual(expectedDateKeys);
+    });
+
+    // Test case 5: Ensure non-string values are ignored (though `filter` expects strings generally)
+    test('should only process string elements and ignore non-strings', () => {
+      //setup
+      const chromeKeyList = [
+        '2025-01-01',
+        123, // Non-string
+        true, // Non-string
+        null, // Non-string
+        undefined, // Non-string
+        '2024-11-20',
+      ];
+      const expectedDateKeys = ['2025-01-01', '2024-11-20'];
+      // Exercise
+      const result = filterDateKeys(chromeKeyList);
+      // test / check
+      expect(result).toEqual(expectedDateKeys);
+    });
+  });
+
+  describe('sortByUrlUsageTime', () => {
+    // Test case 1: Basic sorting with distinct totalTime values
+    test('should sort urlList by totalTime in descending order', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'example.com/b',
+          totalTime: 50,
+        },
+        {
+          url: 'example.com/a',
+          totalTime: 100,
+        },
+        {
+          url: 'example.com/c',
+          totalTime: 25,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'example.com/a',
+          totalTime: 100,
+        },
+        {
+          url: 'example.com/b',
+          totalTime: 50,
+        },
+        {
+          url: 'example.com/c',
+          totalTime: 25,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      // Also check that it's the same array instance (sorts in-place)
+      expect(result).toBe(urlList);
+    });
+
+    // Test case 2: Sorting with duplicate totalTime values
+    test('should handle duplicate totalTime values gracefully (maintain relative order if equal)', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'example.com/d',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/e',
+          totalTime: 30,
+        },
+        {
+          url: 'example.com/f',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/g',
+          totalTime: 10,
+        },
+      ];
+      // When totalTime is equal, the original relative order is maintained by `sort`
+      const expectedSortedList = [
+        {
+          url: 'example.com/d',
+          totalTime: 70,
+        }, // d comes before f in original, so it should stay that way
+        {
+          url: 'example.com/f',
+          totalTime: 70,
+        },
+        {
+          url: 'example.com/e',
+          totalTime: 30,
+        },
+        {
+          url: 'example.com/g',
+          totalTime: 10,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+
+    // Test case 3: Empty array input
+    test('should return an empty array if an empty array is provided', () => {
+      // Setup
+      const urlList = [];
+      const expectedSortedList = [];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      expect(result).toBe(urlList); // Still the same array instance
+    });
+
+    // Test case 4: Array with a single element
+    test('should return the same array if it contains only one element', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'single.com',
+          totalTime: 42,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'single.com',
+          totalTime: 42,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+      expect(result).toBe(urlList);
+    });
+
+    // Test case 5: Array with zero totalTime values or mixed values
+    test('should correctly sort with zero or mixed totalTime values', () => {
+      // Setup
+      const urlList = [
+        {
+          url: 'zero.com',
+          totalTime: 0,
+        },
+        {
+          url: 'high.com',
+          totalTime: 999,
+        },
+        {
+          url: 'mid.com',
+          totalTime: 50,
+        },
+        {
+          url: 'another_zero.com',
+          totalTime: 0,
+        },
+      ];
+      const expectedSortedList = [
+        {
+          url: 'high.com',
+          totalTime: 999,
+        },
+        {
+          url: 'mid.com',
+          totalTime: 50,
+        },
+        {
+          url: 'zero.com',
+          totalTime: 0,
+        }, // Retains relative order for equal totalTime
+        {
+          url: 'another_zero.com',
+          totalTime: 0,
+        },
+      ];
+
+      // Exercise
+      const result = sortByUrlUsageTime(urlList);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+  });
+
+  describe('combineAndSumTimesWithOccurrences', () => {
+    // Test case 1: Basic consolidation and sorting with distinct URLs
+    test('should consolidate and sort URL usage by totalTime', () => {
+      // Setup
+      const inputUrlData = [
+        [{ url: 'example.com/b', totalTime: 50 }],
+        [{ url: 'example.com/a', totalTime: 100 }],
+        [{ url: 'example.com/c', totalTime: 25 }],
+      ];
+      const expectedSortedList = [
+        { url: 'example.com/b', totalTime: 50, occurrences: 1 },
+        { url: 'example.com/a', totalTime: 100, occurrences: 1 },
+        { url: 'example.com/c', totalTime: 25, occurrences: 1 },
+      ];
+
+      // Exercise
+      const result = combineAndSumTimesWithOccurrences(inputUrlData);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+
+    // Test case 2: Consolidation with duplicate URLs across inner arrays
+    test('should consolidate totalTime and occurrences for duplicate URLs', () => {
+      // Setup
+      const inputUrlData = [
+        [
+          { url: 'google.com', totalTime: 20 },
+          { url: 'apple.com', totalTime: 10 },
+        ],
+        [
+          { url: 'google.com', totalTime: 30 },
+          { url: 'microsoft.com', totalTime: 5 },
+        ],
+        [
+          { url: 'apple.com', totalTime: 15 },
+          { url: 'google.com', totalTime: 10 },
+        ],
+      ];
+      const expectedSortedList = [
+        { url: 'google.com', totalTime: 60, occurrences: 3 }, // 20 + 30 + 10
+        { url: 'apple.com', totalTime: 25, occurrences: 2 }, // 10 + 15
+        { url: 'microsoft.com', totalTime: 5, occurrences: 1 },
+      ];
+
+      // Exercise
+      const result = combineAndSumTimesWithOccurrences(inputUrlData);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+
+    // Test case 3: Empty input array
+    test('should return an empty array when input is empty', () => {
+      // Setup
+      const inputUrlData = [];
+      const expectedSortedList = [];
+
+      // Exercise
+      const result = combineAndSumTimesWithOccurrences(inputUrlData);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+
+    // Test case 4: Input with empty inner arrays
+    test('should return an empty array when inner arrays are empty', () => {
+      // Setup
+      const inputUrlData = [[], [], []];
+      const expectedSortedList = [];
+
+      // Exercise
+      const result = combineAndSumTimesWithOccurrences(inputUrlData);
+
+      // Test / Check
+      expect(result).toEqual(expectedSortedList);
+    });
+  });
+
+  describe('calcAverages', () => {
+    // Test case 1: Basic calculation with distinct values and occurrences of 1
+    test('should calculate correct averages for items with single occurrences', () => {
+      // Setup
+      const inputList = [
+        { url: 'example.com/a', totalTime: 100, occurrences: 1 },
+        { url: 'example.com/b', totalTime: 50, occurrences: 1 },
+        { url: 'example.com/c', totalTime: 25, occurrences: 1 },
+      ];
+      const expectedList = [
+        { url: 'example.com/a', avg: 100 },
+        { url: 'example.com/b', avg: 50 },
+        { url: 'example.com/c', avg: 25 },
+      ];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    // Test case 2: Calculation with multiple occurrences
+    test('should calculate correct averages for items with multiple occurrences', () => {
+      // Setup
+      const inputList = [
+        { url: 'google.com', totalTime: 60, occurrences: 3 },
+        { url: 'apple.com', totalTime: 25, occurrences: 2 },
+        { url: 'microsoft.com', totalTime: 100, occurrences: 5 },
+      ];
+      const expectedList = [
+        { url: 'google.com', avg: 20 }, // 60 / 3
+        { url: 'apple.com', avg: 12.5 }, // 25 / 2
+        { url: 'microsoft.com', avg: 20 }, // 100 / 5
+      ];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    // Test case 3: Empty input array
+    test('should return an empty array when the input list is empty', () => {
+      // Setup
+      const inputList = [];
+      const expectedList = [];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    // Test case 4: Item with zero totalTime
+    test('should handle items with zero totalTime correctly', () => {
+      // Setup
+      const inputList = [
+        { url: 'zero.com', totalTime: 0, occurrences: 5 },
+        { url: 'non-zero.com', totalTime: 50, occurrences: 1 },
+      ];
+      const expectedList = [
+        { url: 'zero.com', avg: 0 }, // 0 / 5
+        { url: 'non-zero.com', avg: 50 },
+      ];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    // Test case 5: Item with zero occurrences
+    test('should handle items with zero occurrences (avg should be 0)', () => {
+      // Setup
+      const inputList = [
+        { url: 'no-visits.com', totalTime: 100, occurrences: 0 },
+        { url: 'some-visits.com', totalTime: 50, occurrences: 1 },
+      ];
+      // Note: If totalTime / 0 results in Infinity/NaN and you want 0, adjust the function.
+      // The current placeholder function returns 0 for occurrences === 0.
+      const expectedList = [
+        { url: 'no-visits.com', avg: 0 },
+        { url: 'some-visits.com', avg: 50 },
+      ];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    // Test case 6: Input with mixed data types (ensure robustness)
+    test('should handle a mix of single and multiple occurrences', () => {
+      // Setup
+      const inputList = [
+        { url: 'site1.com', totalTime: 100, occurrences: 1 },
+        { url: 'site2.com', totalTime: 150, occurrences: 3 },
+        { url: 'site3.com', totalTime: 20, occurrences: 2 },
+        { url: 'site4.com', totalTime: 0, occurrences: 1 },
+        { url: 'site5.com', totalTime: 50, occurrences: 0 },
+      ];
+      const expectedList = [
+        { url: 'site1.com', avg: 100 },
+        { url: 'site2.com', avg: 50 }, // 150 / 3
+        { url: 'site3.com', avg: 10 }, // 20 / 2
+        { url: 'site4.com', avg: 0 },
+        { url: 'site5.com', avg: 0 }, // 50 / 0, handled as 0 in placeholder
+      ];
+
+      // Exercise
+      const result = calcAverages(inputList);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
     });
   });
 });

@@ -10,20 +10,16 @@
 
 // TODO: clean up
 //    - move calcTime function / tests (??)
+//    - isTimeElapsedWithinInterval needs tests (and re-design?)
 
-// TODO: Release - 2
+// TODO: Release - 3
 // - block list - (site blocker dialog)
 //      - DONE - add
 //      - DONE - remove
 //      - ---- - redirect
-// - day selector - day selector right above the table as a carasell ` < day X   day Y >`
 // - storage - clear data button
-// - publicly list the extension
 //
-// TODO: Release - 3
-// - data continuity - run exit session when computer sleeps ( NOTE: is this possible? )
-// - data continuity - when opening report pop up the data for current tab's time session is not shown until you leave that tab
-// - data continuity - set a heart beat check the elapsed time every x amount of time and trough away values outside that range
+// TODO: Release - 4
 // - data continuity - clean up old data (Date based)
 // - build DoNotTrack ui page
 // - add a total time count?
@@ -33,6 +29,7 @@
 // TODO: - Future..
 // - MAINTENANCE -- see if there is a way to easily test extension performance impact
 // - MAINTENANCE -- clean up test names across all tests files (some have "test" in the name others don't)
+// - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
 //
 // - FEATURE -- add a button to clear / reset all local data (check the chrome API)
 // - FEATURE -- add % of total time spent on each site (later)
@@ -42,20 +39,27 @@
 //          { dayX: date-xyz, dayY: date-abc } also if you can get a list of keys stored in
 //          local this will be easy to clean up and check if days need to be cleaned
 
-// import { UrlDataObj } from "../utils/urlDataObj.js";
+import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   __logger__,
+  calcAverages,
+  combineAndSumTimesWithOccurrences,
   convertMillisecondsToMinutes,
+  filterDateKeys,
   formatMillisecsToHoursAndMinutes,
+  getDateKey,
+  sortByUrlUsageTime,
 } from '../utils/utils.js';
 import {
   getSiteObjData,
   getBlockedSiteList,
   setBlockedSiteList,
+  getAllChromeLocalStorageKeys,
+  getChromeLocalDataByKey,
   // setSiteObjData
 } from '../utils/chromeStorage.js';
 
-const URL__DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
+const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
 
 // ===================================================== \\
 // ===================================================== \\
@@ -80,39 +84,37 @@ function setHtmlById(htmlId, htmlContent) {
   }
 }
 
-// ===================================================== \\
-// ===================================================== \\
-//                TimeTracking Page JS
-// ===================================================== \\
-// ===================================================== \\
-
 /**
- * Generates an HTML table string from an array of URL objects.
- * The table includes columns for an example index, the site URL, and the time spent (in hours).
- * It assumes each object in the urlList has 'url' and 'totalTime' properties (in milliseconds).
+ * Generates an HTML table string from a list of URL objects, displaying usage data.
+ * The table includes columns for the entry number, the site URL, and the time spent.
+ * Only URLs with a total time greater than 1 minute are included in the table.
+ * The table display is limited to a maximum length defined by `MAX_URL_DISPLAY_LIST_LENGTH`.
  *
- * @param {Array<object>} urlList - An array of objects, where each object contains
- * at least 'url' (string) and 'totalTime' (number in milliseconds) properties.
- * @returns {string} - An HTML string representing a table displaying the URL data.
+ * @param {Array<object>} urlList - An array of objects, where each object is expected to have
+ * a 'url' (string) and a property identified by the 'key' parameter,
+ * representing time in milliseconds.
+ * @param {string} [key] - The name of the property in each URL object that holds
+ * the time in milliseconds.
+ * @returns {string} - An HTML string representing a table displaying the filtered and formatted URL data.
  */
-function getUrlListAsTable(urlList) {
+function getUrlListAsTable(urlList, key) {
   let display = '<table>';
   display +=
     '<thead><tr><th>#</th><th>Site Name</th><th>Time</th></tr></thead>';
   display += '<tbody>';
 
   // take the list size or max at 20
-  let tableSize = Math.min(URL__DISPLAY_LIST_LENGTH, urlList.length);
+  let tableSize = Math.min(MAX_URL_DISPLAY_LIST_LENGTH, urlList.length);
 
   // list top 20 Urls time was spent on
   for (let i = 0; i < tableSize; i++) {
     // only show items that have more then 1 minute total
-    if (convertMillisecondsToMinutes(urlList[i].totalTime) > 1) {
-      const totalTime = formatMillisecsToHoursAndMinutes(urlList[i].totalTime);
+    if (convertMillisecondsToMinutes(urlList[i][key]) > 1) {
+      const time = formatMillisecsToHoursAndMinutes(urlList[i][key]);
       display += '<tr>';
       display += `<td>${i + 1}</td>`; // Example 'Ex' column (row number)
       display += `<td>${urlList[i].url}</td>`;
-      display += `<td>${totalTime}</td>`;
+      display += `<td>${time}</td>`;
       display += '</tr>';
     }
   }
@@ -120,41 +122,6 @@ function getUrlListAsTable(urlList) {
   display += '</tbody>';
   display += '</table>';
   return display;
-}
-
-/**
- * Asynchronously retrieves website tracking data and displays it in an HTML table
- * within the element having the ID 'content-div'.
- * It fetches the data using 'getSiteObjData', formats it into an HTML table using
- * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
- *
- * @async
- * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
- */
-async function dispayUrlTimePage() {
-  // get the data on display (live update???)
-  let data = await getSiteObjData();
-
-  // update the data for display (this data is never re-stored to local - non persistent )
-  data.endSession();
-
-  // sort by highest usage time
-  let sortedUrlList = data.urlList.sort((a, b) => {
-    // Compare the totalTime property of the two objects
-    if (a.totalTime < b.totalTime) {
-      return 1; // a comes before b
-    }
-    if (a.totalTime > b.totalTime) {
-      return -1; // a comes after b
-    }
-    return 0; // a and b are equal
-  });
-
-  // format the data
-  let html = getUrlListAsTable(sortedUrlList);
-
-  // inject the data
-  setHtmlById('content-div', html);
 }
 
 // ===================================================== \\
@@ -298,14 +265,140 @@ document.addEventListener('click', (event) => {
 
 // ===================================================== \\
 // ===================================================== \\
+//                WeeklySum Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+// TODO: func comment / clean up func
+async function displayWeeklyAvgPage() {
+  // get a list of dates in storage
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let dateKeyList = filterDateKeys(chromeKeyList);
+  dateKeyList.sort();
+
+  // check today's date is at the top
+  const todaysDateKey = getDateKey(); // default is today's key
+  if (dateKeyList[0] !== todaysDateKey) {
+    __logger__('weeklyAvg - Todays date was not in the right place.');
+  }
+
+  // get last 7 days or up to dateKeyList length if shorter
+  let itLength = Math.min(dateKeyList.length, 7);
+  let dataList = [];
+
+  // get the data for each key up to itLength
+  for (let index = 0; index < itLength; index++) {
+    const key = dateKeyList[index];
+
+    const urlObj = new UrlDataObj();
+    const promise = await getChromeLocalDataByKey(key);
+    dataList.push(urlObj.fromJSONString(promise));
+  }
+
+  // resolve promises and grab only what we need (urlList)
+  dataList = await Promise.all(dataList);
+  dataList = dataList.map((item) => {
+    return item.urlList;
+  });
+
+  dataList = combineAndSumTimesWithOccurrences(dataList);
+  dataList = calcAverages(dataList);
+
+  // sort: highest avg time at top
+  dataList.sort((a, b) => {
+    return b.avg - a.avg;
+  });
+
+  // inject the data
+  let html = getUrlListAsTable(dataList, 'avg');
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//                Yesterday Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Fetches, processes, and displays yesterday's Browse data.
+ * It retrieves the date key for yesterday, then uses it to fetch stored URL data.
+ * If data is found, it sorts the URLs by usage time and formats them into an HTML table.
+ * If no data is found, a "No data" message is displayed. Finally, the generated HTML
+ * is injected into the 'content-div' element on the page.
+ * @async
+ * @returns {Promise<void>} A promise that resolves when the data has been displayed.
+ */
+async function displayYesterdaysPage() {
+  // get yesterdays date key
+  const today = new Date();
+  let yesterdaysDate = new Date();
+  yesterdaysDate.setDate(today.getDate() - 1);
+  const yesterdaysDateKey = getDateKey(yesterdaysDate);
+
+  // get yesterdays data
+  const urlObj = new UrlDataObj();
+  const yesterdaysData = urlObj.fromJSONString(
+    await getChromeLocalDataByKey(yesterdaysDateKey)
+  );
+
+  let html = '';
+
+  // check if the data was found
+  if (yesterdaysData) {
+    // sort by highest usage time
+    let sortedUrlList = sortByUrlUsageTime(yesterdaysData.urlList);
+    // format the data
+    html = getUrlListAsTable(sortedUrlList, 'totalTime');
+  } else {
+    html = 'No data for yesterday found';
+  }
+
+  // inject the data
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
+//             TimeTracking (today) Page JS
+// ===================================================== \\
+// ===================================================== \\
+
+/**
+ * Asynchronously retrieves website tracking data and displays it in an HTML table
+ * within the element having the ID 'content-div'.
+ * It fetches the data using 'getSiteObjData', formats it into an HTML table using
+ * 'getUrlListAsTable', and then injects the HTML into the specified DOM element.
+ *
+ * @async
+ * @returns {Promise<void>} - A Promise that resolves after the data is fetched and displayed.
+ */
+async function dispayUrlTimePage() {
+  // get the data on display (live update???)
+  let data = await getSiteObjData();
+
+  // update the data for display (this data is never re-stored to local - non persistent )
+  data.endSession();
+
+  // sort by highest usage time
+  let sortedUrlList = sortByUrlUsageTime(data.urlList);
+
+  // format the data
+  let html = getUrlListAsTable(sortedUrlList, 'totalTime');
+
+  // inject the data
+  setHtmlById('content-div', html);
+}
+
+// ===================================================== \\
+// ===================================================== \\
 //                  Nav Script / Listeners
 // ===================================================== \\
 // ===================================================== \\
 
 const timeSpentLink = document.getElementById('timeSpentLink');
-const weeklySum = document.getElementById('weeklySum');
-const doNotTrackLink = document.getElementById('doNotTrackLink');
-const blockListkLink = document.getElementById('blockListLink');
+const yesterday = document.getElementById('yesterday');
+const weekAvg = document.getElementById('weekAvg');
 const menuLinks = document.querySelectorAll('.menu-link');
 
 // Function to remove 'active' from all menu links
@@ -322,15 +415,36 @@ timeSpentLink.addEventListener('click', function (event) {
   this.classList.add('active');
 });
 
-weeklySum.addEventListener('click', function (event) {
+yesterday.addEventListener('click', function (event) {
   event.preventDefault();
-  // TODO: build page
-  setHtmlById('content-div', 'Work In Progress');
+  displayYesterdaysPage();
 
   // set active link item
   removeActiveClassFromAll();
   this.classList.add('active');
 });
+
+weekAvg.addEventListener('click', function (event) {
+  event.preventDefault();
+  displayWeeklyAvgPage();
+
+  // set active link item
+  removeActiveClassFromAll();
+  this.classList.add('active');
+});
+
+// first function that is called on enter
+dispayUrlTimePage();
+
+// ======================================== \\
+// ======================================== \\
+//           __THIS IS FOR LATER__          \\
+// ======================================== \\
+// ======================================== \\
+/*
+
+const doNotTrackLink = document.getElementById('doNotTrackLink');
+const blockListkLink = document.getElementById('blockListLink');
 
 doNotTrackLink.addEventListener('click', function (event) {
   event.preventDefault();
@@ -353,5 +467,4 @@ blockListkLink.addEventListener('click', function (event) {
   this.classList.add('active');
 });
 
-// first function that is called on enter
-dispayUrlTimePage();
+*/
