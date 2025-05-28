@@ -31,7 +31,7 @@
 
 ## Install Instructions:
 
-- Can be found on the chrome store [HERE](link) (not up yet).
+- Can be found on the chrome store [HERE](https://chromewebstore.google.com/detail/timetracer/oalkfnhcckpeghkjmaoidcckokidaoap).
 
 ### Manual install from source (unpacked):
 
