@@ -136,6 +136,7 @@ nav a:hover {
 
 #content-div {
   font-size: 1.2em;
+  min-height: 363px; /* keeps the div full length*/
 }
 
 /* reusable  */
