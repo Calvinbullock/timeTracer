@@ -12,24 +12,19 @@
 //    - move calcTime function / tests (??)
 //    - isTimeElapsedWithinInterval needs tests (and re-design?)
 
-// TODO: Release - 3
+// TODO: Release - 4
 // - block list - (site blocker dialog)
 //      - DONE - add
 //      - DONE - remove
 //      - ---- - redirect
-// - storage - clear data button
+// - storage - clear data older then 28 days
 //
-// TODO: Release - 4
-// - data continuity - clean up old data (Date based)
-// - build DoNotTrack ui page
-// - add a total time count?
-// - when date key changes need to run endSesstion
-// - make the UI window wider / remove the count from the table
-
 // TODO: - Future..
 // - MAINTENANCE -- see if there is a way to easily test extension performance impact
 // - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
+// - MAINTENANCE -- when date key changes need to run endSesstion
 //
+// - FEATURE -- add a total time count?
 // - FEATURE -- add a button to clear / reset all local data (check the chrome API)
 // - FEATURE -- add % of total time spent on each site (later)
 // - FEATURE -- allow pausing of tracking
