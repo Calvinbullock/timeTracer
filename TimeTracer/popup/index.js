@@ -11,6 +11,7 @@
 // TODO: clean up
 //    - move calcTime function / tests (??)
 //    - isTimeElapsedWithinInterval needs tests (and re-design?)
+//    - WARN: nulls might be being added to the url list - NOTE: unconfirmed...
 
 // TODO: Release - 4
 // - block list - (site blocker dialog)

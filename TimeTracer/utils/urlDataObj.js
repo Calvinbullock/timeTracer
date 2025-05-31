@@ -39,7 +39,7 @@ class UrlDataObj {
    * @param {number} elapsedTime - The time duration in milliseconds to add to the active URL's total time.
    */
   addActiveTime(elapsedTime) {
-    // check if there is an active url
+    // check if there is an active url, return if not
     if (this.activeUrl == null) {
       __logger__('activeItem was null when addTime was called.');
       return;
