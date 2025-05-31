@@ -57,10 +57,11 @@
 ## Future plans / Road map
 
 ### Clean up / bug fixes
-  - move calcTime function / tests (??)
-  - isTimeElapsedWithinInterval needs tests (and re-design?)
-  - WARN: nulls might be being added to the url list - NOTE: unconfirmed...
-  - TODO: have a function that fires once a day at a set time to do data clean up (is this passable?)
+- add file header comments to files missing them
+- move calcTime function / tests (??)
+- isTimeElapsedWithinInterval needs tests (and re-design?)
+- WARN: nulls might be being added to the url list - NOTE: unconfirmed...
+- TODO: have a function that fires once a day at a set time to do data clean up (is this passable?)
 
 ### Release - 4
  - block list - (site blocker dialog)
