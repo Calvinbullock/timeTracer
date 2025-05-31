@@ -376,17 +376,16 @@ function combineAndSumTimesWithOccurrences(arrays) {
  * and its calculated 'avg' (average time). If 'occurrences' is 0, 'avg' will be 0 to prevent
  * division by zero errors.
  */
-function calcAverages(dataArray) {
+function calcAverages(dataArray, divideBy) {
   let avgArray = [];
 
   dataArray.forEach((element) => {
-    let occurrences = element.occurrences;
     let totalTime = element.totalTime;
     let avg = 0;
 
     // ensure no divide by zero
-    if (occurrences > 0) {
-      avg = totalTime / occurrences;
+    if (divideBy > 0) {
+      avg = totalTime / divideBy;
     }
 
     avgArray.push({

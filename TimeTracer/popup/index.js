@@ -285,6 +285,11 @@ async function displayWeeklyAvgPage() {
     dataList.push(urlObj.fromJSONString(promise));
   }
 
+  // little error log
+  if (dataList.length > 7) {
+    __logger__('weekAvg dates array longer then 7 days');
+  }
+
   // resolve promises and grab only what we need (urlList)
   dataList = await Promise.all(dataList);
   dataList = dataList.map((item) => {
@@ -292,7 +297,7 @@ async function displayWeeklyAvgPage() {
   });
 
   dataList = combineAndSumTimesWithOccurrences(dataList);
-  dataList = calcAverages(dataList);
+  dataList = calcAverages(dataList, itLength);
 
   // sort: highest avg time at top
   dataList.sort((a, b) => {

@@ -697,34 +697,37 @@ describe('Utils Tests', () => {
         { url: 'example.com/b', totalTime: 50, occurrences: 1 },
         { url: 'example.com/c', totalTime: 25, occurrences: 1 },
       ];
+      // In this test, if nothing needs to change, it implies divideBy should be 1.
+      const divideByValue = 1;
       const expectedList = [
-        { url: 'example.com/a', avg: 100 },
-        { url: 'example.com/b', avg: 50 },
-        { url: 'example.com/c', avg: 25 },
+        { url: 'example.com/a', avg: 100 }, // 100 / 1
+        { url: 'example.com/b', avg: 50 }, // 50 / 1
+        { url: 'example.com/c', avg: 25 }, // 25 / 1
       ];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
     });
 
-    test('should calculate correct averages for items with multiple occurrences', () => {
+    test('should calculate correct averages for items with a specific divideBy value (e.g., 5)', () => {
       // Setup
       const inputList = [
-        { url: 'google.com', totalTime: 60, occurrences: 3 },
+        { url: 'google.com', totalTime: 60, occurrences: 3 }, // occurrences is now irrelevant for calculation
         { url: 'apple.com', totalTime: 25, occurrences: 2 },
         { url: 'microsoft.com', totalTime: 100, occurrences: 5 },
       ];
+      const divideByValue = 5; // Example divideBy value
       const expectedList = [
-        { url: 'google.com', avg: 20 }, // 60 / 3
-        { url: 'apple.com', avg: 12.5 }, // 25 / 2
+        { url: 'google.com', avg: 12 }, // 60 / 5
+        { url: 'apple.com', avg: 5 }, // 25 / 5
         { url: 'microsoft.com', avg: 20 }, // 100 / 5
       ];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
@@ -733,10 +736,11 @@ describe('Utils Tests', () => {
     test('should return an empty array when the input list is empty', () => {
       // Setup
       const inputList = [];
+      const divideByValue = 5; // The divideBy value doesn't matter for an empty list
       const expectedList = [];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
@@ -748,39 +752,40 @@ describe('Utils Tests', () => {
         { url: 'zero.com', totalTime: 0, occurrences: 5 },
         { url: 'non-zero.com', totalTime: 50, occurrences: 1 },
       ];
+      const divideByValue = 2; // Example divideBy value
       const expectedList = [
-        { url: 'zero.com', avg: 0 }, // 0 / 5
-        { url: 'non-zero.com', avg: 50 },
+        { url: 'zero.com', avg: 0 }, // 0 / 2
+        { url: 'non-zero.com', avg: 25 }, // 50 / 2
       ];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
     });
 
-    test('should handle items with zero occurrences (avg should be 0)', () => {
+    test('should handle divideBy being 0 (avg should be 0)', () => {
       // Setup
       const inputList = [
-        { url: 'no-visits.com', totalTime: 100, occurrences: 0 },
+        { url: 'divide-by-zero.com', totalTime: 100, occurrences: 5 },
         { url: 'some-visits.com', totalTime: 50, occurrences: 1 },
       ];
-      // Note: If totalTime / 0 results in Infinity/NaN and you want 0, adjust the function.
-      // The current placeholder function returns 0 for occurrences === 0.
+      // The function specifically handles divideBy > 0. If divideBy is 0, avg should be 0.
+      const divideByValue = 0;
       const expectedList = [
-        { url: 'no-visits.com', avg: 0 },
-        { url: 'some-visits.com', avg: 50 },
+        { url: 'divide-by-zero.com', avg: 0 }, // totalTime / 0 should result in 0 based on the function
+        { url: 'some-visits.com', avg: 0 }, // totalTime / 0 should result in 0 based on the function
       ];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
     });
 
-    test('should handle a mix of single and multiple occurrences', () => {
+    test('should handle a mix of totalTime values with a specific divideBy', () => {
       // Setup
       const inputList = [
         { url: 'site1.com', totalTime: 100, occurrences: 1 },
@@ -789,16 +794,17 @@ describe('Utils Tests', () => {
         { url: 'site4.com', totalTime: 0, occurrences: 1 },
         { url: 'site5.com', totalTime: 50, occurrences: 0 },
       ];
+      const divideByValue = 4; // Example divideBy value
       const expectedList = [
-        { url: 'site1.com', avg: 100 },
-        { url: 'site2.com', avg: 50 }, // 150 / 3
-        { url: 'site3.com', avg: 10 }, // 20 / 2
-        { url: 'site4.com', avg: 0 },
-        { url: 'site5.com', avg: 0 }, // 50 / 0, handled as 0 in placeholder
+        { url: 'site1.com', avg: 25 }, // 100 / 4
+        { url: 'site2.com', avg: 37.5 }, // 150 / 4
+        { url: 'site3.com', avg: 5 }, // 20 / 4
+        { url: 'site4.com', avg: 0 }, // 0 / 4
+        { url: 'site5.com', avg: 12.5 }, // 50 / 4
       ];
 
       // Exercise
-      const result = calcAverages(inputList);
+      const result = calcAverages(inputList, divideByValue);
 
       // Test / Check
       expect(result).toEqual(expectedList);
