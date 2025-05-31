@@ -8,32 +8,6 @@
  * @date Date of creation: April, 2025
  */
 
-// TODO: clean up
-//    - move calcTime function / tests (??)
-//    - isTimeElapsedWithinInterval needs tests (and re-design?)
-
-// TODO: Release - 3
-// - block list - (site blocker dialog)
-//      - DONE - add
-//      - DONE - remove
-//      - ---- - redirect
-// - storage - clear data button
-//
-// TODO: Release - 4
-// - data continuity - clean up old data (Date based)
-// - build DoNotTrack ui page
-// - add a total time count?
-// - when date key changes need to run endSesstion
-// - make the UI window wider / remove the count from the table
-
-// TODO: - Future..
-// - MAINTENANCE -- see if there is a way to easily test extension performance impact
-// - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
-//
-// - FEATURE -- add a button to clear / reset all local data (check the chrome API)
-// - FEATURE -- add % of total time spent on each site (later)
-// - FEATURE -- allow pausing of tracking
-
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   __logger__,
@@ -51,7 +25,6 @@ import {
   setBlockedSiteList,
   getAllChromeLocalStorageKeys,
   getChromeLocalDataByKey,
-  // setSiteObjData
 } from '../utils/chromeStorage.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
@@ -290,6 +263,11 @@ async function displayWeeklyAvgPage() {
     dataList.push(urlObj.fromJSONString(promise));
   }
 
+  // little error log
+  if (dataList.length > 7) {
+    __logger__('weekAvg dates array longer then 7 days');
+  }
+
   // resolve promises and grab only what we need (urlList)
   dataList = await Promise.all(dataList);
   dataList = dataList.map((item) => {
@@ -297,7 +275,7 @@ async function displayWeeklyAvgPage() {
   });
 
   dataList = combineAndSumTimesWithOccurrences(dataList);
-  dataList = calcAverages(dataList);
+  dataList = calcAverages(dataList, itLength);
 
   // sort: highest avg time at top
   dataList.sort((a, b) => {

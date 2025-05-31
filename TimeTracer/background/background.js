@@ -86,16 +86,14 @@ async function checkIntervalWraper() {
  * This alarm will fire periodically at the specified interval.
  *
  * @param {string} alarmName - The unique name for the alarm.
- * @param {number} alarmIntervalMilliSec - The interval in milliseconds after which the alarm should repeat.
+ * @param {number} alarmIntervalMinutes - The interval in minutes after which the alarm should repeat.
  */
-function createRepeatingAlarm(alarmName, alarmIntervalMilliSec) {
-  const alarmIntervalMin = convertMillisecondsToMinutes(alarmIntervalMilliSec);
-
+function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
   chrome.alarms.create(alarmName, {
-    periodInMinutes: alarmIntervalMin,
+    periodInMinutes: alarmIntervalMinutes,
   });
   __logger__(
-    `Alarm '${alarmName}' created to fire every ${alarmIntervalMin} minutes.`
+    `Alarm '${alarmName}' created to fire every ${alarmIntervalMinutes} minutes.`
   );
 }
 
@@ -117,12 +115,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // Create the alarm when the service worker starts or when the extension is installed/updated
+//    (Chrome will not run the same alarm twice, they will not stack)
 chrome.runtime.onStartup.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TIME_CHECK_INTERVAL_MILLISEC);
+  createRepeatingAlarm(
+    TIME_CHECK_ALARM,
+    convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
+  );
 });
-
 chrome.runtime.onInstalled.addListener(() => {
-  createRepeatingAlarm(TIME_CHECK_ALARM, TIME_CHECK_INTERVAL_MILLISEC);
+  createRepeatingAlarm(
+    TIME_CHECK_ALARM,
+    convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
+  );
 });
 
 // ===================================================== \\

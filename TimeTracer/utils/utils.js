@@ -367,26 +367,26 @@ function combineAndSumTimesWithOccurrences(arrays) {
 }
 
 /**
- * Calculates the average time spent per occurrence for each URL in a given list.
- * The average is computed as `totalTime / occurrences`.
+ * Calculates the average time based on a given divisor for each URL in a list.
+ * The average is computed as `totalTime / divideBy`.
  *
- * @param {Array<{url: string, totalTime: number, occurrences: number}>} dataArray - An array of
- * URL objects, where each object has a 'url' (string), 'totalTime' (number), and 'occurrences' (number).
+ * @param {Array<{url: string, totalTime: number}>} dataArray - An array of URL objects,
+ * where each object has a 'url' (string) and 'totalTime' (number).
+ * @param {number} divideBy - The number to divide 'totalTime' by to calculate the average.
  * @returns {Array<{url: string, avg: number}>} A new array of objects, each containing the 'url'
- * and its calculated 'avg' (average time). If 'occurrences' is 0, 'avg' will be 0 to prevent
+ * and its calculated 'avg' (average time). If `divideBy` is 0, 'avg' will be 0 to prevent
  * division by zero errors.
  */
-function calcAverages(dataArray) {
+function calcAverages(dataArray, divideBy) {
   let avgArray = [];
 
   dataArray.forEach((element) => {
-    let occurrences = element.occurrences;
     let totalTime = element.totalTime;
     let avg = 0;
 
     // ensure no divide by zero
-    if (occurrences > 0) {
-      avg = totalTime / occurrences;
+    if (divideBy > 0) {
+      avg = totalTime / divideBy;
     }
 
     avgArray.push({
