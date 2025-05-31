@@ -57,6 +57,7 @@
 ## Future plans / Road map
 
 ### Clean up / bug fixes
+
 - add file header comments to files missing them
 - move calcTime function / tests (??)
 - isTimeElapsedWithinInterval needs tests (and re-design?)
@@ -64,18 +65,20 @@
 - TODO: have a function that fires once a day at a set time to do data clean up (is this passable?)
 
 ### Release - 4
- - block list - (site blocker dialog)
-      - DONE - add
-      - DONE - remove
-      - ---- - redirect
- - storage - clear data older then 28 days
+
+- block list - (site blocker dialog)
+  - DONE - add
+  - DONE - remove
+  - ---- - redirect
+- storage - clear data older then 28 days
 
 ### Future...
- - MAINTENANCE -- see if there is a way to easily test extension performance impact
- - MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
- - MAINTENANCE -- when date key changes need to run endSesstion
 
- - FEATURE -- add a total time count?
- - FEATURE -- add a button to clear / reset all local data (check the chrome API)
- - FEATURE -- add % of total time spent on each site (later)
- - FEATURE -- allow pausing of tracking
+- MAINTENANCE -- see if there is a way to easily test extension performance impact
+- MAINTENANCE -- make the different pages css consistent (margin, spacing, etc)
+- MAINTENANCE -- when date key changes need to run endSesstion
+
+- FEATURE -- add a total time count?
+- FEATURE -- add a button to clear / reset all local data (check the chrome API)
+- FEATURE -- add % of total time spent on each site (later)
+- FEATURE -- allow pausing of tracking
