@@ -25,7 +25,6 @@ import {
   setBlockedSiteList,
   getAllChromeLocalStorageKeys,
   getChromeLocalDataByKey,
-  // setSiteObjData
 } from '../utils/chromeStorage.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
