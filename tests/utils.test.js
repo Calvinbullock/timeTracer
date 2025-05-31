@@ -690,8 +690,7 @@ describe('Utils Tests', () => {
   });
 
   describe('calcAverages', () => {
-    // Test case 1: Basic calculation with distinct values and occurrences of 1
-    test('should calculate correct averages for items with single occurrences', () => {
+    test('if nothing needs to change nothing should change', () => {
       // Setup
       const inputList = [
         { url: 'example.com/a', totalTime: 100, occurrences: 1 },
@@ -711,7 +710,6 @@ describe('Utils Tests', () => {
       expect(result).toEqual(expectedList);
     });
 
-    // Test case 2: Calculation with multiple occurrences
     test('should calculate correct averages for items with multiple occurrences', () => {
       // Setup
       const inputList = [
@@ -732,7 +730,6 @@ describe('Utils Tests', () => {
       expect(result).toEqual(expectedList);
     });
 
-    // Test case 3: Empty input array
     test('should return an empty array when the input list is empty', () => {
       // Setup
       const inputList = [];
@@ -745,7 +742,6 @@ describe('Utils Tests', () => {
       expect(result).toEqual(expectedList);
     });
 
-    // Test case 4: Item with zero totalTime
     test('should handle items with zero totalTime correctly', () => {
       // Setup
       const inputList = [
@@ -764,7 +760,6 @@ describe('Utils Tests', () => {
       expect(result).toEqual(expectedList);
     });
 
-    // Test case 5: Item with zero occurrences
     test('should handle items with zero occurrences (avg should be 0)', () => {
       // Setup
       const inputList = [
@@ -785,7 +780,6 @@ describe('Utils Tests', () => {
       expect(result).toEqual(expectedList);
     });
 
-    // Test case 6: Input with mixed data types (ensure robustness)
     test('should handle a mix of single and multiple occurrences', () => {
       // Setup
       const inputList = [
