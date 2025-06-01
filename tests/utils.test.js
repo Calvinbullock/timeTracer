@@ -13,6 +13,7 @@ import {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
+  getGraterEqualOrLessThenKey,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -808,6 +809,147 @@ describe('Utils Tests', () => {
 
       // Test / Check
       expect(result).toEqual(expectedList);
+    });
+  });
+
+  describe('getGraterEqualOrLessThenKey', () => {
+    test('should correctly separate dates into graterEq and less based on period', () => {
+      // Setup
+      const dateKeysArray = [
+        '2025-05-31', // Today
+        '2025-05-25', // 6 days ago (2025-05-31 - 6) - last in the less array
+        '2025-05-24', // 7 days ago (2025-05-31 - 7) - This is the cutoff for 'graterEq'
+        '2025-05-23', // 8 days ago (2025-05-31 - 8) - This is older than the cutoff
+        '2025-05-15', // Older date
+        '2025-06-01', // Future date
+      ];
+      const periodInDays = 7;
+      const today = new Date('2025-05-31T12:00:00Z'); // Using a specific date for 'today'
+
+      // Expected values based on 'today' being 2025-05-31 and periodInDays being 7
+      // Cutoff date is 2025-05-31 - 7 days = 2025-05-24
+      const expectedGraterEq = [
+        '2025-05-31',
+        '2025-05-25',
+        '2025-05-24', // Equal to the cutoff date
+        '2025-06-01', // Future date
+      ];
+      const expectedLess = ['2025-05-23', '2025-05-15'];
+
+      // Exercise
+      const result = getGraterEqualOrLessThenKey(
+        dateKeysArray,
+        periodInDays,
+        today
+      );
+
+      // Test / Check
+      expect(result.graterEq).toEqual(expect.arrayContaining(expectedGraterEq));
+      expect(result.graterEq.length).toBe(expectedGraterEq.length);
+
+      expect(result.less).toEqual(expect.arrayContaining(expectedLess));
+      expect(result.less.length).toBe(expectedLess.length);
+    });
+
+    test('should handle empty dateKeysArray', () => {
+      // Setup
+      const dateKeysArray = [];
+      const periodInDays = 7;
+      const today = new Date('2025-05-31T12:00:00Z');
+
+      const expectedGraterEq = [];
+      const expectedLess = [];
+
+      // Exercise
+      const result = getGraterEqualOrLessThenKey(
+        dateKeysArray,
+        periodInDays,
+        today
+      );
+
+      // Test / Check
+      expect(result.graterEq).toEqual(expectedGraterEq);
+      expect(result.less).toEqual(expectedLess);
+    });
+
+    test('should handle all dates being graterEq', () => {
+      // Setup
+      const dateKeysArray = ['2025-05-31', '2025-05-30'];
+      const periodInDays = 1; // Cutoff: 2025-05-30
+      const today = new Date('2025-05-31T12:00:00Z');
+
+      const expectedGraterEq = ['2025-05-31', '2025-05-30'];
+      const expectedLess = [];
+
+      // Exercise
+      const result = getGraterEqualOrLessThenKey(
+        dateKeysArray,
+        periodInDays,
+        today
+      );
+
+      // Test / Check
+      expect(result.graterEq).toEqual(expect.arrayContaining(expectedGraterEq));
+      expect(result.graterEq.length).toBe(expectedGraterEq.length);
+      expect(result.less).toEqual(expectedLess);
+    });
+
+    test('should handle all dates being less', () => {
+      // Setup
+      const dateKeysArray = ['2025-05-20', '2025-05-19', '2025-05-18'];
+      const periodInDays = 1; // Cutoff: 2025-05-30
+      const today = new Date('2025-05-31T12:00:00Z');
+
+      const expectedGraterEq = [];
+      const expectedLess = ['2025-05-20', '2025-05-19', '2025-05-18'];
+
+      // Exercise
+      const result = getGraterEqualOrLessThenKey(
+        dateKeysArray,
+        periodInDays,
+        today
+      );
+
+      // Test / Check
+      expect(result.graterEq).toEqual(expectedGraterEq);
+      expect(result.less).toEqual(expect.arrayContaining(expectedLess));
+      expect(result.less.length).toBe(expectedLess.length);
+    });
+
+    test('should handle year difference crossing into a new year', () => {
+      // Setup
+      const dateKeysArray = [
+        '2024-12-25', // Older than cutoff (Dec 26, 2024)
+        '2024-12-26', // Equal to cutoff
+        '2024-12-31', // Newer than cutoff
+        '2025-01-01', // Newer than cutoff, next year
+        '2025-01-04', // Newer than cutoff, same year
+        '2023-11-01', // Very old date, different year
+      ];
+      const periodInDays = 10; // Dec 26, 2024 (cutoff date)
+      const today = new Date('2025-01-05T12:00:00Z'); // Today is Jan 5, 2025
+
+      const expectedGraterEq = [
+        '2024-12-26', // Equal to cutoff
+        '2024-12-31',
+        '2025-01-01',
+        '2025-01-04',
+      ];
+      const expectedLess = ['2024-12-25', '2023-11-01'];
+
+      // Exercise
+      const result = getGraterEqualOrLessThenKey(
+        dateKeysArray,
+        periodInDays,
+        today
+      );
+
+      // Test / Check
+      expect(result.graterEq).toEqual(expect.arrayContaining(expectedGraterEq));
+      expect(result.graterEq.length).toBe(expectedGraterEq.length);
+
+      expect(result.less).toEqual(expect.arrayContaining(expectedLess));
+      expect(result.less.length).toBe(expectedLess.length);
     });
   });
 });

@@ -398,6 +398,45 @@ function calcAverages(dataArray, divideBy) {
   return avgArray;
 }
 
+/**
+ * Categorizes an array of date keys into two groups: those less than a calculated period date,
+ * and those greater than or equal to it.
+ *
+ * @param {string[]} dateKeysArray - An array of date keys (e.g., "YYYY-MM-DD" strings) to be categorized.
+ * @param {number} periodInDays - The number of days to subtract from `today` to determine the `periodDateKey`.
+ * @param {Date} [today=new Date()] - The starting date from which `periodInDays` will be subtracted. Defaults to the current date.
+ * @returns {{graterEq: string[], less: string[]}} An object containing two arrays:
+ * - `graterEq`: An array of date keys that are greater than or equal to the `periodDateKey` (newer or same).
+ * - `less`: An array of date keys that are less than the `periodDateKey` (older).
+ */
+function getGraterEqualOrLessThenKey(
+  dateKeysArray,
+  periodInDays,
+  today = new Date()
+) {
+  today.setDate(today.getDate() - periodInDays);
+  let periodDateKey = getDateKey(today);
+
+  // organize data
+  let dateKeyList = filterDateKeys(dateKeysArray);
+  dateKeyList.sort();
+
+  let obj = {
+    graterEq: [], // newer
+    less: [], // older
+  };
+
+  for (const key of dateKeysArray) {
+    if (key < periodDateKey) {
+      obj.less.push(key);
+    } else {
+      obj.graterEq.push(key);
+    }
+  }
+
+  return obj;
+}
+
 export {
   filterDateKeys,
   formatDateTime,
@@ -413,4 +452,5 @@ export {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
+  getGraterEqualOrLessThenKey,
 };
