@@ -20,7 +20,7 @@ const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
 const DAILY_CLEANUP_TIME_MINUTES = 60 * 24;
 
 // this should match the largest avg count from index.js
-// NOTE: can't use imports as the index use Document and this file can't parse that
+// NOTE: can't use imports as index.js access a page Document and this file can't parse that
 const MAX_DATES_TO_RETAIN = 7;
 
 /**
