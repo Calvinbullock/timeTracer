@@ -32,12 +32,6 @@ const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 async function updateActiveUrlSession(newActiveUrl, stopTracking) {
   let siteDataObj = await getSiteObjData();
 
-  if (!(siteDataObj instanceof UrlDataObj)) {
-    console.error(
-      'Error: siteData not instance of UrlDataObj - updateStoredData'
-    );
-  }
-
   siteDataObj.endSession(TIME_CHECK_INTERVAL_MILLISEC);
   if (!stopTracking) {
     siteDataObj.startSession(newActiveUrl);
