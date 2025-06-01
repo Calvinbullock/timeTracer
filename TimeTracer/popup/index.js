@@ -14,7 +14,6 @@ import {
   calcAverages,
   combineAndSumTimesWithOccurrences,
   convertMillisecondsToMinutes,
-  filterDateKeys,
   formatMillisecsToHoursAndMinutes,
   getDateKey,
   getGraterEqualOrLessThenKey,
@@ -276,7 +275,7 @@ async function displayWeeklyAvgPage() {
   });
 
   // check we have data
-  let html = "No time data yet.";
+  let html = 'No time data yet.';
   if (dataList.length > 0) {
     html = getUrlListAsTable(dataList, 'avg');
   }
