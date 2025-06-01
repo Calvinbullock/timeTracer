@@ -19,7 +19,7 @@ const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
 const DAILY_CLEANUP_TIME_MINUTES = 60 * 24;
 
-const MAX_DATES_TO_RETAIN = 6; // take number of days you want -1 (Ex: keep last 7 days; = 6)
+const MAX_DATES_TO_RETAIN = 7; // this should match the largest avg count from index.js
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -151,8 +151,7 @@ async function dateStorageCleanUp() {
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === TIME_CHECK_ALARM) {
     checkIntervalWraper();
-  }
-  if (alarm.name === DAILY_CLEANUP_ALARM_TITLE) {
+  } else if (alarm.name === DAILY_CLEANUP_ALARM_TITLE) {
     dateStorageCleanUp();
   }
 });

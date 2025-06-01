@@ -829,10 +829,8 @@ describe('Utils Tests', () => {
       // Expected values based on 'today' being 2025-05-31 and periodInDays being 7
       // Cutoff date is 2025-05-31 - 7 days = 2025-05-24
       const expectedGraterEq = [
-        '2025-05-31',
         '2025-05-25',
         '2025-05-24', // Equal to the cutoff date
-        '2025-06-01', // Future date
       ];
       const expectedLess = ['2025-05-23', '2025-05-15'];
 
@@ -878,7 +876,7 @@ describe('Utils Tests', () => {
       const periodInDays = 1; // Cutoff: 2025-05-30
       const today = new Date('2025-05-31T12:00:00Z');
 
-      const expectedGraterEq = ['2025-05-31', '2025-05-30'];
+      const expectedGraterEq = ['2025-05-30'];
       const expectedLess = [];
 
       // Exercise

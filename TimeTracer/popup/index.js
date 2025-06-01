@@ -28,6 +28,7 @@ import {
 } from '../utils/chromeStorage.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
+const WEEKLY_AVG_DAY_COUNT = 7;
 
 // ===================================================== \\
 // ===================================================== \\
@@ -247,7 +248,10 @@ document.addEventListener('click', (event) => {
 async function displayWeeklyAvgPage() {
   // get a list of dates in storage
   const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateKeyList = getGreaterEqualOrLessThenKey(chromeKeyList, 6).graterEq; // get last 7 days
+  let dateKeyList = getGreaterEqualOrLessThenKey(
+    chromeKeyList,
+    WEEKLY_AVG_DAY_COUNT
+  ).graterEq;
 
   let dataList = [];
   for (const key of dateKeyList) {

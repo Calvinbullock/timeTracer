@@ -414,6 +414,7 @@ function getGreaterEqualOrLessThenKey(
   periodInDays,
   today = new Date()
 ) {
+  let todayKey = getDateKey(today);
   today.setDate(today.getDate() - periodInDays);
   let periodDateKey = getDateKey(today);
 
@@ -429,7 +430,7 @@ function getGreaterEqualOrLessThenKey(
   for (const key of dateKeysArray) {
     if (key < periodDateKey) {
       obj.less.push(key);
-    } else {
+    } else if (key < todayKey) {
       obj.graterEq.push(key);
     }
   }
