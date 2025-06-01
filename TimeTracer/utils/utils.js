@@ -409,7 +409,7 @@ function calcAverages(dataArray, divideBy) {
  * - `graterEq`: An array of date keys that are greater than or equal to the `periodDateKey` (newer or same).
  * - `less`: An array of date keys that are less than the `periodDateKey` (older).
  */
-function getGraterEqualOrLessThenKey(
+function getGreaterEqualOrLessThenKey(
   dateKeysArray,
   periodInDays,
   today = new Date()
@@ -452,5 +452,5 @@ export {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
-  getGraterEqualOrLessThenKey,
+  getGreaterEqualOrLessThenKey,
 };

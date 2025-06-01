@@ -4,7 +4,7 @@ import {
   __logger__,
   checkInterval,
   convertMillisecondsToMinutes,
-  getGraterEqualOrLessThenKey,
+  getGreaterEqualOrLessThenKey,
 } from '../utils/utils.js';
 import {
   getAllChromeLocalStorageKeys,
@@ -113,7 +113,7 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
  *
  * This function retrieves all keys from Chrome's local storage, then identifies
  * and removes keys that represent dates older than a specified retention period
- * defined by `MAX_DATES_TO_RETAIN`. It uses `getGraterEqualOrLessThenKey` to
+ * defined by `MAX_DATES_TO_RETAIN`. It uses `getGreaterEqualOrLessThenKey` to
  * determine which keys are considered "old" and should be deleted.
  *
  * @async
@@ -123,7 +123,7 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
  */
 async function dateStorageCleanUp() {
   const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let deleteKeyList = getGraterEqualOrLessThenKey(
+  let deleteKeyList = getGreaterEqualOrLessThenKey(
     chromeKeyList,
     MAX_DATES_TO_RETAIN
   );

@@ -13,7 +13,7 @@ import {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
-  getGraterEqualOrLessThenKey,
+  getGreaterEqualOrLessThenKey,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -837,7 +837,7 @@ describe('Utils Tests', () => {
       const expectedLess = ['2025-05-23', '2025-05-15'];
 
       // Exercise
-      const result = getGraterEqualOrLessThenKey(
+      const result = getGreaterEqualOrLessThenKey(
         dateKeysArray,
         periodInDays,
         today
@@ -861,7 +861,7 @@ describe('Utils Tests', () => {
       const expectedLess = [];
 
       // Exercise
-      const result = getGraterEqualOrLessThenKey(
+      const result = getGreaterEqualOrLessThenKey(
         dateKeysArray,
         periodInDays,
         today
@@ -882,7 +882,7 @@ describe('Utils Tests', () => {
       const expectedLess = [];
 
       // Exercise
-      const result = getGraterEqualOrLessThenKey(
+      const result = getGreaterEqualOrLessThenKey(
         dateKeysArray,
         periodInDays,
         today
@@ -904,7 +904,7 @@ describe('Utils Tests', () => {
       const expectedLess = ['2025-05-20', '2025-05-19', '2025-05-18'];
 
       // Exercise
-      const result = getGraterEqualOrLessThenKey(
+      const result = getGreaterEqualOrLessThenKey(
         dateKeysArray,
         periodInDays,
         today
@@ -938,7 +938,7 @@ describe('Utils Tests', () => {
       const expectedLess = ['2024-12-25', '2023-11-01'];
 
       // Exercise
-      const result = getGraterEqualOrLessThenKey(
+      const result = getGreaterEqualOrLessThenKey(
         dateKeysArray,
         periodInDays,
         today

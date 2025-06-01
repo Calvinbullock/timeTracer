@@ -16,7 +16,7 @@ import {
   convertMillisecondsToMinutes,
   formatMillisecsToHoursAndMinutes,
   getDateKey,
-  getGraterEqualOrLessThenKey,
+  getGreaterEqualOrLessThenKey,
   sortByUrlUsageTime,
 } from '../utils/utils.js';
 import {
@@ -247,7 +247,7 @@ document.addEventListener('click', (event) => {
 async function displayWeeklyAvgPage() {
   // get a list of dates in storage
   const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateKeyList = getGraterEqualOrLessThenKey(chromeKeyList, 6); // get last 7 days
+  let dateKeyList = getGreaterEqualOrLessThenKey(chromeKeyList, 6); // get last 7 days
   dateKeyList = dateKeyList.less;
 
   // get the data for each key
