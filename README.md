@@ -64,7 +64,7 @@
 - WARN: nulls might be being added to the url list - NOTE: unconfirmed...
 - TODO: have a function that fires once a day at a set time to do data clean up (is this passable?)
 
-### Release - 4
+### Release - 1.1.3
 
 - block list - (site blocker dialog)
   - DONE - add
