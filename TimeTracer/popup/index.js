@@ -8,9 +8,9 @@
  * @date Date of creation: April, 2025
  */
 
+import { __logger__ } from './utils.js';
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
-  __logger__,
   calcAverages,
   combineAndSumTimesWithOccurrences,
   convertMillisecondsToMinutes,

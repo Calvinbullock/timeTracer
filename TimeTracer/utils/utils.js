@@ -9,6 +9,8 @@
  * @date Date of creation: April, 2025
  */
 
+import { __logger__ } from "./logger";
+
 // ===================================================== \\
 // ===================================================== \\
 //                        Start Utils                    \\
@@ -36,23 +38,6 @@ function formatDateTime(currDate = new Date()) {
   const dateString = `${year}/${month}/${day}`;
 
   return `${dateString} ${timeString}`;
-}
-
-/**
- * Logs a message to the console, optionally adding empty lines before and after for better readability.
- *
- * @param {string} msg The message to be logged.
- * @param {boolean} [buffer=false] If true, adds an empty line before and after the log message. Defaults to false.
- */
-function __logger__(msg, buffer = false) {
-  let timeStamp = formatDateTime();
-  if (buffer) {
-    console.log('');
-    console.log(`${timeStamp} - ${msg}`);
-    console.log('');
-  } else {
-    console.log(`${timeStamp} - ${msg}`);
-  }
 }
 
 /**
@@ -398,7 +383,6 @@ function calcAverages(dataArray, divideBy) {
 export {
   filterDateKeys,
   formatDateTime,
-  __logger__,
   searchDataUrls,
   cleanUrl,
   getDateKey,
