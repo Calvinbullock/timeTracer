@@ -19,9 +19,9 @@ const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
 const DAILY_CLEANUP_TIME_MINUTES = 60 * 24;
 
-// this should match the largest avg count from index.js 
+// this should match the largest avg count from index.js
 // NOTE: can't use imports as the index use Document and this file can't parse that
-const MAX_DATES_TO_RETAIN = 7; 
+const MAX_DATES_TO_RETAIN = 7;
 
 /**
  * Manages the tracking session for the currently active URL.
