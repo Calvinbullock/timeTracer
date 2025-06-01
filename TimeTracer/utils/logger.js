@@ -17,4 +17,4 @@ function __logger__(msg, buffer = false) {
   }
 }
 
-export { __logger__ };
+//export { __logger__ };

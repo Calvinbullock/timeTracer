@@ -7,8 +7,7 @@
  * @date Date of creation: April, 2025
  */
 
-import { __logger__ } from './logger.js';
-import { isTimeElapsedWithinInterval } from './utils.js';
+import { __logger__, isTimeElapsedWithinInterval } from './utils.js';
 
 // ===================================================== \\
 // ===================================================== \\

@@ -2,9 +2,9 @@ import {
   cleanUrl,
   checkInterval,
   convertMillisecondsToMinutes,
+  __logger__,
 } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
-import { __logger__ } from '../utils/logger.js';
 
 const TIME_CHECK_ALARM_TITLE = 'timeCheck';
 const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds

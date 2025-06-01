@@ -17,6 +17,7 @@ import {
   formatMillisecsToHoursAndMinutes,
   getDateKey,
   sortByUrlUsageTime,
+  __logger__,
 } from '../utils/utils.js';
 import {
   getSiteObjData,
@@ -25,7 +26,6 @@ import {
   getAllChromeLocalStorageKeys,
   getChromeLocalDataByKey,
 } from '../utils/chromeStorage.js';
-import { __logger__ } from '../utils/logger.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
 
