@@ -1,4 +1,4 @@
-import { formatDateTime } from "./utils";
+import { formatDateTime } from './utils';
 
 /**
  * Logs a message to the console, optionally adding empty lines before and after for better readability.
@@ -17,6 +17,4 @@ function __logger__(msg, buffer = false) {
   }
 }
 
-export {
-  __logger__
-}
+export { __logger__ };

@@ -8,7 +8,6 @@
  * @date Date of creation: April, 2025
  */
 
-import { __logger__ } from './utils.js';
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   calcAverages,
@@ -26,6 +25,7 @@ import {
   getAllChromeLocalStorageKeys,
   getChromeLocalDataByKey,
 } from '../utils/chromeStorage.js';
+import { __logger__ } from '../utils/logger.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
 
