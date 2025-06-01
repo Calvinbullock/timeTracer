@@ -126,8 +126,7 @@ async function dateStorageCleanUp() {
   let deleteKeyList = getGreaterEqualOrLessThenKey(
     chromeKeyList,
     MAX_DATES_TO_RETAIN
-  );
-  deleteKeyList = deleteKeyList.less;
+  ).less;
 
   for (const dateKey of deleteKeyList) {
     try {

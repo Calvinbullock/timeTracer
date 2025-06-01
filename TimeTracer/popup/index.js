@@ -247,10 +247,8 @@ document.addEventListener('click', (event) => {
 async function displayWeeklyAvgPage() {
   // get a list of dates in storage
   const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateKeyList = getGreaterEqualOrLessThenKey(chromeKeyList, 6); // get last 7 days
-  dateKeyList = dateKeyList.less;
+  let dateKeyList = getGreaterEqualOrLessThenKey(chromeKeyList, 6).graterEq; // get last 7 days
 
-  // get the data for each key
   let dataList = [];
   for (const key of dateKeyList) {
     const promise = await getChromeLocalDataByKey(key);
