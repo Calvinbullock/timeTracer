@@ -4,11 +4,23 @@ import {
   __logger__,
   checkInterval,
   convertMillisecondsToMinutes,
+  filterDateKeys,
+  getDateKey,
 } from '../utils/utils.js';
-import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
+import {
+  getAllChromeLocalStorageKeys,
+  getSiteObjData,
+  removeChromeLocalStorageItem,
+  setSiteObjData,
+} from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM = 'timeCheck';
 const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
+
+const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
+const DAILY_CLEANUP_TIME_MINUTES = 60 * 24;
+
+const MAX_DATES_TO_RETAIN = 7;
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -97,6 +109,38 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
   );
 }
 
+async function dateStorageCleanUp() {
+  // get the list of dates in storage
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let dateKeyList = filterDateKeys(chromeKeyList);
+  dateKeyList.sort();
+
+  const dateKeyListLength = dateKeyList.length;
+
+  // return if dateKeyList is less then dates to keep
+  if (dateKeyListLength <= MAX_DATES_TO_RETAIN) {
+    return;
+  }
+
+  // check today's date is at the bottom
+  if (dateKeyList[dateKeyListLength - 1] !== getDateKey()) {
+    __logger__('DailyCleanUp - Todays date was not in the right place.');
+    return;
+  }
+
+  // remove all dateKeys past MAX_DATES_TOKEEP_AFTER_CLEAN
+  for (let i = 0; i < dateKeyListLength - MAX_DATES_TO_RETAIN; i++) {
+    let dateKey = dateKeyList[i];
+    try {
+      console.log('REMOVED', dateKey);
+      //await removeChromeLocalStorageItem(dateKey);
+    } catch (error) {
+      console.error(`Failed to remove item "${dateKey}" from storage:`, error);
+    }
+  }
+  console.log('REMOVED', dateKeyList);
+}
+
 // ===================================================== \\
 // ===================================================== \\
 //              Chromium API Event Listeners             \\
@@ -112,6 +156,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === TIME_CHECK_ALARM) {
     checkIntervalWraper();
   }
+  if (alarm.name === DAILY_CLEANUP_ALARM_TITLE) {
+    dateStorageCleanUp();
+  }
 });
 
 // Create the alarm when the service worker starts or when the extension is installed/updated
@@ -121,12 +168,14 @@ chrome.runtime.onStartup.addListener(() => {
     TIME_CHECK_ALARM,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
+  createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);
 });
 chrome.runtime.onInstalled.addListener(() => {
   createRepeatingAlarm(
     TIME_CHECK_ALARM,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
+  createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);
 });
 
 // ===================================================== \\
