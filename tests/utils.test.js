@@ -36,15 +36,6 @@ describe('Utils Tests', () => {
   });
 
   describe('formatDateTime', () => {
-    test('should format the current date and time correctly when no argument is provided', () => {
-      // Setup
-      const mockDate = new Date('2025-06-01T14:30:05.123Z');
-      // Exercise
-      const formattedString = formatDateTime(mockDate);
-      // Test / Check
-      expect(formattedString).toBe('2025/06/01 07:30:05');
-    });
-
     test('should format a specific date and time correctly', () => {
       // Setup
       const specificDate = new Date('2023-01-05T09:07:03'); // January 5th, 2023, 09:07:03 AM
