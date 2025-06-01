@@ -7,7 +7,7 @@ import {
 } from '../utils/utils.js';
 import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
 
-const TIME_CHECK_ALARM = 'timeCheck';
+const TIME_CHECK_ALARM_TITLE = 'timeCheck';
 const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 
 /**
@@ -109,7 +109,7 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
 
 // Listen for the alarm event
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === TIME_CHECK_ALARM) {
+  if (alarm.name === TIME_CHECK_ALARM_TITLE) {
     checkIntervalWraper();
   }
 });
@@ -118,13 +118,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 //    (Chrome will not run the same alarm twice, they will not stack)
 chrome.runtime.onStartup.addListener(() => {
   createRepeatingAlarm(
-    TIME_CHECK_ALARM,
+    TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
 });
 chrome.runtime.onInstalled.addListener(() => {
   createRepeatingAlarm(
-    TIME_CHECK_ALARM,
+    TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
 });
