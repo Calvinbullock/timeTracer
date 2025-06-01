@@ -315,16 +315,13 @@ async function displayYesterdaysPage() {
     await getChromeLocalDataByKey(yesterdaysDateKey)
   );
 
-  let html = '';
+  let html = 'No data for yesterday found';
 
   // check if the data was found
   if (yesterdaysData) {
     // sort by highest usage time
     let sortedUrlList = sortByUrlUsageTime(yesterdaysData.urlList);
-    // format the data
     html = getUrlListAsTable(sortedUrlList, 'totalTime');
-  } else {
-    html = 'No data for yesterday found';
   }
 
   // inject the data
