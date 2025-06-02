@@ -11,8 +11,7 @@
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   __logger__,
-  calcAverages,
-  combineAndSumTimesWithOccurrences,
+  calcTimeAvg,
   convertMillisecondsToMinutes,
   formatMillisecsToHoursAndMinutes,
   getDateKey,
@@ -267,14 +266,7 @@ async function displayWeeklyAvgPage() {
     return item.urlList;
   });
 
-  // combine the data and avg it
-  dataList = combineAndSumTimesWithOccurrences(dataList);
-  dataList = calcAverages(dataList, dateKeyList.length);
-
-  // sort: highest avg time at top
-  dataList.sort((a, b) => {
-    return b.avg - a.avg;
-  });
+  dataList = calcTimeAvg(dataList, dateKeyList.length);
 
   // check we have data
   let html = 'No time data yet.';

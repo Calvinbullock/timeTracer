@@ -14,6 +14,7 @@ import {
   combineAndSumTimesWithOccurrences,
   calcAverages,
   getGreaterEqualOrLessThenKey,
+  calcTimeAvg,
 } from './../TimeTracer/utils/utils.js';
 
 describe('Utils Tests', () => {
@@ -806,6 +807,199 @@ describe('Utils Tests', () => {
 
       // Exercise
       const result = calcAverages(inputList, divideByValue);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+  });
+
+  describe('calcTimeAvg', () => {
+    test('should calculate average correctly for a single URL and diviser of 1', () => {
+      // Setup
+      const dataList = [[{ url: 'example.com/page1', totalTime: 100 }]];
+      const diviser = 1;
+      const expectedList = [{ url: 'example.com/page1', avg: 100 }];
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should calculate average for multiple URLs in a single inner array', () => {
+      // Setup
+      const dataList = [
+        [
+          { url: 'example.com/home', totalTime: 50 },
+          { url: 'example.com/about', totalTime: 30 },
+        ],
+      ];
+      const diviser = 5;
+      const expectedList = [
+        { url: 'example.com/home', avg: 10 }, // 50 / 5
+        { url: 'example.com/about', avg: 6 }, // 30 / 5
+      ].sort((a, b) => b.avg - a.avg); // Ensure expected is also sorted
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should aggregate totalTime for the same URL across nested arrays and calculate average', () => {
+      // Setup
+      const dataList = [
+        [{ url: 'example.com/product', totalTime: 100 }],
+        [{ url: 'example.com/cart', totalTime: 50 }],
+        [{ url: 'example.com/product', totalTime: 200 }],
+      ];
+      const diviser = 10;
+      const expectedList = [
+        { url: 'example.com/product', avg: 30 }, // (100 + 200) / 10 = 300 / 10
+        { url: 'example.com/cart', avg: 5 }, // 50 / 10
+      ].sort((a, b) => b.avg - a.avg);
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should sort results by average time in descending order', () => {
+      // Setup
+      const dataList = [
+        [{ url: 'pageB', totalTime: 80 }],
+        [{ url: 'pageA', totalTime: 150 }],
+        [{ url: 'pageC', totalTime: 20 }],
+      ];
+      const diviser = 10;
+      const expectedList = [
+        { url: 'pageA', avg: 15 }, // 150 / 10
+        { url: 'pageB', avg: 8 }, // 80 / 10
+        { url: 'pageC', avg: 2 }, // 20 / 10
+      ]; // Already sorted descending
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should return an empty array if dataList is empty', () => {
+      // Setup
+      const dataList = [];
+      const diviser = 5;
+      const expectedList = [];
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should return an empty array if dataList contains empty inner arrays', () => {
+      // Setup
+      const dataList = [[], []];
+      const diviser = 5;
+      const expectedList = [];
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should handle zero diviser gracefully (avg should be 0 for all)', () => {
+      // Setup
+      const dataList = [
+        [{ url: 'pageX', totalTime: 100 }],
+        [{ url: 'pageY', totalTime: 50 }],
+      ];
+      const diviser = 0;
+      const expectedList = [
+        { url: 'pageX', avg: 0 },
+        { url: 'pageY', avg: 0 },
+      ].sort((a, b) => b.avg - a.avg); // Even if all are 0, sort still applies.
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should handle URLs with totalTime of 0', () => {
+      // Setup
+      const dataList = [
+        [{ url: 'zero.com', totalTime: 0 }],
+        [{ url: 'nonzero.com', totalTime: 75 }],
+      ];
+      const diviser = 3;
+      const expectedList = [
+        { url: 'nonzero.com', avg: 25 }, // 75 / 3
+        { url: 'zero.com', avg: 0 }, // 0 / 3
+      ].sort((a, b) => b.avg - a.avg);
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should handle floating point averages', () => {
+      // Setup
+      const dataList = [
+        [{ url: 'floaty.com', totalTime: 101 }],
+        [{ url: 'another.com', totalTime: 50 }],
+      ];
+      const diviser = 2;
+      const expectedList = [
+        { url: 'floaty.com', avg: 50.5 }, // 101 / 2
+        { url: 'another.com', avg: 25 }, // 50 / 2
+      ].sort((a, b) => b.avg - a.avg);
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
+
+      // Test / Check
+      expect(result).toEqual(expectedList);
+    });
+
+    test('should handle a more complex scenario with mixed data and multiple occurrences', () => {
+      // Setup
+      const dataList = [
+        [
+          { url: 'blog.com', totalTime: 60 },
+          { url: 'shop.com', totalTime: 120 },
+        ],
+        [{ url: 'news.com', totalTime: 30 }],
+        [
+          { url: 'blog.com', totalTime: 30 },
+          { url: 'shop.com', totalTime: 60 },
+          { url: 'news.com', totalTime: 90 },
+        ],
+      ];
+      const diviser = 3; // Example: 3 days of data
+
+      // blog.com: (60 + 30) / 3 = 90 / 3 = 30
+      // shop.com: (120 + 60) / 3 = 180 / 3 = 60
+      // news.com: (30 + 90) / 3 = 120 / 3 = 40
+
+      const expectedList = [
+        { url: 'shop.com', avg: 60 },
+        { url: 'news.com', avg: 40 },
+        { url: 'blog.com', avg: 30 },
+      ];
+
+      // Exercise
+      const result = calcTimeAvg(dataList, diviser);
 
       // Test / Check
       expect(result).toEqual(expectedList);
