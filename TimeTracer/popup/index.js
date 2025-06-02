@@ -12,10 +12,12 @@ import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   calcAverages,
   combineAndSumTimesWithOccurrences,
+  __logger__,
+  calcTimeAvg,
   convertMillisecondsToMinutes,
-  filterDateKeys,
   formatMillisecsToHoursAndMinutes,
   getDateKey,
+  getGreaterEqualOrLessThenKey,
   sortByUrlUsageTime,
   __logger__,
 } from '../utils/utils.js';
@@ -28,6 +30,7 @@ import {
 } from '../utils/chromeStorage.js';
 
 const MAX_URL_DISPLAY_LIST_LENGTH = 20; // the number of urls displayed
+const WEEKLY_AVG_DAY_COUNT = 7;
 
 // ===================================================== \\
 // ===================================================== \\
@@ -237,53 +240,44 @@ document.addEventListener('click', (event) => {
 // ===================================================== \\
 // ===================================================== \\
 
-// TODO: func comment / clean up func
+/**
+ * Asynchronously fetches and displays the weekly average Browse time per URL.
+ *
+ * @async
+ * @function displayWeeklyAvgPage
+ * @returns {Promise<void>} A promise that resolves once the weekly average data is fetched, processed, and displayed.
+ */
 async function displayWeeklyAvgPage() {
   // get a list of dates in storage
   const chromeKeyList = await getAllChromeLocalStorageKeys();
-  let dateKeyList = filterDateKeys(chromeKeyList);
-  dateKeyList.sort();
+  let dateKeyList = getGreaterEqualOrLessThenKey(
+    chromeKeyList,
+    WEEKLY_AVG_DAY_COUNT
+  ).graterEq;
 
-  // check today's date is at the top
-  const todaysDateKey = getDateKey(); // default is today's key
-  if (dateKeyList[0] !== todaysDateKey) {
-    __logger__('weeklyAvg - Todays date was not in the right place.');
-  }
-
-  // get last 7 days or up to dateKeyList length if shorter
-  let itLength = Math.min(dateKeyList.length, 7);
   let dataList = [];
-
-  // get the data for each key up to itLength
-  for (let index = 0; index < itLength; index++) {
-    const key = dateKeyList[index];
+  for (const key of dateKeyList) {
+    const promise = await getChromeLocalDataByKey(key);
 
     const urlObj = new UrlDataObj();
-    const promise = await getChromeLocalDataByKey(key);
     dataList.push(urlObj.fromJSONString(promise));
   }
 
-  // little error log
-  if (dataList.length > 7) {
-    __logger__('weekAvg dates array longer then 7 days');
-  }
-
-  // resolve promises and grab only what we need (urlList)
+  // resolve promises and grab only the 'urlList' elements
   dataList = await Promise.all(dataList);
   dataList = dataList.map((item) => {
     return item.urlList;
   });
 
-  dataList = combineAndSumTimesWithOccurrences(dataList);
-  dataList = calcAverages(dataList, itLength);
+  dataList = calcTimeAvg(dataList, dateKeyList.length);
 
-  // sort: highest avg time at top
-  dataList.sort((a, b) => {
-    return b.avg - a.avg;
-  });
+  // check we have data
+  let html = 'No time data yet.';
+  if (dataList.length > 0) {
+    html = getUrlListAsTable(dataList, 'avg');
+  }
 
   // inject the data
-  let html = getUrlListAsTable(dataList, 'avg');
   setHtmlById('content-div', html);
 }
 

@@ -395,6 +395,69 @@ function calcAverages(dataArray, divideBy) {
   return avgArray;
 }
 
+/**
+ * Calculates the average time spent per URL from a nested list of data,
+ * then sorts the results by average time in descending order.
+ *
+ * @param {Array<Array<{url: string, totalTime: number}>>} dataList - A nested array where each inner array contains objects.
+ * Each object must have a `url` (string) and `totalTime` (number) property.
+ * @param {number} diviser - The number to divide by when calculating the average (e.g., number of days, number of occurrences).
+ * @returns {Array<{url: string, avg: number}>} An array of objects, each containing a `url` and its calculated `avg` time,
+ * sorted from highest average time to lowest.
+ */
+function calcTimeAvg(dataList, diviser) {
+  // combine the data and avg it
+  dataList = combineAndSumTimesWithOccurrences(dataList);
+  dataList = calcAverages(dataList, diviser);
+
+  // sort: highest avg time at top
+  dataList.sort((a, b) => {
+    return b.avg - a.avg;
+  });
+
+  return dataList;
+}
+
+/**
+ * Categorizes an array of date keys into two groups: those less than a calculated period date,
+ * and those greater than or equal to it.
+ *
+ * @param {string[]} dateKeysArray - An array of date keys (e.g., "YYYY-MM-DD" strings) to be categorized.
+ * @param {number} periodInDays - The number of days to subtract from `today` to determine the `periodDateKey`.
+ * @param {Date} [today=new Date()] - The starting date from which `periodInDays` will be subtracted. Defaults to the current date.
+ * @returns {{graterEq: string[], less: string[]}} An object containing two arrays:
+ * - `graterEq`: An array of date keys that are greater than or equal to the `periodDateKey` (newer or same).
+ * - `less`: An array of date keys that are less than the `periodDateKey` (older).
+ */
+function getGreaterEqualOrLessThenKey(
+  dateKeysArray,
+  periodInDays,
+  today = new Date()
+) {
+  let todayKey = getDateKey(today);
+  today.setDate(today.getDate() - periodInDays);
+  let periodDateKey = getDateKey(today);
+
+  // organize data
+  let dateKeyList = filterDateKeys(dateKeysArray);
+  dateKeyList.sort();
+
+  let obj = {
+    graterEq: [], // newer
+    less: [], // older
+  };
+
+  for (const key of dateKeysArray) {
+    if (key < periodDateKey) {
+      obj.less.push(key);
+    } else if (key < todayKey) {
+      obj.graterEq.push(key);
+    }
+  }
+
+  return obj;
+}
+
 export {
   filterDateKeys,
   formatDateTime,
@@ -410,4 +473,6 @@ export {
   combineAndSumTimesWithOccurrences,
   calcAverages,
   __logger__,
+  calcTimeAvg,
+  getGreaterEqualOrLessThenKey,
 };

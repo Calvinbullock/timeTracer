@@ -3,11 +3,24 @@ import {
   checkInterval,
   convertMillisecondsToMinutes,
   __logger__,
+  getGreaterEqualOrLessThenKey,
 } from '../utils/utils.js';
-import { getSiteObjData, setSiteObjData } from '../utils/chromeStorage.js';
+import {
+  getAllChromeLocalStorageKeys,
+  getSiteObjData,
+  removeChromeLocalStorageItem,
+  setSiteObjData,
+} from '../utils/chromeStorage.js';
 
 const TIME_CHECK_ALARM_TITLE = 'timeCheck';
 const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
+
+const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
+const DAILY_CLEANUP_TIME_MINUTES = 60 * 24;
+
+// this should match the largest avg count from index.js
+// NOTE: can't use imports as index.js access a page Document and this file can't parse that
+const MAX_DATES_TO_RETAIN = 7;
 
 /**
  * Manages the tracking session for the currently active URL.
@@ -90,6 +103,35 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
   );
 }
 
+/**
+ * Asynchronously cleans up old date-based data stored in Chrome's local storage.
+ *
+ * This function retrieves all keys from Chrome's local storage, then identifies
+ * and removes keys that represent dates older than a specified retention period
+ * defined by `MAX_DATES_TO_RETAIN`. It uses `getGreaterEqualOrLessThenKey` to
+ * determine which keys are considered "old" and should be deleted.
+ *
+ * @async
+ * @function dateStorageCleanUp
+ * @returns {Promise<void>} A promise that resolves when the cleanup process is complete.
+ * @throws {Error} If there's an issue retrieving keys or removing items from local storage.
+ */
+async function dateStorageCleanUp() {
+  const chromeKeyList = await getAllChromeLocalStorageKeys();
+  let deleteKeyList = getGreaterEqualOrLessThenKey(
+    chromeKeyList,
+    MAX_DATES_TO_RETAIN
+  ).less;
+
+  for (const dateKey of deleteKeyList) {
+    try {
+      await removeChromeLocalStorageItem(dateKey);
+    } catch (error) {
+      console.error(`Failed to remove item "${dateKey}" from storage:`, error);
+    }
+  }
+}
+
 // ===================================================== \\
 // ===================================================== \\
 //              Chromium API Event Listeners             \\
@@ -104,6 +146,8 @@ function createRepeatingAlarm(alarmName, alarmIntervalMinutes) {
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === TIME_CHECK_ALARM_TITLE) {
     checkIntervalWraper();
+  } else if (alarm.name === DAILY_CLEANUP_ALARM_TITLE) {
+    dateStorageCleanUp();
   }
 });
 
@@ -114,12 +158,14 @@ chrome.runtime.onStartup.addListener(() => {
     TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
+  createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);
 });
 chrome.runtime.onInstalled.addListener(() => {
   createRepeatingAlarm(
     TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
+  createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);
 });
 
 // ===================================================== \\

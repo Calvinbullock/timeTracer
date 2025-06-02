@@ -81,10 +81,6 @@ function removeChromeLocalStorageItem(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.remove(key, () => {
       if (chrome.runtime.lastError) {
-        console.error(
-          'Error removing item from local storage:',
-          chrome.runtime.lastError
-        );
         reject(chrome.runtime.lastError);
       } else {
         __logger__(`Item with key "${key}" removed from local storage.`);
