@@ -384,7 +384,9 @@ function calcAverages(dataArray, divideBy) {
     let totalTime = element.totalTime;
     let avg = 0;
 
-    avg = totalTime / divideBy;
+    if (divideBy != 0) {
+      avg = totalTime / divideBy;
+    }
 
     avgArray.push({
       url: element.url,

@@ -10,9 +10,6 @@
 
 import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
-  calcAverages,
-  combineAndSumTimesWithOccurrences,
-  __logger__,
   calcTimeAvg,
   convertMillisecondsToMinutes,
   formatMillisecsToHoursAndMinutes,

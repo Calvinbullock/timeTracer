@@ -818,8 +818,8 @@ describe('Utils Tests', () => {
       // The function specifically handles divideBy > 0. If divideBy is 0, avg should be 0.
       const divideByValue = 0;
       const expectedList = [
-        { url: 'divide-by-zero.com', avg: Infinity }, // totalTime / 0 should result in 0 based on the function
-        { url: 'some-visits.com', avg: Infinity }, // totalTime / 0 should result in 0 based on the function
+        { url: 'divide-by-zero.com', avg: 0 }, // totalTime / 0 should result in 0 based on the function
+        { url: 'some-visits.com', avg: 0 }, // totalTime / 0 should result in 0 based on the function
       ];
 
       // Exercise
