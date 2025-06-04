@@ -1,9 +1,8 @@
-import { UrlDataObj } from '../utils/urlDataObj.js';
 import {
   cleanUrl,
-  __logger__,
   checkInterval,
   convertMillisecondsToMinutes,
+  __logger__,
   getGreaterEqualOrLessThenKey,
 } from '../utils/utils.js';
 import {
@@ -13,7 +12,7 @@ import {
   setSiteObjData,
 } from '../utils/chromeStorage.js';
 
-const TIME_CHECK_ALARM = 'timeCheck';
+const TIME_CHECK_ALARM_TITLE = 'timeCheck';
 const TIME_CHECK_INTERVAL_MILLISEC = 2 * 60000; // minutes * milliseconds
 
 const DAILY_CLEANUP_ALARM_TITLE = 'dailyCleanup';
@@ -44,12 +43,6 @@ const MAX_DATES_TO_RETAIN = 7;
  */
 async function updateActiveUrlSession(newActiveUrl, stopTracking) {
   let siteDataObj = await getSiteObjData();
-
-  if (!(siteDataObj instanceof UrlDataObj)) {
-    console.error(
-      'Error: siteData not instance of UrlDataObj - updateStoredData'
-    );
-  }
 
   siteDataObj.endSession(TIME_CHECK_INTERVAL_MILLISEC);
   if (!stopTracking) {
@@ -151,7 +144,7 @@ async function dateStorageCleanUp() {
 
 // Listen for the alarm event
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === TIME_CHECK_ALARM) {
+  if (alarm.name === TIME_CHECK_ALARM_TITLE) {
     checkIntervalWraper();
   } else if (alarm.name === DAILY_CLEANUP_ALARM_TITLE) {
     dateStorageCleanUp();
@@ -162,14 +155,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 //    (Chrome will not run the same alarm twice, they will not stack)
 chrome.runtime.onStartup.addListener(() => {
   createRepeatingAlarm(
-    TIME_CHECK_ALARM,
+    TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
   createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);
 });
 chrome.runtime.onInstalled.addListener(() => {
   createRepeatingAlarm(
-    TIME_CHECK_ALARM,
+    TIME_CHECK_ALARM_TITLE,
     convertMillisecondsToMinutes(TIME_CHECK_INTERVAL_MILLISEC)
   );
   createRepeatingAlarm(DAILY_CLEANUP_ALARM_TITLE, DAILY_CLEANUP_TIME_MINUTES);

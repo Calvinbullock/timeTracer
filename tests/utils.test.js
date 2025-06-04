@@ -13,6 +13,7 @@ import {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
+  formatDateTime,
   getGreaterEqualOrLessThenKey,
   calcTimeAvg,
 } from './../TimeTracer/utils/utils.js';
@@ -36,6 +37,44 @@ describe('Utils Tests', () => {
     consoleWarnSpy.mockRestore();
   });
 
+  describe('formatDateTime', () => {
+    test('should format a specific date and time correctly', () => {
+      // Setup
+      const specificDate = new Date('2023-01-05T09:07:03'); // January 5th, 2023, 09:07:03 AM
+      // Exercise
+      const formattedString = formatDateTime(specificDate);
+      // Test / Check
+      expect(formattedString).toBe('2023/01/05 09:07:03');
+    });
+
+    test('should handle single-digit values with leading zeros correctly', () => {
+      // Setup
+      const singleDigitDate = new Date('2024-03-09T01:02:08'); // March 9th, 2024, 01:02:08 AM
+      // Exercise
+      const formattedString = formatDateTime(singleDigitDate);
+      // Test / Check
+      expect(formattedString).toBe('2024/03/09 01:02:08');
+    });
+
+    test('should format midnight (00:00:00) correctly', () => {
+      // Setup
+      const midnight = new Date('2025-12-25T00:00:00');
+      // Exercise
+      const formattedString = formatDateTime(midnight);
+      // Test / Check
+      expect(formattedString).toBe('2025/12/25 00:00:00');
+    });
+
+    test('should format the end of the day (23:59:59) correctly', () => {
+      // Setup
+      const endOfDay = new Date('2026-07-15T23:59:59');
+      // Exercise
+      const formattedString = formatDateTime(endOfDay);
+      // Test / Check
+      expect(formattedString).toBe('2026/07/15 23:59:59');
+    });
+  });
+
   describe('searchDataUrls', () => {
     test('should return the index of the object containing the target URL', () => {
       const target = 'google.com';
@@ -45,8 +84,11 @@ describe('Utils Tests', () => {
     });
 
     test('should return -1 if the target URL is not found', () => {
+      // Setup
       const data = [{ url: 'google.com' }, { url: 'poodle.com' }];
+      // Exercises
       const index = searchDataUrls('taco.com', data);
+      // Test / Check
       expect(index).toBe(-1);
     });
   });

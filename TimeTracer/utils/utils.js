@@ -384,7 +384,6 @@ function calcAverages(dataArray, divideBy) {
     let totalTime = element.totalTime;
     let avg = 0;
 
-    // ensure no divide by zero
     if (divideBy > 0) {
       avg = totalTime / divideBy;
     }
@@ -464,7 +463,6 @@ function getGreaterEqualOrLessThenKey(
 export {
   filterDateKeys,
   formatDateTime,
-  __logger__,
   searchDataUrls,
   cleanUrl,
   getDateKey,
@@ -476,6 +474,7 @@ export {
   sortByUrlUsageTime,
   combineAndSumTimesWithOccurrences,
   calcAverages,
+  __logger__,
   calcTimeAvg,
   getGreaterEqualOrLessThenKey,
 };
