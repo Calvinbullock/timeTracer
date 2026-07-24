@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Take a Break!</title>
+  <style>
+    body {
+      background-color: #0b0b0e;
+      color: #f1f1f1;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .card {
+      border: 1px solid #ff4757;
+      padding: 40px;
+      border-radius: 12px;
+      background: #151518;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    h1 { color: #ff4757; font-size: 2.5rem; margin-top: 0; }
+    p { font-size: 1.2rem; margin-bottom: 30px; color: #a4a4a8; }
+    button {
+      background-color: #ff4757;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Focus Mode Active 🛑</h1>
+    <p>You have used YouTube for over 30 minutes today.</p>
+    <!-- We close the tab entirely if they click okay -->
+    <button id="closeTabBtn">Close this Tab</button>
+  </div>
+
+  <script>
+    // Close the current tab when the button is clicked
+    document.getElementById("closeTabBtn").addEventListener("click", () => {
+      window.close();
+    });
+  </script>
+</body>
+</html>

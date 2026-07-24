@@ -52,6 +52,26 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
   setSiteObjData(siteDataObj);
 }
 
+
+// NOTE: temp placement
+async function safeCreateTab(tabPath, retries = 3) {
+  let createProperties = {
+      url: chrome.runtime.getURL(tabPath)
+    };
+
+  try {
+    return await chrome.tabs.create(createProperties);
+  } catch (err) {
+    if (err.message.includes("user may be dragging a tab") && retries > 0) {
+      __logger__(`Tab strip locked, retrying... (${retries} left)`);
+      await new Promise(res => setTimeout(res, 100)); // Wait 100ms for drag to complete
+      return safeCreateTab(tabPath, retries - 1);
+    }
+    // Log any other non-drag error (e.g., invalid URL)
+    console.error("Failed to create tab:", err);
+  }
+}
+
 /**
  * Handles actions to be performed when a new tab becomes active or the URL of the current tab changes.
  * It cleans the provided URL, checks if it's blocked and potentially redirects, then if not blocked
@@ -61,11 +81,19 @@ async function updateActiveUrlSession(newActiveUrl, stopTracking) {
  * @param {string} logMsg - A message to be included in the console log for this action.
  * @returns {void} - This function does not return any value.
  */
-function tabEnterOrChangeAction(activeUrl, logMsg) {
+async function tabEnterOrChangeAction(activeUrl, logMsg) {
   activeUrl = cleanUrl(activeUrl);
 
-  // TODO: check and redirect
+  // NOTE: WORKING HERE: check and redirect
   //checkBlockedUrls(activeUrl);
+  __logger__(`${activeUrl} blockcheck`);
+  //if (activeUrl in blocklist) {
+  if (activeUrl === 'www.reddit.com') {
+    __logger__(`yeep`);
+
+    await safeCreateTab("blocked.html");
+    return; // stops reddit logging
+  }
 
   updateActiveUrlSession(activeUrl, false);
   __logger__(`${logMsg} ${activeUrl}`, true);
